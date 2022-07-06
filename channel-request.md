@@ -16,12 +16,12 @@ Request an inbound channel with a specific size and duration.
 
 ##### Parameters
 
-| Name | Located in | Description | Required | Default | Schema |
-| ---- | ---------- | ----------- | -------- | ------- | ------ |
-| remote_balance | body | Inbound liquidity amount in satoshis | Yes | | integer |
-| local_balance | body | Outbound liqudity amount in satoshis | No | 0 | integer |
-| channel_expiry | body | Channel expiration in weeks | Yes | | integer |
-| node_connection_info | body | pubkey@host:port | Yes | | string |
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| node_connection_info | body | pubkey@host:port | Yes | string |
+| remote_balance | body | Inbound liquidity amount in satoshis | No | integer |
+| local_balance | body | Outbound liqudity amount in satoshis | No | integer |
+| channel_expiry | body | Channel expiration in weeks | No | integer |
 
 
 ##### Response

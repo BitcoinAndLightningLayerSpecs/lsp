@@ -14,16 +14,17 @@ A unified channel request API standard for services to buy channels from LSP. Th
 
 
 ## Services
-List of Lightning Service Providers that currently or will support LSP specs in future.
+List of Lightning Service Providers in alphabetic order that currently or will support LSP specs in future.
 
 (If you would like to get added to this list, please open a PR and update the table below)
 
 | Name | Specs | Status |
 | ---- | ----------- | ------ |
 | Blocktank | LSPS1 | Soon |
-| ZeroFeeRouting | ? |  ?  |
-| SwissRouting | ? |  ?  |
+| Breez | [Breez](https://github.com/breez/lspd/blob/master/rpc/lspd.md) / LSPS1 | In production / Soon |
 | LNBIG | ? |  ?  |
+| SwissRouting | ? |  ?  |
 | TBD | ? |  ?  |
+| ZeroFeeRouting | ? |  ?  |
 
 

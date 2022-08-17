@@ -18,7 +18,7 @@ Request an inbound channel with a specific size and duration.
 
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ------ |
-| node_connection_info | body | pubkey@host:port | Yes | string |
+| node_connection_info | body | pubkey or pubkey@host:port | Yes | string |
 | remote_balance | body | Inbound liquidity amount in satoshis | No | integer |
 | local_balance | body | Outbound liqudity amount in satoshis | No | integer |
 | channel_expiry | body | Channel expiration in weeks | No | integer |
@@ -32,8 +32,9 @@ Request an inbound channel with a specific size and duration.
 | fee_total | The total fee the lsp will charge to open this channel | number |
 | fee_per_payment | For intercepted payment of fee, fee taken from each payment until fee is paid | number |
 | scid | The scid user puts in the route hint of invoice to identify order | string |
+| lsp_connection_info | pubkey or pubkey@host:port | string |
 | ln_invoice | A lightning bolt11 invoice to pay the fee for this channel open | string |
-| btc_address | An on-chain bitcoin address to pay the fee for this channel open | string | 
+| btc_address | An on-chain bitcoin address to pay the fee for this channel open | string |
 | order_id | An lsp generated order id used to look-up the status of this request | string |
 | lnurl_channel | A way to request the open via lnurl after the order is paid | string |
 
@@ -69,6 +70,7 @@ Get information about a channel order
 | fee_total | The total fee the lsp will charge to open this channel | number |
 | fee_per_payment | For intercepted payment of fee, fee taken from each payment until fee is paid | number |
 | scid | The scid user puts in the route hint of invoice to identify order | string |
+| lsp_connection_info | pubkey or pubkey@host:port of the lsp node | string |
 | ln_invoice | A lightning bolt11 invoice to pay the fee for this channel open | string |
 | btc_address | An on-chain bitcoin address to pay the fee for this channel open | string | 
 | order_id | An lsp generated order id used to look-up the status of this request | string |

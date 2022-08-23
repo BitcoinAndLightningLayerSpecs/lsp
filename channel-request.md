@@ -31,7 +31,7 @@ Request an inbound channel with a specific size and duration.
 | order_total | The total fee plus the local_balance requested | number |
 | fee_total | The total fee the lsp will charge to open this channel | number |
 | fee_per_payment | For intercepted payment of fee, fee taken from each payment until fee is paid | number |
-| scid | The scid user puts in the route hint of invoice to identify order | string |
+| temporary_scid | The scid user puts in the route hint of invoice to identify order | string |
 | ln_invoice | A lightning bolt11 invoice to pay the fee for this channel open | string |
 | btc_address | An on-chain bitcoin address to pay the fee for this channel open | string | 
 | order_id | An lsp generated order id used to look-up the status of this request | string |
@@ -52,13 +52,13 @@ Get information about a channel order
 
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ---- |
-| order_id | query | The order_id provided in response to channel request | Yes | string |
+| id | query | order_id provided in response to channel request or scid | Yes | string |
 
 ##### Response
 
 | Name | Description | Schema |
 | ---- | ----------- | ------ |
-| id | The order id | string |
+| order_id | The order id | string |
 | created_at | Number of seconds since epoch when this order was created | number |
 | local_balance | Local balance in sats requested by client | number |
 | remote_balance | Remote balance in sats requested by client | number |
@@ -68,10 +68,10 @@ Get information about a channel order
 | order_total | The total fee plus the local_balance requested | number |
 | fee_total | The total fee the lsp will charge to open this channel | number |
 | fee_per_payment | For intercepted payment of fee, fee taken from each payment until fee is paid | number |
-| scid | The scid user puts in the route hint of invoice to identify order | string |
+| temporary_scid | The scid user puts in the route hint of invoice to identify order | string |
+| scid | The scid of the channel if already established | string |
 | ln_invoice | A lightning bolt11 invoice to pay the fee for this channel open | string |
 | btc_address | An on-chain bitcoin address to pay the fee for this channel open | string | 
-| order_id | An lsp generated order id used to look-up the status of this request | string |
 | lnurl_channel | A way to request the open via lnurl after the order is paid | string |
 | amount_paid | Amount paid by client so far in sats | number |
 | node_connection_info | The node_connection_info for the node to open the channel to | string |

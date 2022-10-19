@@ -39,6 +39,9 @@ Policy field is an  json object that can include various different policies that
 5. **reputation** - what reputation systems are you using and their links 
 6. **push_support** - if you support pushing part of the balance to buyers side 
 7. **duration_unit** - what units are you using for duration 
+8. **contact** - contact information (tg/twitter/web)
+9. **location** - node location
+
 
 ##### Policy structure
 Proposed policy format consists of three fields 

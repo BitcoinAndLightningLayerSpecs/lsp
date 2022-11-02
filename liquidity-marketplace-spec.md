@@ -1,4 +1,4 @@
-# Liquidity marketplace spec
+# Liquidity marketplace spec - draft 
 
 
 ## Version: 0.0.1
@@ -28,8 +28,8 @@ Request an inbound channel with a specific size and duration.
 
 
 
-##### Policies
-Policy field is an  json object that can include various different policies that are not mandatory and serve as an additional information provided. Spec covers a list of predefined policies for common use-cases.
+#### Policies
+Policy field is an  json object that can include various different policies that are not mandatory and serve as an additional information provided. Spec covers a list of predefined policies for common use-cases. 
 
 ##### Existing policies
 1. **closing_policy** - under what conditions will you close the channels or leave it open 
@@ -40,11 +40,51 @@ Policy field is an  json object that can include various different policies that
 6. **push_support** - if you support pushing part of the balance to buyers side 
 7. **duration_unit** - what units are you using for duration 
 8. **contact** - contact information (tg/twitter/web)
-9. **location** - node location
+9. **location** - node location information 
 
 
 ##### Policy structure
-Proposed policy format consists of three fields 
+Policy format consists of three fields 
 1. name -> standardized name in snake case, should be machine readable
 2. value ->  machine readable value 
 3. info -> human readable field with additional information
+
+
+##### Policy example
+```
+{
+
+"policies": [ 
+	{
+		"name": "max_htlc_size",
+		"value": "123456", 
+		"info": "i will enforce this policy for channels smaller than 50million" 
+	},
+	{
+		"name": "closing_policy", 
+		"value": "123456", 
+		"info": "i will enforce this policy for channels smaller than 50million" 
+	},
+	{
+		"name": "reputation", 
+		"value": "bos=https://fulmo.org/bos-score.html,rank=https://terminal.lightning.engineering/", 
+		"info": "" 
+	},
+	{
+		"name": "rate_fee_formula", 
+		"value": "", 
+		"info": "size*(100/size)" 
+	},		
+	{
+		"name": "fee_policy", 
+		"value": "",
+		"info": "we have different fee tiers based on chan sizes, more at https://lsp.com/rates.html" 
+	},
+	{
+		"name": "push_support",
+		"value": "true",
+		"info": "we support pushing part of the balance on your side, up to 2btc in size"
+	}
+	]
+}
+```

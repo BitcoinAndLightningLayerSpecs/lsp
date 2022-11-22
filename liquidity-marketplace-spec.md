@@ -31,7 +31,7 @@ Request an inbound channel with a specific size and duration.
 #### Policies
 Policy field is an  json object that can include various different policies that are not mandatory and serve as an additional information provided. Spec covers a list of predefined policies for common use-cases. 
 
-##### Existing policies
+##### Communitiy supported policies
 1. **closing_policy** - under what conditions will you close the channels or leave it open 
 2. **fee_policy** - if you have tiered system for routing fees you're charging 
 3. **max_htlc_size**  - what is the max htlc size you'll be allowing on the chan, useful for flow control
@@ -39,8 +39,9 @@ Policy field is an  json object that can include various different policies that
 5. **reputation** - what reputation systems are you using and their links 
 6. **push_support** - if you support pushing part of the balance to buyers side 
 7. **duration_unit** - what units are you using for duration 
-8. **contact** - contact information where node operator can be reached (tg/twitter/web)
-9. **location** - node location information 
+8. **contact** - contact information where node operator/lsp can be reached (tg/twitter/web)
+9. **location** - node location information
+10. **tos** - where to find terms of use, legal, etc 
 
 
 ##### Policy structure

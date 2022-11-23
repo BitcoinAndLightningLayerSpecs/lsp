@@ -3,15 +3,12 @@
 
 ## Version: 0.0.1
 
-##### Summary
+### Summary
 
 Creating interoperable liquidty API we can make integrations between LSPs easier and enable consumers to utilize liquidity from wider selection of providers 
 
-##### Description
 
-Request an inbound channel with a specific size and duration.
-
-##### Order
+### Order
 
 
 | Field  |  Description |   Unit | Required | Schema
@@ -60,7 +57,7 @@ Request an inbound channel with a specific size and duration.
 ```
 
 
-#### Policies
+### Policies
 Policy field is an  json object that can include various different policies that are **not mandatory** and serve as an additional information provided. Spec covers a list of predefined policies for common use-cases. Adding provider specific policies is supported and commonly used policies will be added to future versions of the spec.
 
 ##### Communitiy supported policies

@@ -13,7 +13,7 @@ Creating interoperable liquidty API we can make integrations between LSPs easier
 
 | Field  |  Description |   Unit | Required | Schema
 |---|---|---|---|---|
-|  min_size  | minimum chan size i'm willing to sell (  | sats |yes|integer| 
+|  min_size  | minimum chan size i'm willing to sell   | sats |yes|integer| 
 |  max_size  |  total available capacity  | sats |yes| integer |
 |  base_fee |  fixed fee charged for lease  |  sats | yes | integer 
 |  rate_fee |  example: size*0.002/duration | expressed as formula |yes|integer|

@@ -1,4 +1,4 @@
-# Liquidity marketplace spec - draft 
+# Liquidity marketplace spec
 
 
 ## Version: 0.0.1

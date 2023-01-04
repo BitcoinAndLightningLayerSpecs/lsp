@@ -1,0 +1,178 @@
+swagger: "2.0"
+info:
+  description: "API documentation for channel opening request from a Lightning Network Service Provider (LSP)"
+  version: "0.0.0"
+  title: "LSP Spec 1"
+tags:
+- name: "Channel Request"
+schemes:
+- "https"
+x-readme:
+  explorer-enabled: true
+  samples-enabled: true
+  samples-languages:
+    - curl
+paths:
+  /lsp/channel:
+    post:
+      tags:
+      - "Channel Request"
+      summary: "Request a new channel opening from LSP"
+      description: "This endpoint accepts arguments for a channel with a specific size and duration and returns an order information"
+      operationId: "new-channel-request"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - in: body
+          name: Channel request
+          description: Requested channel parameters.
+          schema:
+            $ref: "#/definitions/ChannelOrderRequest"
+      responses:
+        "200":
+          description: "Information for channel order"
+          schema:
+            $ref: "#/definitions/ChannelOrderResponse"
+    get:
+      tags:
+      - "Channel Request"
+      summary: "Get information about a channel order."
+      description: "Get information about a channel order"
+      operationId: "get-channel-order"
+      produces:
+      - "application/json"
+      parameters:
+        - in: query
+          name: order id
+          description: Order id of the channel
+          type: string
+      responses:
+        "200":
+          description: "Channel information"
+          schema:
+              $ref: "#/definitions/ChannelInformation"
+definitions:
+  ChannelOrderRequest:
+    type: "object"
+    required:
+      - node_connection_info
+    properties:
+      node_connection_info:
+        type: string
+        description: "pubkey@host:port"
+      remote_balance:
+        type: integer
+        description: "Inbound liquidity amount in satoshis"
+      local_balance:
+        type: integer
+        description: "Outbound liquidity amount in satoshis"
+      channel_expiry:
+        type: integer
+        description: "Channel expiration in weeks. "
+  ChannelOrderResponse:
+    type: "object"
+    properties:
+      order_id:
+        type: string
+        description: "An lsp generated order id used to look-up the status of this request"
+      order_total:
+        type: integer
+        description: "The total fee plus the local_balance requested"
+      fee_total:
+        type: integer
+        description: "The total fee the LSP will charge to open this channel"
+      fee_per_payment:
+        type: integer
+        description: "For intercepted payment of fee, fee taken from each payment until fee is paid"
+      scid:
+        type: string
+        description: "The scid user puts in the route hint of invoice to identify order"
+      ln_invoice:
+        type: string
+        description: "A lightning bolt11 invoice to pay the fee for this channel open"
+      btc_address:
+        type: string
+        description: "An on-chain bitcoin address to pay the fee for this channel open"
+      lnurl_channel:
+        type: "string"
+        description: "LNURL channel request uri"
+  ChannelInformation:
+    type: "object"
+    properties:
+      id:
+        type: string
+        description: "An lsp generated order id used to look-up the status of this request"
+      created_at:
+        description: "Number of seconds since epoch when this order was created"
+        type: "number"
+      local_balance:
+        description: "Local balance in sats requested by client"
+        type: "number"
+      remote_balance:
+        description: "Remote balance in sats requested by client"
+        type: "number"
+      channel_expiry:
+        description: "Channel expiry in weeks requested by client"
+        type: "number"
+      channel_expiry_ts:
+        description: "Number of seconds since epoch when the channel can be closed"
+        type: "number"
+      order_expiry_ts:
+        description: "Number of seconds since epoch when this order can still be paid"
+        type: "number"
+      order_total:
+        description: "The total fee plus the local_balance requested"
+        type: "number"
+      fee_total:
+        description: "The total fee the lsp will charge to open this channel"
+        type: "number"
+      fee_per_payment:
+        description: "For intercepted payment of fee, fee taken from each payment until fee is paid"
+        type: "number"
+      scid:
+        description: "The scid user puts in the route hint of invoice to identify order"
+        type: "string"
+      ln_invoice:
+        description: "A lightning bolt11 invoice to pay the fee for this channel open"
+        type: "string"
+      btc_address:
+        description: "An on-chain bitcoin address to pay the fee for this channel open "
+        type: "string"
+      order_id:
+        description: "An lsp generated order id used to look-up the status of this request"
+        type: "string"
+      lnurl_channel:
+        description: "A way to request the open via lnurl after the order is paid"
+        type: "string"
+      amount_paid:
+        description: "Amount paid by client so far in sats"
+        type: "number"
+      node_connection_info:
+        description: "The node_connection_info for the node to open the channel to"
+        type: "string"
+      channel_open_tx:
+        description: "The txid of the channel funding tx once it is broadcast"
+        type: "string"
+      state:
+        description: "The state of the order"
+        type: "string"
+      onchain_payments:
+        description: "A list of payments received to btc_address on-chain |"
+        type: "array"
+        items:
+          type: object
+          properties:
+            height: 
+              type: integer
+              description: "Transaction block height"
+            hash:
+              type: string
+              description: "Transaction id"
+            amount:
+              type: integer
+              description: "Transaction amount"
+            zero_conf:
+              type: boolean
+              description: "If payment was accepted as zero confirmation"

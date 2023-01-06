@@ -21,6 +21,7 @@ Request an inbound channel with a specific size and duration.
 | node_connection_info | body | pubkey or pubkey@host:port | Yes | string |
 | remote_balance | body | Inbound liquidity amount in satoshis | No | integer |
 | local_balance | body | Outbound liqudity amount in satoshis | No | integer |
+| on_chain_fee_rate | body | On-chain fee rate of the channel opening transaction in satoshis per vbyte | No | number |
 | channel_expiry | body | Channel expiration in weeks | No | integer |
 
 

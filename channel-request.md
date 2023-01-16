@@ -81,3 +81,19 @@ Get information about a channel order
 | channel_open_tx | The txid of the channel funding tx once it is broadcast | string |
 | state | The state of the order | string |
 | onchain_payments | A list of payments received to btc_address on-chain | object[] |
+
+
+###### Order state enum
+
+| State          	| Description                                                                           	|
+|----------------	|---------------------------------------------------------------------------------------	|
+| CREATED       	| The order has been created but the user hasn't paid yet.                         	|
+| PENDING        	| Order is paid but the channel has not been opened yet.                                	|
+| OPEN_INITIATED 	| Channel broadcast transaction is in the mempool. 0conf might skip directly to OPENED. 	|
+| OPENED         	| Channel is open and has the necessary block confirmations.                            	|
+| CLOSE_INITIADED   | The closing transaction has been broadcasted.                                             |
+| CLOSED            | Channel is closed and has the necessary block confirmations.                              |
+| FAILED         	| Any error. For example, the LSP couldn't connect to the target node.                  	|
+| REFUNDED       	| Payment has been refunded.                                                            	|
+| OFFER_EXPIRED  	| Order has not been paid and offer has therefore expired.                              	|
+

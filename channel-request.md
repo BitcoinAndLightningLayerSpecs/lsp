@@ -88,6 +88,7 @@ Get information about a channel order
 | State          	| Description                                                                           	|
 |----------------	|---------------------------------------------------------------------------------------	|
 | CREATED       	| The order has been created but the user hasn't paid yet.                               	|
+| UNDER_FUNDED      | Funding received but under paid.                                                       	|
 | PENDING        	| Order is paid but the channel has not been opened yet.                                	|
 | OPENING       	| The opening transaction has been broadcasted. 0conf might skip directly to OPENED.     	|
 | OPENED         	| Channel is open and has the necessary block confirmations.                            	|

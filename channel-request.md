@@ -89,9 +89,9 @@ Get information about a channel order
 |----------------	|---------------------------------------------------------------------------------------	|
 | CREATED       	| The order has been created but the user hasn't paid yet.                               	|
 | PENDING        	| Order is paid but the channel has not been opened yet.                                	|
-| OPEN_INITIATED 	| The opening transaction has been broadcasted. 0conf might skip directly to OPENED.     	|
+| OPENING       	| The opening transaction has been broadcasted. 0conf might skip directly to OPENED.     	|
 | OPENED         	| Channel is open and has the necessary block confirmations.                            	|
-| CLOSE_INITIADED   | The closing transaction has been broadcasted.                                             |
+| CLOSING           | The closing transaction has been broadcasted.                                             |
 | CLOSED            | Channel is closed and has the necessary block confirmations.                              |
 | FAILED         	| Any error. For example, the LSP couldn't connect to the target node.                  	|
 | REFUNDED       	| Payment has been refunded.                                                            	|

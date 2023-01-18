@@ -1,0 +1,115 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "API documentation for liquidity marketplace for a Lightning Network Service Provider (LSP)",
+    "version": "0.0.0",
+    "title": "LSP Spec 2"
+  },
+  "tags": [
+    {
+      "name": "Liquidity offers"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "x-readme": {
+    "explorer-enabled": true,
+    "samples-enabled": true,
+    "samples-languages": [
+      "curl"
+    ]
+  },
+  "paths": {
+    "/lsp/liquidity": {
+      "get": {
+        "tags": [
+          "Liquidity offers"
+        ],
+        "summary": "Get information about available liquidity",
+        "description": "Get information about available liquidity",
+        "operationId": "get-availabe-liquidity",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Available liquidity for sell",
+            "schema": {
+              "$ref": "#/definitions/AvailableLiquidity"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AvailableLiquidity": {
+      "type": "object",
+      "required": [
+        "min_size",
+        "max_size",
+        "base_fee",
+        "rate_fee",
+        "min_duration",
+        "chan_base_fee",
+        "chan_rate_fee",
+        "pub_key"
+      ],
+      "properties": {
+        "min_size": {
+          "type": "integer",
+          "description": "minimum chan size availabe for purchase"
+        },
+        "max_size": {
+          "type": "integer",
+          "description": "total available capacity in satoshis"
+        },
+        "base_fee": {
+          "type": "integer",
+          "description": "fixed fee charged for lease in satoshis"
+        },
+        "rate_fee": {
+          "type": "number",
+          "description": "rate fee for liquidity expressed as formula"
+        },
+        "min_duration": {
+          "type": "integer",
+          "description": "promise to keep open for minimum this amount of time / blocks"
+        },
+        "chan_base_fee": {
+          "type": "integer",
+          "description": "promise to not charge greater than this base fee in satoshis"
+        },
+        "chan_rate_fee": {
+          "type": "integer",
+          "description": "promise to not charge greater than this ppm"
+        },
+        "pub_key": {
+          "type": "string",
+          "description": "sellers pubkey"
+        },
+        "policy": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "snake case policy name"
+              },
+              "value": {
+                "type": "string",
+                "description": "machine readable value"
+              },
+              "info": {
+                "type": "string",
+                "description": "additional information"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

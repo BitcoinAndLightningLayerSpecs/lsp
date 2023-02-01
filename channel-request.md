@@ -18,7 +18,7 @@ Request an inbound channel with a specific size and duration.
 
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ------ |
-| node_connection_info | body | pubkey or pubkey@host:port | Yes | string |
+| node_connection_info | body | pubkey or pubkey@host:port | No | string |
 | remote_balance | body | Inbound liquidity amount in satoshis | No | integer |
 | local_balance | body | Outbound liqudity amount in satoshis | No | integer |
 | on_chain_fee_rate | body | On-chain fee rate of the channel opening transaction in satoshis per vbyte | No | number |
@@ -37,7 +37,7 @@ Request an inbound channel with a specific size and duration.
 | ln_invoice | A lightning bolt11 invoice to pay the fee for this channel open | string |
 | btc_address | An on-chain bitcoin address to pay the fee for this channel open | string |
 | order_id | An lsp generated order id used to look-up the status of this request | string |
-| lnurl_channel | A way to request the open via lnurl after the order is paid | string |
+| lnurl_channel | A way to request the open via lnurl after the order is paid as defined by [LNURL - LUD2](https://github.com/lnurl/luds/blob/luds/02.md) Step 3 | Object |
 
 ### /lsp/channel
 

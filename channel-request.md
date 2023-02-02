@@ -21,6 +21,7 @@ Request an inbound channel with a specific size and duration.
 | node_connection_info | body | pubkey or pubkey@host:port | Yes | string |
 | remote_balance | body | Inbound liquidity amount in satoshis | No | integer |
 | local_balance | body | Outbound liqudity amount in satoshis | No | integer |
+| on_chain_fee_rate | body | On-chain fee rate of the channel opening transaction in satoshis per vbyte | No | number |
 | channel_expiry | body | Channel expiration in weeks | No | integer |
 
 
@@ -80,3 +81,20 @@ Get information about a channel order
 | channel_open_tx | The txid of the channel funding tx once it is broadcast | string |
 | state | The state of the order | string |
 | onchain_payments | A list of payments received to btc_address on-chain | object[] |
+
+
+###### Order state enum
+
+| State          	| Description                                                                           	|
+|----------------	|---------------------------------------------------------------------------------------	|
+| CREATED       	| The order has been created but the user hasn't paid yet.                               	|
+| UNDER_FUNDED      | Funding received but under paid.                                                       	|
+| PENDING        	| Order is paid but the channel has not been opened yet.                                	|
+| OPENING       	| The opening transaction has been broadcasted. 0conf might skip directly to OPENED.     	|
+| OPENED         	| Channel is open and has the necessary block confirmations.                            	|
+| CLOSING           | The closing transaction has been broadcasted.                                             |
+| CLOSED            | Channel is closed and has the necessary block confirmations.                              |
+| FAILED         	| Any error. For example, the LSP couldn't connect to the target node.                  	|
+| REFUNDED       	| Payment has been refunded.                                                            	|
+| OFFER_EXPIRED  	| Order has not been paid and offer has therefore expired.                              	|
+

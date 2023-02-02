@@ -68,6 +68,9 @@ definitions:
       local_balance:
         type: integer
         description: "Outbound liquidity amount in satoshis"
+      on_chain_fee_rate:
+        type: number
+        description: "On-chain fee rate of the channel opening transaction in satoshis per vbyte"
       channel_expiry:
         type: integer
         description: "Channel expiration in weeks. "

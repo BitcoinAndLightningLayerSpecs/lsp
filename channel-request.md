@@ -1,7 +1,7 @@
 # LSP channel request
 
 
-## Version: 0.0.1
+## Version: 0.0.2
 
 ### /lsp/channel
 
@@ -18,7 +18,7 @@ Request an inbound channel with a specific size and duration.
 
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ------ |
-| node_connection_info | body | pubkey or pubkey@host:port | Yes | string |
+| coupon_code | body | pubkey or pubkey@host:port | Yes | string |
 | remote_balance | body | Inbound liquidity amount in satoshis | No | integer |
 | local_balance | body | Outbound liqudity amount in satoshis | No | integer |
 | on_chain_fee_rate | body | On-chain fee rate of the channel opening transaction in satoshis per vbyte | No | number |
@@ -97,4 +97,5 @@ Get information about a channel order
 | FAILED         	| Any error. For example, the LSP couldn't connect to the target node.                  	|
 | REFUNDED       	| Payment has been refunded.                                                            	|
 | OFFER_EXPIRED  	| Order has not been paid and offer has therefore expired.                              	|
+
 

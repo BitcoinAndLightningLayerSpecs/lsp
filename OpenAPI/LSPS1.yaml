@@ -1,6 +1,11 @@
 openapi: 3.0.3
 info:
-  description: "API documentation for channel opening request from a Lightning Network Service Provider (LSP)"
+  description: |
+    API documentation for channel opening request from a Lightning Network Service Provider (LSP).
+    
+    ### Onchain payments
+    Any on chain addresses can be omitted if the LSP doesnt want to support onchain payments. This can also be the case selectively. For example, when the payment is too small.
+    
   version: "0.0.2"
   title: "LSP Spec 1"
 tags:
@@ -14,12 +19,28 @@ paths:
     get:
       tags:
       - "API Info"
-      summary: "Get general information."
-      description: "Get general information about this API and supported features."
+      summary: "Get general API information."
+      description: |
+        Get general information about this API and supported features.
+        
       operationId: "channel-order-info"
       responses:
         "200":
-          description: "Channel information"
+          description: |
+            ## Supported features
+            
+            ### lnurl_lud2
+            Indicates if LNURL LUD2 channel request is supported. Sets `lnurl_channel` to `null` if not.
+            
+            ### local_balance
+            Indicates if the LSP is willing to push satoshi to the receiver side. Set `local_balance` to `0` if not supported.
+            
+            ### refunds
+            Indicates if the LSP supports automatic refunds. If not then there is no need to implement `/lsp/channels/{id}/refund`.
+            
+            ### jit_channels
+            Indicates if the LSP supports Just-In-Time channels. If not then set the `jit` object to null.
+            
           content:
               application/json:
                 schema:
@@ -29,7 +50,14 @@ paths:
       tags:
       - "Channel Request"
       summary: "Requests a new channel order from the LSP."
-      description: "This endpoint accepts arguments for a channel with a specific size and duration and returns the order information."
+      description: |
+        This endpoint accepts arguments for a channel with a specific size and duration and returns the order information.
+        
+        ## Open questions
+        - Compliance: How do we prevent blacklisted nodes to buy channels?
+        - Onchain fees change over time. The actual channel open can be significantly later than the channel purchase. Problem?
+        - JIT: We need to register the node somewhere so we can associate the node with the route_hint.
+        
       operationId: "new-channel-request"
       requestBody:
           description: "Information needed to create your new deposit invoice."
@@ -39,8 +67,8 @@ paths:
                   schema:
                       $ref: '#/components/schemas/ChannelOrderRequest'
       responses:
-        "200":
-          description: "Information for channel order"
+        "201":
+          description: "Created"
           content:
               application/json:
                 schema:
@@ -80,7 +108,8 @@ paths:
       tags:
       - "Channel Request"
       summary: "Opens a previously paid channel."
-      description: "This endpoint accepts arguments to open a channel to a specific node. It performs an actual channel open and returns success/error."
+      description: |
+        This endpoint accepts arguments to open a channel to a specific node. It performs an actual channel open and returns success/error.
       operationId: "open-channel-request"
       parameters:
         - in: path
@@ -97,7 +126,7 @@ paths:
                   schema:
                       $ref: '#/components/schemas/ChannelOpenRequest'
       responses:
-        "200":
+        "201":
           description: "Success"
           content:
               application/json:
@@ -113,6 +142,75 @@ paths:
               application/json:
                 schema:
                   $ref: "#/components/schemas/ChannelOpenResponse"
+                  
+  /lsp/channels/{id}/lnurl/open:
+    post:
+      tags:
+      - "Channel Request"
+      summary: "LNURL callback to open the channel."
+      description: |
+        This endpoint is similar to the `/lsp/channel/{id}/open` request but supports LNURL query parameters. See [LNURL spec](https://github.com/lnurl/luds/blob/luds/02.md) for more information.
+        This endpoint can be omitted if `lnurl_lud2` is not supported.
+      operationId: "openlnurl-channel-request"
+      parameters:
+        - in: path
+          name: id
+          description: "Order id."
+          required: true
+          schema:
+              type: string
+        - in: query
+          name: k1
+          description: "k1 for LNURL-LUD2."
+          required: true
+          schema:
+              type: string
+        - in: query
+          name: remoteid
+          description: "remoteid for LNURL-LUD2."
+          required: true
+          schema:
+              type: string
+        - in: query
+          name: private
+          description: "private for LNURL-LUD2."
+          required: true
+          schema:
+              type: integer
+              
+        - in: query
+          name: cancel
+          description: "cancel for LNURL-LUD2."
+          required: false
+          schema:
+              type: integer
+
+      responses:
+        "201":
+          description: "Success"
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ChannelOpenLnurlResponse"
+        "400":
+          description: "Validation error"
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ChannelOpenLnurlResponse"
+        "404":
+          description: "Not found"
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ChannelOpenLnurlResponse"
+        "412":
+          description: "Channel open failed"
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ChannelOpenLnurlResponse"
+                  
                   
   /lsp/channels/{id}/refund:
     get:
@@ -191,11 +289,10 @@ components:
             items:
               type: string
               example:
-                - onchain_payments # Onchain payments
                 - lnurl_lud2 # LNURL channel request
                 - jit_channels # Just-In-Time Channels
                 - local_balance # Push balance to user
-                - refunds
+                - refunds # Refunds via api
           website:
             type: string
             description: "Website that provides devs a way to get in contact and/or TOS."
@@ -217,7 +314,7 @@ components:
             default: 0
             example: 2000000
             minimum: 0
-          on_chain_fee_rate:
+          onchain_fee_rate:
             type: number
             description: "On-chain fee rate of the channel opening transaction in satoshis per vbyte."
             minimum: 1
@@ -243,6 +340,10 @@ components:
             description: "The total fee in satoshi the LSP will charge to open this channel."
             example: 8888
             minimum: 0
+          order_expiry_ts:
+            description: "Number of seconds since epoch when this order can still be paid."
+            type: integer
+            example: 1672661897
           order_total:
             type: integer
             description: "fee_total plus the local_balance requested in satoshi."
@@ -257,6 +358,8 @@ components:
             nullable: true
             description: "An on-chain bitcoin address to pay the fee for this channel open."
             example: "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr"
+          request:
+            $ref: "#/components/schemas/ChannelOrderRequest"
             
       Order:
         type: "object"
@@ -279,24 +382,8 @@ components:
               - COMPLETED
             example: COMPLETED
           request:
-            type: object
-            properties:
-              remote_balance:
-                type: integer
-                description: "Inbound liquidity amount in satoshis. LSP side."
-                example: 5000000
-                minimum: 0
-              local_balance:
-                type: integer
-                description: "Outbound liquidity amount in satoshis. User side."
-                default: 0
-                example: 2000000
-                minimum: 1
-              channel_expiry:
-                description: "Channel expiry in weeks requested by client"
-                type: integer
-                example: 12
-                minimum: 1
+            $ref: "#/components/schemas/ChannelOrderRequest"
+
           payment:
             type: object
             properties:
@@ -460,6 +547,19 @@ components:
               - ALREADY_OPEN
             example: null
             
+      ChannelOpenLnurlResponse:
+        type: "object"
+        properties:
+          status:
+            type: string
+            description: "Indicates if the channel has been opened."
+            example: "OK"
+          reason:
+            type: string
+            nullable: true
+            description: "Reason the channel couldn't be opened."
+            example: null
+            
       ChannelRefundGetResponse:
         type: "object"
         properties:
@@ -469,6 +569,7 @@ components:
               - AVAILABLE
               - PAID_OUT
               - IN_FLIGHT # Stuck payment. Resolves later.
+              - UNSUPPORTED
             description: "Is a refund possible?"
             example: AVAILABLE
           amounts:
@@ -529,6 +630,7 @@ components:
             enum:
               - PAYMENT_FAILED # For example, path not found
               - REJECTED_BY_LSP # LSP rejected node.
+              - UNSUPPORTED
             example: null
           
           

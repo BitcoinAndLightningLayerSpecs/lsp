@@ -407,7 +407,6 @@ components:
             example: COMPLETED
           request:
             $ref: "#/components/schemas/ChannelOrderRequest"
-
           payment:
             type: object
             properties:
@@ -506,15 +505,16 @@ components:
                 type: integer
                 example: 1672661898
                 nullable: true
-              node_connection_info:
-                description: "The connection string for the node to open the channel to."
+              node_id:
+                description: "The node id of the customer node."
                 type: "string"
                 example: "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@xahwmijytzsgjeo5z2spaj2kcmbawdw2bn7kejtbftvazhhvcn5wloqd.onion:9735"
-              lsp_connection_info:
-                description: "The connection string for lsp node that opened the channel ."
+              lsp_node_id:
+                description: "The node id of the lsp node."
                 type: "string"
                 example: "0296b2db342fcf87ea94d981757fdf4d3e545bd5cef4919f58b5d38dfdd73bf5c9@34.79.58.84:9735"
-                  
+          
+
       ChannelOpenRequest:
         type: "object"
         required:
@@ -552,6 +552,10 @@ components:
               - PAYMENT_REQUIRED
               - ALREADY_OPEN
             example: null
+          lsp_node_connection_string:
+            type: string
+            nullable: true
+            description: "Node connection string that tried to connect."
             
       ChannelOpenLnurlResponse:
         type: "object"

@@ -3,6 +3,12 @@ info:
   description: |
     API documentation for channel opening request from a Lightning Network Service Provider (LSP).
     
+
+    ### Features
+    The api is split up in to the base api and additional features.
+    All supported additional features are listed in the general API info endpoint.
+    Features can add additional endpoints or fields.
+
     ### Onchain payments
     Any on chain addresses can be omitted if the LSP doesnt want to support onchain payments. This can also be the case selectively. For example, when the payment is too small.
     
@@ -57,10 +63,6 @@ paths:
       summary: "Requests a new channel order from the LSP."
       description: |
         This endpoint accepts arguments for a channel with a specific size and duration and returns the order information.
-        
-        ## Open questions
-        - Onchain fees change over time. The actual channel open can be significantly later than the channel purchase. Problem?
-        - Show LSP connection string for LNURL somewhere before channel open.
         
       operationId: "new-channel-request"
       requestBody:
@@ -359,15 +361,15 @@ components:
             description: "The total fee in satoshi the LSP will charge to open this channel."
             example: 8888
             minimum: 0
-          order_expiry_ts:
-            description: "Number of seconds since epoch when this order can still be paid."
-            type: integer
-            example: 1672661897
           order_total:
             type: integer
             description: "fee_total plus the local_balance requested in satoshi."
             example: 2008888
             minimum: 0
+          order_expiry_ts:
+            description: "Number of seconds since epoch when this order can still be paid."
+            type: integer
+            example: 1672661897
           ln_invoice:
             type: string
             description: "A lightning bolt11 invoice to pay the fee for this channel open."
@@ -509,12 +511,6 @@ components:
                 description: "The connection string for lsp node that opened the channel ."
                 type: "string"
                 example: "0296b2db342fcf87ea94d981757fdf4d3e545bd5cef4919f58b5d38dfdd73bf5c9@34.79.58.84:9735"
-          lnurl_channel:
-            description: "A way to request the open via lnurl after the order is paid. Only available after invoices have been paid."
-            type: "string"
-            nullable: true
-            example: 'lnurl1dp68gurn8ghj7mrww4exctt5dahkccn00qhxget8wfjk2um0veax2un09e3k7mf0w5lhz0fevvunqcnzxuckxd3n8ymn2ef5ve3kyvrx8qmngc33vymkzvenvesnscm9xuunjwrzxgcxxvrrvcmxgvtyvvmkyc33vsmnjd3svgckzcrx382'
-
                   
       ChannelOpenRequest:
         type: "object"

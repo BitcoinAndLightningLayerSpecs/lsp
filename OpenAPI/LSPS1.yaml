@@ -11,6 +11,8 @@ info:
 tags:
 - name: "API Info"
 - name: "Channel Request"
+- name: "LNURL"
+- name: "JIT"
 - name: "Refund"
 
 
@@ -30,7 +32,7 @@ paths:
             ## Supported features
             
             ### lnurl_lud2
-            Indicates if LNURL LUD2 channel request is supported. Sets `lnurl_channel` to `null` if not.
+            Indicates if [LNURL LUD2 channel request](https://github.com/lnurl/luds/blob/luds/02.md) is supported. Sets `lnurl_channel` to `null` if not.
             
             ### local_balance
             Indicates if the LSP is willing to push satoshi to the receiver side. Set `local_balance` to `0` if not supported.
@@ -54,9 +56,8 @@ paths:
         This endpoint accepts arguments for a channel with a specific size and duration and returns the order information.
         
         ## Open questions
-        - Compliance: How do we prevent blacklisted nodes to buy channels?
         - Onchain fees change over time. The actual channel open can be significantly later than the channel purchase. Problem?
-        - JIT: We need to register the node somewhere so we can associate the node with the route_hint.
+        - Show LSP connection string for LNURL somewhere before channel open.
         
       operationId: "new-channel-request"
       requestBody:
@@ -142,74 +143,89 @@ paths:
               application/json:
                 schema:
                   $ref: "#/components/schemas/ChannelOpenResponse"
-                  
-  /lsp/channels/{id}/lnurl/open:
-    post:
+
+  /lsp/channels/{id}/jit:
+    get:
       tags:
-      - "Channel Request"
-      summary: "LNURL callback to open the channel."
+      - JIT
+      summary: "Get information about registered JIT node."
       description: |
-        This endpoint is similar to the `/lsp/channel/{id}/open` request but supports LNURL query parameters. See [LNURL spec](https://github.com/lnurl/luds/blob/luds/02.md) for more information.
-        This endpoint can be omitted if `lnurl_lud2` is not supported.
-      operationId: "openlnurl-channel-request"
+        Get information about registered JIT node. Feature: `jit_channels`.
+      operationId: "get-channel-jit"
+
       parameters:
         - in: path
           name: id
-          description: "Order id."
+          description: "Order id"
           required: true
           schema:
               type: string
-        - in: query
-          name: k1
-          description: "k1 for LNURL-LUD2."
-          required: true
-          schema:
-              type: string
-        - in: query
-          name: remoteid
-          description: "remoteid for LNURL-LUD2."
-          required: true
-          schema:
-              type: string
-        - in: query
-          name: private
-          description: "private for LNURL-LUD2."
-          required: true
-          schema:
-              type: integer
-              
-        - in: query
-          name: cancel
-          description: "cancel for LNURL-LUD2."
-          required: false
-          schema:
-              type: integer
-
       responses:
-        "201":
-          description: "Success"
+        "200":
+          description: "Channel information"
           content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/ChannelOpenLnurlResponse"
-        "400":
-          description: "Validation error"
+                  $ref: "#/components/schemas/ChannelJITResponse"
+        "404":
+          description: "Not found"
+    post:
+      tags:
+      - JIT
+      summary: "Register the JIT node."
+      description: |
+        Register JIT node. Feature: `jit_channels`.
+      operationId: "post-channel-jit"
+
+      parameters:
+        - in: path
+          name: id
+          description: "Order id"
+          required: true
+          schema:
+              type: string
+      requestBody:
+          description: "Information needed to refund the payment."
+          required: true
+          content:
+              application/json:
+                  schema:
+                      $ref: '#/components/schemas/ChannelJITRequest'
+      responses:
+        "200":
+          description: "Channel information"
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ChannelJITResponse"
+        "404":
+          description: "Not found"
+                  
+  /lsp/channels/{id}/lnurl:
+    get:
+      tags:
+      - LNURL
+      summary: "Get LNURL LUD2."
+      description: |
+        Get the LNURL LUD2 string. Feature: `lnurl_lud2`.
+      operationId: "get-channel-lnurl-lud2"
+
+      parameters:
+        - in: path
+          name: id
+          description: "Order id"
+          required: true
+          schema:
+              type: string
+      responses:
+        "200":
+          description: "Channel information"
           content:
               application/json:
                 schema:
                   $ref: "#/components/schemas/ChannelOpenLnurlResponse"
         "404":
           description: "Not found"
-          content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ChannelOpenLnurlResponse"
-        "412":
-          description: "Channel open failed"
-          content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ChannelOpenLnurlResponse"
                   
                   
   /lsp/channels/{id}/refund:
@@ -490,18 +506,6 @@ components:
                 description: "The connection string for lsp node that opened the channel ."
                 type: "string"
                 example: "0296b2db342fcf87ea94d981757fdf4d3e545bd5cef4919f58b5d38dfdd73bf5c9@34.79.58.84:9735"
-          jit:
-            type: object
-            nullable: true
-            properties:
-              fee_per_payment:
-                description: "For intercepted payment of fee, fee in satoshi taken from each payment until fee is paid."
-                type: integer
-                example: 50
-              route_hint:
-                description: "The short_channel_id user puts in the route hint of invoice to identify order. See BOLT#7 for scid definition."
-                example: "733904x1451x0"
-                type: "string"
           lnurl_channel:
             description: "A way to request the open via lnurl after the order is paid. Only available after invoices have been paid."
             type: "string"
@@ -550,16 +554,11 @@ components:
       ChannelOpenLnurlResponse:
         type: "object"
         properties:
-          status:
+          lnurl:
             type: string
-            description: "Indicates if the channel has been opened."
-            example: "OK"
-          reason:
-            type: string
-            nullable: true
-            description: "Reason the channel couldn't be opened."
-            example: null
-            
+            description: "Encoded LNURL LUD2 string."
+            example: "lnurl1dp68gurn8ghj7mrww4exctt5dahkccn00qhxget8wfjk2um0veax2un09e3k7mf0w5lhz0fevvunqcnzxuckxd3n8ymn2ef5ve3kyvrx8qmngc33vymkzvenvesnscm9xuunjwrzxgcxxvrrvcmxgvtyvvmkyc33vsmnjd3svgckzcrx382"
+
       ChannelRefundGetResponse:
         type: "object"
         properties:
@@ -632,6 +631,41 @@ components:
               - REJECTED_BY_LSP # LSP rejected node.
               - UNSUPPORTED
             example: null
+
+      ChannelJITRequest:
+        type: "object"
+        required:
+          - node_connection_string
+        properties:
+          node_connection_string:
+            description: "The node connection string that the channel will be opened to in case of an incoming payment."
+            example: "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735"
+            type: "string"
+
+      ChannelJITResponse:
+        type: "object"
+        properties:
+          fee_per_payment:
+            description: "For intercepted payment of fee, fee in satoshi taken from each payment until fee is paid."
+            type: integer
+            example: 50
+          route_hint:
+            type: object
+            nullable: true
+            properties:
+              scid:
+                description: "The short_channel_id the user puts in the route hint of the invoice. See BOLT#7 for scid definition."
+                example: "733904x1451x0"
+                type: "string"
+              node_id:
+                description: "The node_id the user puts in the route hint of the invoice."
+                example: "031015a7839468a3c266d662d5bb21ea4cea24226936e2864a7ca4f2c3939836e0"
+                type: "string"
+          registerd_node_connection_string:
+            description: "The registerd node id that the channel will be opened to in case of an incoming payment."
+            example: "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735"
+            type: "string"
+            nullable: true
           
           
           

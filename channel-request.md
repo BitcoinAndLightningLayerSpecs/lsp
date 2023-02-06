@@ -2,12 +2,65 @@
 
 `Version: 0.0.2`
 
-The specification is defined in [LSPS1.yaml](./OpenAPI/LSPS1.yaml) and can be viewed in
-OpenAPI editors like the [Swagger Editor](https://editor.swagger.io/).
+The specification is defined in [LSPS1.yaml](./OpenAPI/LSPS1.yaml) and can be viewed in an OpenAPI editors like the [Swagger Editor](https://editor.swagger.io/).
+
+
+## Base API
+
+The base api consists of 4 endpoints:
+- `GET /lsp/channels`: General API information.
+- `POST /lsp/channels`: Create channel request.
+- `GET /lsp/channels/{id}`: Get request state.
+- `POST /lsp/channels/{id}/open`: Synchronously open channel.
+
+The request is split between 2 phases: Purchasing a channel and opening a channel.
+
+## Features
+
+The base api can be extended by additional features. Feature either can extend the base api or add additional endpoints. Base api needs to stay backward-compatible though.
+
+Each supported feature must to be listed in `GET /lsp/channels`.`features` either as a `string` or as a object.
+
+```json
+features: [
+    "local_balance",
+    {
+        "name": "onchain_payments",
+        ...Additional settings
+    }
+]
+```
+
+### lnurl_lud2
+
+The feature `lnurl_lud2` adds a new endpoint `GET /lsp/channels/{id}/lnurl` that provides an [lnurl channel request](https://github.com/lnurl/luds/blob/luds/02.md) according to [LUD2](https://github.com/lnurl/luds/blob/luds/02.md).
+
+### local_balance
+
+The feature `local_balance` allows `POST /lsp/channels`.`local_balance` to be greater 0. Otherwise it is 0 by default.
+
+### refunds
+
+The feature `refunds` adds two endpoints to automatically manage refunds.
+
+- `POST /lsp/channels/{id}/refund` allows a user to claim the refund with a Lightning invoice or an onchain address.
+- `GET /lsp/channels/{id}/refund` shows the refund state and available amount.
+
+### jit_channels
+
+The feature `jit_channels` adds the ability to to register a node and receive a route hint to add the channel Just-In-Time.
+
+### onchain_payments
+
+The feature `onchain_payments` indicates if this LSP is willing to receive payments onchain. The feature has 1 required setting:
+
+- `min_satoshi` indicates at what value the LSP is willing to receive payments onchain.
+
+In case the LSP doesn't support onchain payments, all values related to onchain payments will be `null`.
 
 ### /lsp/channel
 
-#### POST
+#### GET
 ##### Summary
 
 Request an inbound channel
@@ -16,30 +69,6 @@ Request an inbound channel
 
 Request an inbound channel with a specific size and duration.
 
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ------ |
-| coupon_code | body | pubkey or pubkey@host:port | Yes | string |
-| remote_balance | body | Inbound liquidity amount in satoshis | No | integer |
-| local_balance | body | Outbound liqudity amount in satoshis | No | integer |
-| on_chain_fee_rate | body | On-chain fee rate of the channel opening transaction in satoshis per vbyte | No | number |
-| channel_expiry | body | Channel expiration in weeks | No | integer |
-
-
-##### Response
-
-| Name | Description | Schema |
-| ---- | ----------- | ------ |
-| order_total | The total fee plus the local_balance requested | number |
-| fee_total | The total fee the lsp will charge to open this channel | number |
-| fee_per_payment | For intercepted payment of fee, fee taken from each payment until fee is paid | number |
-| temporary_scid | The scid user puts in the route hint of invoice to identify order | string |
-| lsp_connection_info | pubkey or pubkey@host:port | string |
-| ln_invoice | A lightning bolt11 invoice to pay the fee for this channel open | string |
-| btc_address | An on-chain bitcoin address to pay the fee for this channel open | string |
-| order_id | An lsp generated order id used to look-up the status of this request | string |
-| lnurl_channel | A way to request the open via lnurl after the order is paid | string |
 
 ### /lsp/channel
 

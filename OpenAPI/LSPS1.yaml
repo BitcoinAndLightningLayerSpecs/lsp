@@ -313,7 +313,7 @@ components:
             type: string
             description: "Version of this api. See https://github.com/BitcoinAndLightningLayerSpecs/lsp"
             example: '0.0.2'
-          supported_features:
+          features:
             type: array
             items:
               $ref: "#/components/schemas/ApiFeature"

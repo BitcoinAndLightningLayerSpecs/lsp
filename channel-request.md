@@ -1,7 +1,9 @@
-# LSP channel request
+# LSPS1 channel request
 
+`Version: 0.0.2`
 
-## Version: 0.0.2
+The specification is defined in [LSPS1.yaml](./OpenAPI/LSPS1.yaml) and can be viewed in
+OpenAPI editors like the [Swagger Editor](https://editor.swagger.io/).
 
 ### /lsp/channel
 

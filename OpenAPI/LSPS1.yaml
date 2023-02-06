@@ -10,7 +10,8 @@ info:
     Features can add additional endpoints or fields.
 
     ### Onchain payments
-    Any on chain addresses can be omitted if the LSP doesnt want to support onchain payments. This can also be the case selectively. For example, when the payment is too small.
+    Any on chain addresses can be omitted if the LSP doesnt want to support onchain payments. 
+    This can also be the case selective. For example, when the payment is too small.
     
   version: "0.0.2"
   title: "LSP Spec 1"
@@ -56,6 +57,13 @@ paths:
               application/json:
                 schema:
                     $ref: "#/components/schemas/ChannelApiInfo"
+                example:
+                - lnurl_lud2 # LNURL channel request
+                - jit_channels # Just-In-Time Channels
+                - name: local_balance # Push balance to user
+                - name: onchain_payments
+                  min_satoshi: 50000
+                - refunds # Refunds via api
   
     post:
       tags:
@@ -190,7 +198,7 @@ paths:
           schema:
               type: string
       requestBody:
-          description: "Information needed to refund the payment."
+          description: "Information needed to connect to the node."
           required: true
           content:
               application/json:
@@ -308,12 +316,7 @@ components:
           supported_features:
             type: array
             items:
-              type: string
-              example:
-                - lnurl_lud2 # LNURL channel request
-                - jit_channels # Just-In-Time Channels
-                - local_balance # Push balance to user
-                - refunds # Refunds via api
+              $ref: "#/components/schemas/ApiFeature"
           website:
             type: string
             description: "Website that provides devs a way to get in contact and/or TOS."
@@ -665,6 +668,33 @@ components:
             example: "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735"
             type: "string"
             nullable: true
+      
+      BaseApiFeature:
+        type: object
+        properties:
+          name:
+            type: string
+            example: 'local_balance'
+            description: Feature name.
+        
+      OnchainPaymentApiFeature:
+        # Extends BaseApiFeature
+        allOf:
+          - $ref: "#/components/schemas/BaseApiFeature"
+          - type: object
+            properties:
+              min_satoshi:
+                type: string
+                description: "Minimal number of satoshi required to be eligable for an onchain payment."
+                example: 50000
+
+      ApiFeature:
+      # One of these types need to match
+        oneOf:
+          - type: string
+          - $ref: "#/components/schemas/BaseApiFeature"
+          - $ref: "#/components/schemas/OnchainPaymentApiFeature"
+
           
           
           

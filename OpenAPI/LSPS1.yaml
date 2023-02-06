@@ -12,8 +12,11 @@ tags:
 - name: "API Info"
 - name: "Channel Request"
 - name: "LNURL"
+  description: "Feature: `lnurl_lud2`."
 - name: "JIT"
+  description: "Feature: `jit_channels`."
 - name: "Refund"
+  description: "Feature: `refunds`."
 
 
 paths:
@@ -32,16 +35,16 @@ paths:
             ## Supported features
             
             ### lnurl_lud2
-            Indicates if [LNURL LUD2 channel request](https://github.com/lnurl/luds/blob/luds/02.md) is supported. Sets `lnurl_channel` to `null` if not.
+            Indicates if [LNURL LUD2 channel request](https://github.com/lnurl/luds/blob/luds/02.md) is supported.
             
             ### local_balance
-            Indicates if the LSP is willing to push satoshi to the receiver side. Set `local_balance` to `0` if not supported.
+            Indicates if the LSP is willing to push satoshi to the receiver side.
             
             ### refunds
-            Indicates if the LSP supports automatic refunds. If not then there is no need to implement `/lsp/channels/{id}/refund`.
+            Indicates if the LSP supports automatic refunds.
             
             ### jit_channels
-            Indicates if the LSP supports Just-In-Time channels. If not then set the `jit` object to null.
+            Indicates if the LSP supports Just-In-Time channels.
             
           content:
               application/json:
@@ -554,7 +557,7 @@ components:
       ChannelOpenLnurlResponse:
         type: "object"
         properties:
-          lnurl:
+          lnurl_channel:
             type: string
             description: "Encoded LNURL LUD2 string."
             example: "lnurl1dp68gurn8ghj7mrww4exctt5dahkccn00qhxget8wfjk2um0veax2un09e3k7mf0w5lhz0fevvunqcnzxuckxd3n8ymn2ef5ve3kyvrx8qmngc33vymkzvenvesnscm9xuunjwrzxgcxxvrrvcmxgvtyvvmkyc33vsmnjd3svgckzcrx382"

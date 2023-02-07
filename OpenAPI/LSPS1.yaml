@@ -103,7 +103,7 @@ paths:
       parameters:
         - in: path
           name: id
-          description: "Order id or short channel id if available."
+          description: "Order id"
           required: true
           schema:
               type: string
@@ -574,7 +574,7 @@ components:
               - AVAILABLE
               - PAID_OUT
               - IN_FLIGHT # Stuck payment. Resolves later.
-              - UNSUPPORTED
+              - UNAVAILABLE
             description: "Is a refund possible?"
             example: AVAILABLE
           amounts:
@@ -585,12 +585,10 @@ components:
                 type: integer
                 description: "Satoshi available for refunds on lightning."
                 example: 2008888
-                nullable: true # null if unsupported
               onchain:
                 type: integer
                 description: "Satoshi available for refunds onchain."
                 example: 2005000
-                nullable: true # null if unsupported
           paid_to:
            type: string
            description: "Either Lightning invoice or onchain address where the refund has been paid to."

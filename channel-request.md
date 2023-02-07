@@ -2,7 +2,7 @@
 
 `Version: 0.0.2`
 
-The specification is defined in [LSPS1.yaml](./OpenAPI/LSPS1.yaml) and can be viewed in an OpenAPI editors like the [Swagger Editor](https://editor.swagger.io/).
+The specification is defined in [LSPS1.yaml](./OpenAPI/LSPS1.yaml) and can be viewed in an OpenAPI editors like the [Swagger Editor](https://editor.swagger.io/). Every field is described in detail in the OpenApi document.
 
 
 ## Base API
@@ -14,6 +14,16 @@ The base api consists of 4 endpoints:
 - `POST /lsp/channels/{id}/open`: Synchronously open channel.
 
 The request is split between 2 phases: Purchasing a channel and opening a channel.
+
+
+### Basic client flow
+
+1. Client pulls `GET /lsp/channels` to determine what the api supports.
+2. Client calls `POST /lsp/channels` with the values demanded to create an order. The response of the request includes prices, a lightning invoice and a bitcoin address in case the feature `onchain_payment` is supported.
+3. Client pays the order with their method of choice before the order is expired.
+4. Client pulls `GET /lsp/channels/{id}` to determine the status of his payment. As soon as `payment.state` switches to `PAID` they can attempt a channel open.
+5. Client calls `POST /lsp/channels/{id}/open` with the nessecary parameters for a channel open. The LSP directly attempts a channel open and responds with the result. The client gets direct feedback if the attempt succeeded or why it failed.
+6. The `channel` object in `GET /lsp/channels/{id}` represents the state of the channel. `expiry_ts` shows when the LSP is allowed to close the channel again.
 
 ## Features
 
@@ -46,9 +56,24 @@ The feature `refunds` adds two endpoints to automatically manage refunds.
 - `POST /lsp/channels/{id}/refund` allows a user to claim the refund with a Lightning invoice or an onchain address.
 - `GET /lsp/channels/{id}/refund` shows the refund state and available amount.
 
+#### Client flow
+
+1. Pull `GET /lsp/channels/{id}/refund` to receive the information if a refund is available and what amounts. Amounts can differ depending on the payout method.
+2. Call `POST /lsp/channels/{id}/refund` to instruct the LSP to issue a refund. The endpoint either takes a lightning invoice or a onchain_address.
+3. Client can watch the progress of the payout by pulling `GET /lsp/channels/{id}/refund`.
+
 ### jit_channels
 
 The feature `jit_channels` adds the ability to to register a node and receive a route hint to add the channel Just-In-Time.
+
+Todo: More information needed from Breez.
+
+#### Client flow
+
+1. Client creates an order by calling `POST /lsp/channels`.
+2. Client registers their node by calling ``POST /lsp/channels/{id}/jit`.
+3. Client uses the route hint provided to issue invoices.
+4. The LSP opens a channel just in time as soon as their is an incoming channel.
 
 ### onchain_payments
 
@@ -57,76 +82,5 @@ The feature `onchain_payments` indicates if this LSP is willing to receive payme
 - `min_satoshi` indicates at what value the LSP is willing to receive payments onchain.
 
 In case the LSP doesn't support onchain payments, all values related to onchain payments will be `null`.
-
-### /lsp/channel
-
-#### GET
-##### Summary
-
-Request an inbound channel
-
-##### Description
-
-Request an inbound channel with a specific size and duration.
-
-
-### /lsp/channel
-
-#### GET
-##### Summary
-
-Get information about a channel order
-
-##### Description
-
-Get information about a channel order
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| id | query | order_id provided in response to channel request or scid | Yes | string |
-
-##### Response
-
-| Name | Description | Schema |
-| ---- | ----------- | ------ |
-| order_id | The order id | string |
-| created_at | Number of seconds since epoch when this order was created | number |
-| local_balance | Local balance in sats requested by client | number |
-| remote_balance | Remote balance in sats requested by client | number |
-| channel_expiry | Channel expiry in weeks requested by client | number |
-| channel_expiry_ts | Number of seconds since epoch when the channel can be closed | number |
-| order_expiry_ts | Number of seconds since epoch when this order can still be paid | number |
-| order_total | The total fee plus the local_balance requested | number |
-| fee_total | The total fee the lsp will charge to open this channel | number |
-| fee_per_payment | For intercepted payment of fee, fee taken from each payment until fee is paid | number |
-| temporary_scid | The scid user puts in the route hint of invoice to identify order | string |
-| scid | The scid of the channel if already established | string |
-| lsp_connection_info | pubkey or pubkey@host:port of the lsp node | string |
-| ln_invoice | A lightning bolt11 invoice to pay the fee for this channel open | string |
-| btc_address | An on-chain bitcoin address to pay the fee for this channel open | string | 
-| lnurl_channel | A way to request the open via lnurl after the order is paid | string |
-| amount_paid | Amount paid by client so far in sats | number |
-| node_connection_info | The node_connection_info for the node to open the channel to | string |
-| channel_open_tx | The txid of the channel funding tx once it is broadcast | string |
-| state | The state of the order | string |
-| onchain_payments | A list of payments received to btc_address on-chain | object[] |
-
-
-###### Order state enum
-
-| State          	| Description                                                                           	|
-|----------------	|---------------------------------------------------------------------------------------	|
-| CREATED       	| The order has been created but the user hasn't paid yet.                               	|
-| UNDER_FUNDED      | Funding received but under paid.                                                       	|
-| PENDING        	| Order is paid but the channel has not been opened yet.                                	|
-| OPENING       	| The opening transaction has been broadcasted. 0conf might skip directly to OPENED.     	|
-| OPENED         	| Channel is open and has the necessary block confirmations.                            	|
-| CLOSING           | The closing transaction has been broadcasted.                                             |
-| CLOSED            | Channel is closed and has the necessary block confirmations.                              |
-| FAILED         	| Any error. For example, the LSP couldn't connect to the target node.                  	|
-| REFUNDED       	| Payment has been refunded.                                                            	|
-| OFFER_EXPIRED  	| Order has not been paid and offer has therefore expired.                              	|
 
 

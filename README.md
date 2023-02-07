@@ -8,7 +8,7 @@ Once the important aspects are covered, we may work on liquidity marketplace con
 
 ## Specs
 
-### **LSPS.1** [Channel Request](channel-request.md)
+### **LSPS.1** [Channel Request](./LSPS1/README.md)
 A unified channel request API standard for services to buy channels from LSP. This spec supports both just in time channel openings and pre paid channels
 
 

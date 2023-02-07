@@ -2,7 +2,7 @@
 
 `Version: 0.0.2`
 
-The specification is defined in [LSPS1.yaml](./OpenAPI/LSPS1.yaml) and can be viewed in an OpenAPI editors like the [Swagger Editor](https://editor.swagger.io/). Every field is described in detail in the OpenApi document.
+The specification is defined in [LSPS1.yaml](./LSPS1.yaml) and can be viewed in an OpenAPI editors like the [Swagger Editor](https://editor.swagger.io/). Every field is described in detail in the OpenApi document.
 
 
 ## Base API
@@ -43,7 +43,7 @@ features: [
 
 ### lnurl_lud2
 
-The feature `lnurl_lud2` adds a new endpoint `GET /lsp/channels/{id}/lnurl` that provides an [lnurl channel request](https://github.com/lnurl/luds/blob/luds/02.md) according to [LUD2](https://github.com/lnurl/luds/blob/luds/02.md).
+The feature `lnurl_lud2` adds a new endpoint `GET /lsp/channels/{id}/lnurl` that provides an lnurl channel request according to [LUD2](https://github.com/lnurl/luds/blob/luds/02.md).
 
 ### local_balance
 

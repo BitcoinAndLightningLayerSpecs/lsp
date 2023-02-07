@@ -52,6 +52,9 @@ paths:
             
             ### jit_channels
             Indicates if the LSP supports Just-In-Time channels.
+
+            ### onchain_payments
+            Indicates if the LSP is willing to receive payments onchain.
             
           content:
               application/json:

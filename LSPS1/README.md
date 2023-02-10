@@ -11,7 +11,11 @@ The API is split between the base api and possible extensions. The base api is r
 
 All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notable the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension.
 
-
+| Extension                              	    | Version 	|
+|----------------------------------------------	|---------	|
+| [lnurl_lud2](./extensions/lnurl_lud2/)        | 1       	|
+| [refunds](./extensions/refunds/)          	| 1       	|
+| [jit_channels](./extensions/jit_channels/) 	| 1       	|
 
 ## General API information
 

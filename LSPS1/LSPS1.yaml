@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   description: |
-    API documentation for channel opening request from a Lightning Network Service Provider (LSP).
+    API documentation for channel opening request from a Lightning Network Service Provider (LSP). Base API.
     
 
     ### Extensions

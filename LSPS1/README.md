@@ -1,11 +1,56 @@
 # LSPS1 channel request
 
-`Version: 0.0.2`
+| Name    	| base_api                                     	|
+|---------	|------------------------------------------------	|
+| Version 	| 2                                              	|
+| OpenApi 	| [LSPS1.yaml](LSPS1.yaml) 	|
 
-The specification is defined in [LSPS1.yaml](./LSPS1.yaml) and can be viewed in an OpenAPI editors like the [Swagger Editor](https://editor.swagger.io/). Every field is described in detail in the OpenApi document.
+## Introduction
+
+The API is split between the base api and possible extensions. The base api is required to support this spec. Extensions are defined in the [extensions](./extensions/) folder. It is up to every LSP what extensions they like to implement.
+
+All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notable the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension.
+
+## General API information
+
+`GET /lsp/channels` is the entrypoint for each client using the api. It lists the version of the api and all supported extensions.
+
+An extension in `GET /lsp/channels`.`extensions` consists of the `BaseExtension` properties and can have additional properties based on the individual extensions requirement.
+
+```yaml
+BaseExtension:
+    type: object
+    properties:
+        name:
+            type: string
+            example: 'local_balance'
+            description: Extension name
+        version:
+            type: integer
+            example: 1
+            default: 1
+            nullable: true
+            description: Version of this extension. Integer starting at 1 counting up.
+```
+
+For example, the extension `OnchainPaymentExtension` adds an additional property called `min_satoshi`.
+
+```yaml
+OnchainPaymentExtension:
+    allOf:
+        - $ref: "#/components/schemas/BaseExtension" # Extends BaseExtension
+        - type: object
+          properties:
+              min_satoshi:
+              type: string
+              description: "Minimal number of satoshi required to be eligable for an onchain payment."
+              example: 50000
+```
 
 
 ## Base API
+
+The base api is defined in [LSPS1.yaml](./LSPS1.yaml) and can be viewed in an OpenApi editors like [Swagger Editor](https://editor.swagger.io/). The OpenApi document includes extensive descriptions for every field. Make sure to check them out.
 
 The base api consists of 4 endpoints:
 - `GET /lsp/channels`: General API information.
@@ -13,74 +58,41 @@ The base api consists of 4 endpoints:
 - `GET /lsp/channels/{id}`: Get request state.
 - `POST /lsp/channels/{id}/open`: Synchronously open channel.
 
+### Extensions
 
-### Basic client flow
+The base api itself allows for 2 extensions.
+
+#### local_balance
+
+Indicates if the LSP is willing to push satoshi to the receiver side.
+
+```json
+{
+    "name": "local_balance"
+}
+```
+
+#### onchain_payments
+
+Indicates if the LSP is willing to receive payments onchain.
+
+Properties:
+
+- `min_satoshi` is the number of satoshi that are required for an onchain payment.
+
+```json
+{
+    "name": "onchain_payments",
+    "min_satoshi": 50000
+}
+```
+
+### Client flow
 
 1. Client pulls `GET /lsp/channels` to determine what the api supports.
-2. Client calls `POST /lsp/channels` with the values demanded to create an order. The response includes prices, a lightning invoice and a bitcoin address in case the feature `onchain_payment` is supported.
-3. Client pays the order with their method of choice before the order is expired.
+2. Client calls `POST /lsp/channels` with the values demanded to create an order. The response includes prices, a lightning invoice and a bitcoin address in case the extension `onchain_payment` is supported.
+3. Client pays the order with their method of choice before the order expires.
 4. Client pulls `GET /lsp/channels/{id}` to determine the status of their payment. As soon as `payment.state` switches to `PAID` they can attempt a channel open.
 5. Client calls `POST /lsp/channels/{id}/open` with the nessecary parameters for a channel open. The LSP directly attempts a channel open and responds with the result. The client gets direct feedback if the attempt succeeded.
 6. The `channel` object in `GET /lsp/channels/{id}` represents the state of the channel. `expiry_ts` shows when the LSP is allowed to close the channel again.
-
-## Features
-
-The base api can be extended by additional features. Feature can extend the base api and add additional endpoints. Features need to stay backward-compatible with the base api.
-
-Each supported feature must to be listed in `GET /lsp/channels`.`features` either as a `string` or as an object.
-
-```json
-features: [
-    "local_balance",
-    {
-        "name": "onchain_payments",
-        ...Additional settings
-    }
-]
-```
-
-### lnurl_lud2
-
-The feature `lnurl_lud2` adds a new endpoint `GET /lsp/channels/{id}/lnurl` that provides an lnurl channel request according to [LUD2](https://github.com/lnurl/luds/blob/luds/02.md).
-
-### local_balance
-
-The feature `local_balance` allows `POST /lsp/channels`.`local_balance` to be greater 0. Otherwise it is statically set to 0.
-
-### refunds
-
-The feature `refunds` adds two endpoints to automatically manage refunds.
-
-- `POST /lsp/channels/{id}/refund` allows a user to claim the refund with a Lightning invoice or an onchain address.
-- `GET /lsp/channels/{id}/refund` shows the refund state and available amount.
-
-#### Client flow
-
-1. Pull `GET /lsp/channels/{id}/refund` to receive the information if a refund is available and what amounts. Amounts can differ depending on the payout method.
-2. Call `POST /lsp/channels/{id}/refund` to instruct the LSP to issue a refund. The endpoint either takes a lightning invoice or an onchain_address.
-3. Client can watch the progress of the payout by pulling `GET /lsp/channels/{id}/refund`.
-
-
-### jit_channels
-
-The feature `jit_channels` adds the ability to to register a node and receive a route hint to add the channel Just-In-Time.
-
-Todo: More information needed from Breez.
-
-#### Client flow
-
-1. Client creates an order by calling `POST /lsp/channels`.
-2. Client registers their node by calling ``POST /lsp/channels/{id}/jit`.
-3. Client uses the route hint provided to issue invoices.
-4. The LSP opens a channel just in time as soon as their is an incoming channel.
-5. The order is paid by high fees on incoming HTLCs.
-
-### onchain_payments
-
-The feature `onchain_payments` indicates if this LSP is willing to receive payments onchain. The feature has 1 required setting:
-
-- `min_satoshi` indicates at what value the LSP is willing to receive payments onchain.
-
-In case the LSP doesn't support onchain payments, all values related to onchain payments will be `null`.
-
 

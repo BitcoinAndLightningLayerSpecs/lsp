@@ -9,7 +9,7 @@
 
 The API is split between the base api and possible extensions. The base api is required to support this spec. Extensions are defined in the [extensions](./extensions/) folder. It is up to every LSP what extensions they like to implement.
 
-All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notable the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension.
+All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notable the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension. All the OpenAPI documents include detailed descriptions for every field.
 
 | Extension                              	    | Version 	|
 |----------------------------------------------	|---------	|
@@ -56,7 +56,7 @@ OnchainPaymentExtension:
 
 ## Base API
 
-The base api is defined in [LSPS1.yaml](./LSPS1.yaml) and can be viewed in an OpenApi editors like [Swagger Editor](https://editor.swagger.io/). The OpenApi document includes extensive descriptions for every field. Make sure to check them out.
+The base api is defined in [LSPS1.yaml](./LSPS1.yaml).
 
 The base api consists of 4 endpoints:
 - `GET /lsp/channels`: General API information.

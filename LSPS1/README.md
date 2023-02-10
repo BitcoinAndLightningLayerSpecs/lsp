@@ -3,13 +3,15 @@
 | Name    	| base_api                                     	|
 |---------	|------------------------------------------------	|
 | Version 	| 2                                              	|
-| OpenApi 	| [LSPS1.yaml](LSPS1.yaml) 	|
+| OpenApi 	| [LSPS1.yaml](./LSPS1.yaml) 	|
 
 ## Introduction
 
 The API is split between the base api and possible extensions. The base api is required to support this spec. Extensions are defined in the [extensions](./extensions/) folder. It is up to every LSP what extensions they like to implement.
 
 All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notable the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension.
+
+
 
 ## General API information
 
@@ -68,7 +70,8 @@ Indicates if the LSP is willing to push satoshi to the receiver side.
 
 ```json
 {
-    "name": "local_balance"
+    "name": "local_balance",
+    "version": 1
 }
 ```
 
@@ -83,6 +86,7 @@ Properties:
 ```json
 {
     "name": "onchain_payments",
+    "version": 1,
     "min_satoshi": 50000
 }
 ```

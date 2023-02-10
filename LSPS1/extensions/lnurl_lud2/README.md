@@ -9,7 +9,7 @@
 
 ## API
 
-The extension `lnurl_lud2` adds a new endpoint `GET /lsp/channels/{id}/lnurl` that provides a lnurl channel request according to [LUD2](https://github.com/lnurl/luds/blob/luds/02.md). The endpoint is available after ``GET /lsp/channels/{id}`.`payment.state` is `PAID`.
+The extension `lnurl_lud2` adds a new endpoint `GET /lsp/channels/{id}/lnurl` that provides a lnurl channel request according to [LUD2](https://github.com/lnurl/luds/blob/luds/02.md). The endpoint is available after `GET /lsp/channels/{id}`.`payment.state` is `PAID`.
 
 
 ## Extension

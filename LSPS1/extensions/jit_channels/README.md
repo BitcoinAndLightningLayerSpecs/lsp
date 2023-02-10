@@ -1,11 +1,13 @@
 # LSPS1.jit_channels
 
+> **Note** This extension requires some more love.
+
 | Name    	| jit_channels                                     	|
 |---------	|------------------------------------------------	|
 | Version 	| 1                                              	|
 | OpenApi 	| [LSPS1.jit_channels.yaml](./LSPS1.jit_channels.yaml) 	|
 
-> **Note** This extension requires some more love.
+
 
 ## API
 
@@ -17,7 +19,7 @@ Registers a node. The response contains a route hint that should be added to the
 
 ### GET /lsp/channels/{id}/jit
 
-Gets information about the registered node.
+Contains information about the registered node and route hint.
 
 ## Extension
 

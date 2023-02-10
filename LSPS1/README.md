@@ -56,9 +56,8 @@ OnchainPaymentExtension:
 
 ## Base API
 
-The base api is defined in [LSPS1.yaml](./LSPS1.yaml).
+The base api is defined in [LSPS1.yaml](./LSPS1.yaml) and consists of 4 endpoints:
 
-The base api consists of 4 endpoints:
 - `GET /lsp/channels`: General API information.
 - `POST /lsp/channels`: Create channel request.
 - `GET /lsp/channels/{id}`: Get request state.

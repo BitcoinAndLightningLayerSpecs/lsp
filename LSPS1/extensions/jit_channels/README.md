@@ -24,8 +24,7 @@ Contains information about the registered node and route hint.
 ## Extension
 
 ```json
-{
-    "name": "jit_channels",
+"jit_channels": {
     "version": 1
 }
 ```

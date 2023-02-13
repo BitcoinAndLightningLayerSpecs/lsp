@@ -15,8 +15,7 @@ The extension `lnurl_lud2` adds a new endpoint `GET /lsp/channels/{id}/lnurl` th
 ## Extension
 
 ```json
-{
-    "name": "lnurl_lud2",
+"lnurl_lud2": {
     "version": 1
 }
 ```

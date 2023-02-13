@@ -28,8 +28,7 @@ Shows the refund state and available amount.
 ## Extension
 
 ```json
-{
-    "name": "refunds",
+"refunds": {
     "version": 1
 }
 ```

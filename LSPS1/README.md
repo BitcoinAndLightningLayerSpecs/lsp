@@ -19,7 +19,7 @@ All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. I
 
 ## General API information
 
-`GET /lsp/channels` is the entrypoint for each client using the api. It lists the version of the api and all supported extensions.
+`GET /lsp/channels` is the entrypoint for each client using the api. It lists the version of the api and all supported extensions in a dictionary.
 
 An extension in `GET /lsp/channels`.`extensions` consists of the `BaseExtension` properties and can have additional properties based on the individual extensions requirement.
 
@@ -27,10 +27,6 @@ An extension in `GET /lsp/channels`.`extensions` consists of the `BaseExtension`
 BaseExtension:
     type: object
     properties:
-        name:
-            type: string
-            example: 'local_balance'
-            description: Extension name
         version:
             type: integer
             example: 1
@@ -72,8 +68,7 @@ The base api itself allows for 2 extensions.
 Indicates if the LSP is willing to push satoshi to the receiver side.
 
 ```json
-{
-    "name": "local_balance",
+"local_balance": {
     "version": 1
 }
 ```
@@ -87,8 +82,7 @@ Properties:
 - `min_satoshi` is the number of satoshi that are required for an onchain payment.
 
 ```json
-{
-    "name": "onchain_payments",
+"onchain_payments": {
     "version": 1,
     "min_satoshi": 50000
 }

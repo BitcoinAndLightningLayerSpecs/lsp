@@ -43,9 +43,11 @@ paths:
                 schema:
                     $ref: "#/components/schemas/ChannelApiInfo"
                 example:
-                - name: local_balance # Push balance to user
-                - name: onchain_payments
-                  min_satoshi: 50000
+                  local_balance:
+                    version: 1
+                  onchain_payments:
+                    min_satoshi: 50000
+                    version: 1
   
     post:
       tags:
@@ -148,8 +150,8 @@ components:
             description: "Version of this api. See https://github.com/BitcoinAndLightningLayerSpecs/lsp"
             example: 2
           extensions:
-            type: array
-            items:
+            type: object
+            additionalProperties:
               $ref: "#/components/schemas/Extension"
           website:
             type: string
@@ -160,10 +162,6 @@ components:
       BaseExtension:
         type: object
         properties:
-          name:
-            type: string
-            example: 'local_balance'
-            description: Extension name.
           version:
             type: integer
             example: 1
@@ -185,7 +183,6 @@ components:
       Extension:
       # One of these types need to match
         oneOf:
-          - type: string
           - $ref: "#/components/schemas/BaseExtension"
           - $ref: "#/components/schemas/OnchainPaymentExtension"
     

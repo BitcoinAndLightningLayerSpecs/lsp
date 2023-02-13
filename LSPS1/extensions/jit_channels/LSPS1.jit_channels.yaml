@@ -101,7 +101,7 @@ components:
                 description: "The node_id the user puts in the route hint of the invoice."
                 example: "031015a7839468a3c266d662d5bb21ea4cea24226936e2864a7ca4f2c3939836e0"
                 type: "string"
-          registerd_node_connection_string:
+          registered_node_connection_string:
             description: "The registerd node id that the channel will be opened to in case of an incoming payment."
             example: "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735"
             type: "string"

@@ -1,11 +1,27 @@
 # LSPS1 channel request
 
-| Name    	| base_api                                     	|
-|---------	|------------------------------------------------	|
-| Version 	| 2                                              	|
+| Name    	| base_api                      |
+|---------	|------------------------------	|
+| Version 	| 2                             |
 | OpenApi 	| [LSPS1.yaml](./LSPS1.yaml) 	|
 
-## Introduction
+
+
+## Motivation
+
+The goal of this specification is to provide a standardized LSP API to purchase channels. Two client types are supported:
+
+**Wallets** that purchase a channel from the LSP directly.
+
+**Websites** that provide a UI for channel purchases. This should enable channel marketplaces and LSP channel purchase websites.
+
+
+To allow everybody to adopt this specification, we define a **HTTP** api. We purposefully decided against a lightning native api to not have to rely on any lightning implementation developers time and potential reduced adoption potential.
+
+
+> **Note** Some requirements are subtle; we have tried to highlight motivations and reasoning behind the results you see here. I'm sure we've fallen short; if you find any part confusing or wrong, please contact us and help us improve.
+
+## API intro
 
 The API is split between the base api and possible extensions. The base api is required to support this spec. Extensions are defined in the [extensions](./extensions/) folder. It is up to every LSP what extensions they like to implement.
 

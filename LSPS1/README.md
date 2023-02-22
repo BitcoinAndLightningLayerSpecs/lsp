@@ -15,17 +15,15 @@ The goal of this specification is to provide a standardized LSP API to purchase 
 
 **Websites** that provide a UI for channel purchases. This should enable channel marketplaces and LSP channel purchase websites.
 
-
-To allow everybody to adopt this specification, we define a **HTTP** api. We purposefully decided against a lightning native api to not have to rely on any lightning implementation developers time and potential reduced adoption potential.
-
+To allow everybody to adopt this specification, we define a **HTTP** api. We purposefully decided against a lightning native api to not have to rely on any lightning implementation developers time and therefore reduced adoption potential.
 
 > **Note** Some requirements are subtle; we have tried to highlight motivations and reasoning behind the results you see here. I'm sure we've fallen short; if you find any part confusing or wrong, please contact us and help us improve.
 
 ## API intro
 
-The API is split between the base api and possible extensions. The base api is required to support this spec. Extensions are defined in the [extensions](./extensions/) folder. It is up to every LSP what extensions they like to implement.
+The API is split between the base api and possible extensions. The base api must be implemented. Extensions may be implemented and are defined in [extensions](./extensions/).
 
-All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notable the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension. All the OpenAPI documents include detailed descriptions for every field.
+All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notably the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension. All the OpenAPI documents include detailed descriptions of every field.
 
 | Extension                              	    | Version 	|
 |----------------------------------------------	|---------	|
@@ -33,11 +31,12 @@ All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. I
 | [refunds](./extensions/refunds/)          	| 1       	|
 | [jit_channels](./extensions/jit_channels/) 	| 1       	|
 
+
 ## General API information
 
 `GET /lsp/channels` is the entrypoint for each client using the api. It lists the version of the api and all supported extensions in a dictionary.
 
-An extension in `GET /lsp/channels`.`extensions` consists of the `BaseExtension` properties and can have additional properties based on the individual extensions requirement.
+An extension in `GET /lsp/channels`.`extensions` must include the properties in `BaseExtension` and may have additional properties based on the individual extensions requirement.
 
 ```yaml
 BaseExtension:
@@ -68,7 +67,7 @@ OnchainPaymentExtension:
 
 ## Base API
 
-The base api is defined in [LSPS1.yaml](./LSPS1.yaml) and consists of 4 endpoints:
+The base api is defined in [LSPS1.yaml](./LSPS1.yaml) and requires 4 endpoints:
 
 - `GET /lsp/channels`: General API information.
 - `POST /lsp/channels`: Create channel request.
@@ -77,7 +76,7 @@ The base api is defined in [LSPS1.yaml](./LSPS1.yaml) and consists of 4 endpoint
 
 ### Extensions
 
-The base api itself allows for 2 extensions.
+The base api itself may implement 2 extensions.
 
 #### local_balance
 
@@ -104,12 +103,174 @@ Properties:
 }
 ```
 
-### Client flow
+## Client flow
 
-1. Client pulls `GET /lsp/channels` to determine what the api supports.
-2. Client calls `POST /lsp/channels` with the values demanded to create an order. The response includes prices, a lightning invoice and a bitcoin address in case the extension `onchain_payment` is supported.
-3. Client pays the order with their method of choice before the order expires.
-4. Client pulls `GET /lsp/channels/{id}` to determine the status of their payment. As soon as `payment.state` switches to `PAID` they can attempt a channel open.
-5. Client calls `POST /lsp/channels/{id}/open` with the nessecary parameters for a channel open. The LSP directly attempts a channel open and responds with the result. The client gets direct feedback if the attempt succeeded.
-6. The `channel` object in `GET /lsp/channels/{id}` represents the state of the channel. `expiry_ts` shows when the LSP is allowed to close the channel again.
+### 1. API info
+Client must pull `GET /lsp/channels`; must use the right logic depending on the `version`; must respect the properties defined in `extensions`. Client may abort the flow here.
+
+Example: 
+```JSON
+{
+  "version": 2,
+  "website": "http://example.com/contact",
+  "extensions": {
+    "base_api": {
+      "version": 1,
+      "max_local_balance_satoshi": "0",
+      "max_remote_balance_satoshi": "100000000",
+      "min_required_onchain_satoshi": null,
+      "max_channel_expiry_weeks": 24
+    }
+  }
+}
+```
+
+### 2. Create order
+Client must construct the request body depending on their needs and call `POST /lsp/channels`. Client may abort the flow after.
+
+**Example request body**
+
+```json
+{
+  "remote_balance": 5000000,
+  "local_balance": 2000000,
+  "onchain_fee_rate": 1,
+  "channel_expiry_weeks": 12,
+  "coupon_code": ""
+}
+```
+
+
+- `remote_balance` must be 1 or greater. Must be below or equal `base_api.max_remote_balance_satoshi`.
+- `local_balance` must be 0 or greater. Must be below or equal `base_api.max_local_balance_satoshi`. Todo: Rejection error message.
+- `onchain_fee_rate` must be 1 or higher. The LSP may increase this value depending on the onchain fee environment.
+- `channel_expiry_weeks` must be 1 or greater. Must be below or equal `base_api.max_channel_expiry_weeks`.
+- `coupon_code` must be a string or null or not defined at all.
+
+**Example response body**
+
+HTTP Code: 201 CREATED
+
+```json
+{
+  "id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
+  "created_at": "2012-04-23T18:25:43.511Z",
+  "state": "AWAITING_PAYMENT",
+  "expires_at": "2012-04-23T18:25:43.511Z",
+  "request": {
+    "remote_balance": "5000000",
+    "local_balance": "2000000",
+    "onchain_fee_rate": 1,
+    "channel_expiry_weeks": 12,
+    "coupon_code": ""
+  },
+  "payment": {
+    "state": "CREATED",
+    "fee_total": 8888,
+    "order_total": 2008888,
+    "amount_paid": 1200,
+    "ln_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05",
+    "btc_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
+    "onchain_payments": [
+      {
+        "transaction_id": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae",
+        "out_point": 0,
+        "satoshi": 1200,
+      }
+    ]
+  },
+  "lsp_node_connection_strings": [ 
+    "0296b2db342fcf87ea94d981757fdf4d3e545bd5cef4919f58b5d38dfdd73bf5c9@34.79.58.84:9735",
+    "0296b2db342fcf87ea94d981757fdf4d3e545bd5cef4919f58b5d38dfdd73bf5c9@gwdllz5g7vky2q4gr45zguvoajzf33czreca3a3exosftx72ekppkuqd.onion:9735"
+    ],
+  "channel": {
+    "state": "OPENING",
+    "opened_at": "2012-04-23T18:25:43.511Z",
+    "open_transaction": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
+    "scid": "643904x1419x1",
+    "expires_at": "2012-04-23T18:25:43.511Z",
+    "closing_transaction": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
+    "closed_at": "2012-04-23T18:25:43.511Z",
+    "node_id": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@xahwmijytzsgjeo5z2spaj2kcmbawdw2bn7kejtbftvazhhvcn5wloqd.onion:9735",
+    "lsp_node_id": "0296b2db342fcf87ea94d981757fdf4d3e545bd5cef4919f58b5d38dfdd73bf5c9@34.79.58.84:9735"
+  }
+}
+```
+
+- `id` must be a random UUIDv4 that identifies the order.
+- `created_at` must be a ISO8601 datetime when the order has been created.
+- `state` must be one of these values:
+    - `AWAITING_PAYMENT` when waiting for the payment. This is the initial state.
+    - `OFFER_EXPIRED` Offer expired; No payment received.
+    - `PENDING_CHANNEL_OPEN` Payment received; Waiting on channel open.
+    - `COMPLETED` Order completed. Channel opened.
+- `expires_at` must be a ISO8601 datetime when the order expires.
+- `request` must mirror the client request body with filled default values.
+    - LSP should increase the requested `onchain_fee_rate` depending on the onchain fee environment.
+- `payment` contains all properties related to payments.
+    - `state` must be one of these values:
+        - `AWAITING_PAYMENT` Payment expected.
+        - `PAID` Either when the ln_invoice has been paid or btc_address has received order_total amount.
+        - `REFUND_AVAILABLE` When an onchain refund is available.
+        - `REFUNDED` Either when the lightning payment has been canceled or the onchain refund has been sent.
+    - `fee_total` must be the total fee the LSP will charge to open this channel in satoshi.
+    - `order_total` must be the fee_total plus the local_balance requested in satoshi.
+    - `ln_invoice` must be a Lightning Bolt 11 for order_total satoshi. Invoice must be a HOLD invoice.
+    - `btc_address` must be a bitcoin address the user can pay the order_total if `base_api.min_required_onchain_satoshi` is above or equal order_total. Must be null if `base_api.min_required_onchain_satoshi` is null and therefore unsupported.
+    - `onchain_payments` must contain all incoming/confirmed transaction to btc_address. Must be null if `base_api.min_required_onchain_satoshi` is null and therefore unsupported.
+        - `transaction_id` must contain the transaction ID (txid).
+        - `output_index` must contain the output index (vout).
+        - `satoshi` must contain the received satoshi as string.
+        - `confirmed` must contain a boolean if the LSP sees the transaction as confirmed. This can be instantly (zeroconf) or after the required block confirmations.
+- `channel` must contain the opened channel information. Must be null if the channel opening transaction has not been published yet.
+    - `state` Must be one of these values:
+        - `OPENING` Opening transaction published.
+        - `OPENED` Channel is open. LSP must allow payments. May be zero conf and therefore immediately.
+        - `CLOSED` Closing transaction has been published.
+    - `opened_at` must be a ISO8601 datetime when the opening transaction has been published.
+    - `open_transaction` must be the txid:vout of the opening transaction.
+    - `scid` must be the short channel id. Must be null before the channel is confirmed.
+    - `expires_at` must be a ISO8601 datetime when the channel may be closed by the LSP. Must respect channel_expiry_weeks.
+    - `closing_transaction` must be the txid:vout of the closing transaction.
+    - `closed_at` must be a ISO8601 datetime when the closing transaction has been published.
+    - `node_id` must be the node id of the user node.
+    - `lsp_node_id` must be the node id if the lsp node.
+
+    
+
+
+**Errors**
+
+- 400 Bad request - Request body validation error.
+
+
+### 3. Pay order
+
+The client must either pay the `ln_invoice` OR `btc_address`.
+
+**ln_invoice** 
+1. Client must pay the `ln_invoice`. 
+2. The LSP must HOLD the payment and only release the preimage if the channel is opened successfully.
+3. The LSP must change the `payment.status` to `PAID` when receiving the payment.
+4. In case the channel has not been opened, the LSP must reject the payment either before the timeout or when the order expires_at. The LSP sets `payment.status` to `REFUNDED`.
+
+
+**btc_address** 
+1. Client must pay the number of satoshi defined in order_total to the btc_address.
+2. LSP must listen for payments to btc_address and decided how many block confirmations are required to accept the payment. Zeroconf allowed.
+3. LSP must change the payment.status to `PAID` when the required number of satoshi has been confirmed.
+4. In case the channel has not been opened, the LSP must set `payment.status` to `REFUND_AVAILABLE`.
+
+
+### 4. Wait on payment confirmation
+
+
+
+---
+
+2. Client must call `POST /lsp/channels` with the values demanded to create an order. The response includes prices, a lightning invoice and a bitcoin address in case the extension `onchain_payment` is supported.
+3. Client may pay the order with their method of choice before the order expires.
+4. Client should pull `GET /lsp/channels/{id}` to determine the status of their payment. As soon as `payment.state` switches to `PAID` they can attempt a channel open.
+5. Client must call `POST /lsp/channels/{id}/open` with the nessecary parameters for a channel open. The LSP must directly attempt a channel open and responds with the result. The client gets direct feedback if the attempt succeeded.
+6. The `channel` object in `GET /lsp/channels/{id}` must show the state of the channel. `expiry_ts` shows when the LSP is allowed to close the channel again.
 

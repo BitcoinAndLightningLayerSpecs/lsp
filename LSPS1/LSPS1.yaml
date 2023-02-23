@@ -156,16 +156,16 @@ components:
             type: integer
             description: "Version of this api. See https://github.com/BitcoinAndLightningLayerSpecs/lsp"
             example: 1
-          extensions:
+          options:
             type: object
             additionalProperties:
-              $ref: "#/components/schemas/Extension"
+              $ref: "#/components/schemas/ExtensionOptions"
           website:
             type: string
             description: "Website that provides devs a way to get in contact and/or TOS."
             example: "https://blocktank.to/contact"
       
-      AbstractExtension: # All extensions derive from this schema.
+      AbstractExtensionOptions: # All extensions derive from this schema.
         type: object
         properties:
           version:
@@ -175,9 +175,9 @@ components:
             nullable: true
             description: Version of this extension. Integer starting at 1 counting up.
 
-      BaseApiExtensionV1: # Extension for the base api.
+      BaseApiOptionsV1: # Options for the base api.
         allOf:
-          - $ref: "#/components/schemas/AbstractExtension" # Extends BaseExtension
+          - $ref: "#/components/schemas/AbstractExtensionOptions" # Extends BaseExtension
           - type: object
             properties:
               version:
@@ -202,9 +202,9 @@ components:
                 description: "Maximal number of weeks a channel can be leased for."
                 example: 24
 
-      Extension: # Schema of all allowed extensions.
+      ExtensionOptions: # Schema of all allowed options.
         oneOf: # One of these types need to match
-          - $ref: "#/components/schemas/BaseApiExtensionV1"
+          - $ref: "#/components/schemas/BaseApiOptionsV1"
     
       OrderRequest:
         type: object
@@ -222,12 +222,12 @@ components:
           - remote_balance
           - channel_expiry_weeks
         properties:
-          remote_balance:
+          remote_balance_satoshi:
             type: string
             description: "Inbound liquidity amount in satoshis. Funds are at the LSP side."
             example: "5000000"
             minimum: 0
-          local_balance:
+          local_balance_satoshi:
             type: string
             description: "Outbound liquidity amount in satoshis. Funds are at the user side."
             default: 0
@@ -312,7 +312,7 @@ components:
           lightning_invoice:
             description: "A lightning bolt11 invoice to pay the fee for this channel open."
             type: "string"
-            example: "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
+            example: "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
           btc_address:
             description: "An on-chain bitcoin address to pay the fee for this channel open."
             type: "string"

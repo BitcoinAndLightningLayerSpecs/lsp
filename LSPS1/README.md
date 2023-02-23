@@ -130,8 +130,8 @@ Client constructs the request body depending on their needs.
 ```json
 {
   "order": {
-    "remote_balance": "5000000",
-    "local_balance": "2000000",
+    "remote_balance_satoshi": "5000000",
+    "local_balance_satoshi": "2000000",
     "onchain_fee_rate": 1,
     "channel_expiry_weeks": 12,
     "coupon_code": ""
@@ -143,8 +143,8 @@ Client constructs the request body depending on their needs.
 }
 ```
 
-- `order.remote_balance` must be 1 or greater. Must be below or equal `base_api.max_remote_balance_satoshi`.
-- `order.local_balance` must be 0 or greater. Must be below or equal `base_api.max_local_balance_satoshi`. Todo: Rejection error message.
+- `order.remote_balance_satoshi` must be 1 or greater. Must be below or equal `base_api.max_remote_balance_satoshi`.
+- `order.local_balance_satoshi` must be 0 or greater. Must be below or equal `base_api.max_local_balance_satoshi`. Todo: Rejection error message.
 - `order.onchain_fee_rate` must be 1 or higher. The LSP may increase this value depending on the onchain fee environment.
 - `order.channel_expiry_weeks` must be 1 or greater. Must be below or equal `base_api.max_channel_expiry_weeks`.
 - `order.coupon_code` must be a string, null, or not defined at all.
@@ -232,7 +232,7 @@ Example payment object:
     - `HOLD` Lighting payment arrived, preimage NOT released.
     - `PAID` Lightning payment arrived, preimage released OR full `order_total_satoshi` onchain payment arrived.
 - `fee_total_satoshi` MUST be the total fee the LSP will charge to open this channel in satoshi.
-- `order_total_satoshi` MUST be the fee_total plus the local_balance requested in satoshi.
+- `order_total_satoshi` MUST be the fee_total_satoshi plus the local_balance_satoshi requested in satoshi.
 - `ln_invoice` 
     - MUST be a Lightning Bolt 11 for order_total_satoshi. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
@@ -262,7 +262,8 @@ Example payment object:
 **LSP**
 
 - MUST change the payment state to `HOLD` when the payment arrives.
-- MUST start the channel open flow.
+- MUST set open.state to `PENDING`.
+- MUST start then channel open flow.
 - If the channel has been opened successfully
     - MUST release the preimage and therefore complete the payment.
     - MUST set the payment state to `PAID`.
@@ -277,9 +278,11 @@ Example payment object:
 **User**
 
 - MUST pay `order_total_satoshi` to `btc_address`.
-- SHOULD check
+- SHOULD pull `GET /lsp/channel/{id}` to check the success of the payment.
 
 **LSP**
+
+
 
 - `id` must be a random UUIDv4 that identifies the order.
 - `created_at` must be a ISO8601 datetime when the order has been created.
@@ -298,6 +301,34 @@ TODO: Onchain refunds.
 ### 4 Channel Open
 
 After the payment state switched to `HOLD` (lightning) or `PAID` (onchain) AND the user provided `node_id` and `announce`, the LSP MUST attempt a channel open.
+
+
+#### 4.1 Establish Peer Connection
+
+**User**
+
+- SHOULD establish a peer connection with one of the provided node connection strings in `lsp_node_connection_strings`.
+- MUST establish a peer connection to `lsp_node_connection_strings` if `node_connection_string_or_pubkey` only contains a pubkey.
+- MUST establish a peer connection to `lsp_node_connection_strings` if the node is not publicly available, for example behind a NAT.
+
+
+**LSP**
+
+- MUST establish a peer connection to node_connection_string_or_pubkey IF the user provided a connection string.
+- MUST wait on the user establishing a peer connection IF the user only provided a pubkey.
+- MAY establish a peer connection to node_connection_string_or_pubkey IF the user only provided a pubkey but the connection information is available in the Lightning Gossip.
+- MAY try multiple connection attempts.
+
+#### 4.1 Open attempt
+
+**LSP**
+
+- MUST attempt a channel open to `node_connection_string_or_pubkey`.
+    - MUST respect the `announce` flag.
+    - MUST open the channel with a capacity of `remote_balance_satoshi` + `local_balance_satoshi`.
+        - MAY overprovision.
+    - MUST push `local_balance_satoshi` to the user.
+    - MUST use `onchain_fee_rate` or higher.
 
 
 

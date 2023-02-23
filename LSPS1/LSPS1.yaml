@@ -275,11 +275,11 @@ components:
                 items:
                   type: string
               created_at:
-                description: "ISO8601 datetime when this order has been created."
+                description: "Datetime when this order has been created."
                 type: string
                 example: "2012-04-23T18:25:43.511Z"
               expires_at:
-                description: "ISO8601 datetime when the order expires."
+                description: "Datetime when the order expires."
                 type: string
                 example: "2015-01-25T19:29:44.612Z"
               open:
@@ -329,7 +329,7 @@ components:
         properties:
           outpoint:
             type: string
-            description: "Outpoint in the form of txid:vout."
+            description: "Outpoint in the form of [txid:vout](https://btcinformation.org/en/glossary/outpoint)."
             example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1'
           satoshi:
             type: string
@@ -350,11 +350,11 @@ components:
               - OPENED
               - CLOSED
           opened_at:
-            description: "ISO8601 datetime when the channel has been opened."
+            description: "Datetime when the channel has been opened."
             type: string
             example: "2012-04-23T18:25:43.511Z"
           open_transaction:
-            description: "The txid of the channel funding tx once it is broadcast."
+            description: "The [txid](https://btcinformation.org/en/glossary/txid) of the channel funding tx once it is broadcast."
             type: "string"
             example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae'
           scid:
@@ -363,16 +363,16 @@ components:
             example: '643904x1419x1'
             nullable: true
           expires_at:
-            description: "ISO8601 datetime when the channel can be closed. Only available after channel is opened."
+            description: "Datetime when the channel can be closed. Only available after channel is opened."
             type: string
             example: "2012-04-23T18:25:43.511Z"
           closing_transaction:
-            description: "The txid of the channel closing tx once it is broadcast."
+            description: "The [txid](https://btcinformation.org/en/glossary/txid) of the channel closing tx once it is broadcast."
             type: "string"
             nullable: true
             example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae'
           closed_at:
-            description: "ISO8601 datetime when the channel has been closed."
+            description: "Datetime when the channel has been closed."
             type: string
             example: "2012-04-23T18:25:43.511Z"
           node_id:

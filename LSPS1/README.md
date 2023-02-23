@@ -19,13 +19,13 @@ To allow everybody to adopt this specification, we define a **HTTP** api. We pur
 
 Some requirements are subtle; we have tried to highlight motivations and reasoning behind the results you see here. I'm sure we've fallen short; if you find any part confusing or wrong, please contact us and help us improve.
 
-## Date types
+## Data types
 
 ### Datetime
 
 All datetimes are represented as [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) in the form of `2023-02-23T08:47:30.511Z` UTC.
 
-> **Rational** ISO8601 is human readable, it's a standard endorsed by [W3C](http://www.w3.org/TR/NOTE-datetime), and [RFC3339](https://www.rfc-editor.org/rfc/rfc3339) and supported widely.
+> **Rational** ISO8601 is human readable, it's a standard endorsed by [W3C](http://www.w3.org/TR/NOTE-datetime), and [RFC3339](https://www.rfc-editor.org/rfc/rfc3339), sortable, and supported widely.
 
 ### Satoshi
 
@@ -33,6 +33,9 @@ All satoshi values MUST be represented as string and NOT integer values. Make su
 
 > **Rational** Plenty of json parsers use a 32bit signed integer for integer parsing. Max safe value is 2,147,483,647; 2,147,483,647sat = BTC21.474,836,47 which is too low.
 
+## Channel sides
+
+Channel sides are seen from the user point of view. `local_balance` are the funds on the users side. `remote_balance` are the funds on the LSP side.
 
 ## API intro
 
@@ -47,7 +50,7 @@ All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. I
 | [jit_channels](./extensions/jit_channels/) 	| 1       	|
 
 
-## General API information
+## API information
 
 `GET /lsp/channels` is the entrypoint for each client using the api. It lists the version of the api and all supported extensions in a dictionary.
 
@@ -65,18 +68,35 @@ BaseExtension:
             description: Version of this extension. Integer starting at 1 counting up.
 ```
 
-For example, the extension `OnchainPaymentExtension` adds an additional property called `min_satoshi`.
+For example, the extension `base_api` adds multiple additional properties to configure all the api boundries.
 
 ```yaml
-OnchainPaymentExtension:
-    allOf:
-        - $ref: "#/components/schemas/BaseExtension" # Extends BaseExtension
-        - type: object
-          properties:
-              min_satoshi:
-              type: string
-              description: "Minimal number of satoshi required to be eligable for an onchain payment."
-              example: 50000
+      BaseApiExtensionV1: # Extension for the base api.
+        allOf:
+          - $ref: "#/components/schemas/AbstractExtension" # Extends BaseExtension
+          - type: object
+            properties:
+              version:
+                type: integer
+                example: 1
+                default: 1
+              max_local_balance_satoshi:
+                type: string
+                description: "Maximal number of satoshi that the LSP is willing to push to the user side."
+                example: "100000000"
+              max_remote_balance_satoshi:
+                type: string
+                description: "Maximal number of satoshi that the LSP is willing to contribute to the remote balance."
+                example: "100000000"
+              min_required_onchain_satoshi:
+                type: string
+                description: "Minimal number of satoshi required to allow onchain payments. MUST allow onchain payments above or equal this amount. Null for unsupported."
+                example: "9999"
+                nullable: true
+              max_channel_expiry_weeks:
+                type: integer
+                description: "Maximal number of weeks a channel can be leased for."
+                example: 24
 ```
 
 
@@ -85,38 +105,30 @@ OnchainPaymentExtension:
 The base api is defined in [LSPS1.yaml](./LSPS1.yaml) and requires 4 endpoints:
 
 - `GET /lsp/channels`: General API information.
-- `POST /lsp/channels`: Create channel request.
-- `GET /lsp/channels/{id}`: Get request state.
-- `POST /lsp/channels/{id}/open`: Synchronously open channel.
+- `POST /lsp/channels`: Create channel order.
+- `GET /lsp/channels/{id}`: Get order state.
+- `POST /lsp/channels/{id}/update`: Update channel open info.
 
 ### Extensions
 
-The base api itself may implement 2 extensions.
-
-#### local_balance
-
-Indicates if the LSP is willing to push satoshi to the receiver side.
+The base api itself has multiple properties that MUST be defined.
 
 ```json
-"local_balance": {
-    "version": 1
+"extensions": {
+    "base_api": {
+        "version": 1,
+        "max_local_balance_satoshi": "0",
+        "max_remote_balance_satoshi": "100000000",
+        "min_required_onchain_satoshi": null
+    }
 }
 ```
 
-#### onchain_payments
+- `version` MUST be 1.
+- `max_local_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MAY be 0 if pushing satoshi is unsupported.
+- `max_remote_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the remote balance.
+- `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are unsupported.
 
-Indicates if the LSP is willing to receive payments onchain.
-
-Properties:
-
-- `min_satoshi` is the number of satoshi that are required for an onchain payment.
-
-```json
-"onchain_payments": {
-    "version": 1,
-    "min_satoshi": 50000
-}
-```
 
 ## Client flow
 

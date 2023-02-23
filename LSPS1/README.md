@@ -35,7 +35,7 @@ All satoshi values MUST be represented as string and NOT integer values. Make su
 
 ## Channel sides
 
-Channel sides are seen from the user point of view. `local_balance` are the funds on the users side. `remote_balance` are the funds on the LSP side.
+Channel sides are seen from the user point of view. `local_balance` are the funds on the user side. `remote_balance` are the funds on the LSP side.
 
 ## API intro
 
@@ -119,7 +119,8 @@ The base api itself has multiple properties that MUST be defined.
         "version": 1,
         "max_local_balance_satoshi": "0",
         "max_remote_balance_satoshi": "100000000",
-        "min_required_onchain_satoshi": null
+        "min_required_onchain_satoshi": null,
+        "max_channel_expiry_weeks": 24
     }
 }
 ```
@@ -128,6 +129,7 @@ The base api itself has multiple properties that MUST be defined.
 - `max_local_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MAY be 0 if pushing satoshi is unsupported.
 - `max_remote_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the remote balance.
 - `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are unsupported.
+- `max_channel_expiry_weeks` MUST be the maximum length in weeks a channel can be leased for.
 
 
 ## Client flow

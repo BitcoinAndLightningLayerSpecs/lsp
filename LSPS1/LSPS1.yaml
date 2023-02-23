@@ -50,6 +50,7 @@ paths:
                       max_local_balance_satoshi: "0"
                       max_remote_balance_satoshi: "100000000"
                       min_required_onchain_satoshi: null
+                      max_channel_expiry_weeks: 24
   
     post:
       tags:

@@ -17,7 +17,22 @@ The goal of this specification is to provide a standardized LSP API to purchase 
 
 To allow everybody to adopt this specification, we define a **HTTP** api. We purposefully decided against a lightning native api to not have to rely on any lightning implementation developers time and therefore reduced adoption potential.
 
-> **Note** Some requirements are subtle; we have tried to highlight motivations and reasoning behind the results you see here. I'm sure we've fallen short; if you find any part confusing or wrong, please contact us and help us improve.
+Some requirements are subtle; we have tried to highlight motivations and reasoning behind the results you see here. I'm sure we've fallen short; if you find any part confusing or wrong, please contact us and help us improve.
+
+## Date types
+
+### Datetime
+
+All datetimes are represented as [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) in the form of `2023-02-23T08:47:30.511Z` UTC.
+
+> **Rational** ISO8601 is human readable, it's a standard endorsed by [W3C](http://www.w3.org/TR/NOTE-datetime), and [RFC3339](https://www.rfc-editor.org/rfc/rfc3339) and supported widely.
+
+### Satoshi
+
+All satoshi values MUST be represented as string and NOT integer values. Make sure you check your integer limits.
+
+> **Rational** Plenty of json parsers use a 32bit signed integer for integer parsing. Max safe value is 2,147,483,647; 2,147,483,647sat = BTC21.474,836,47 which is too low.
+
 
 ## API intro
 
@@ -173,8 +188,7 @@ HTTP Code: 201 CREATED
     "btc_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "onchain_payments": [
       {
-        "transaction_id": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae",
-        "out_point": 0,
+        "transaction": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:0",
         "satoshi": 1200,
       }
     ]
@@ -218,8 +232,7 @@ HTTP Code: 201 CREATED
     - `ln_invoice` must be a Lightning Bolt 11 for order_total satoshi. Invoice must be a HOLD invoice.
     - `btc_address` must be a bitcoin address the user can pay the order_total if `base_api.min_required_onchain_satoshi` is above or equal order_total. Must be null if `base_api.min_required_onchain_satoshi` is null and therefore unsupported.
     - `onchain_payments` must contain all incoming/confirmed transaction to btc_address. Must be null if `base_api.min_required_onchain_satoshi` is null and therefore unsupported.
-        - `transaction_id` must contain the transaction ID (txid).
-        - `output_index` must contain the output index (vout).
+        - `transaction` must contain the transaction in the form of txid:vout.
         - `satoshi` must contain the received satoshi as string.
         - `confirmed` must contain a boolean if the LSP sees the transaction as confirmed. This can be instantly (zeroconf) or after the required block confirmations.
 - `channel` must contain the opened channel information. Must be null if the channel opening transaction has not been published yet.
@@ -263,6 +276,7 @@ The client must either pay the `ln_invoice` OR `btc_address`.
 
 
 ### 4. Wait on payment confirmation
+
 
 
 

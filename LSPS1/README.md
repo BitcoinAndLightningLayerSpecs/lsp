@@ -267,10 +267,12 @@ Example payment object:
 - If the channel has been opened successfully
     - MUST release the preimage and therefore complete the payment.
     - MUST set the payment state to `PAID`.
-- If the channel open failed
+- If the payment times out and the channel has NOT been opened
     - MUST reject the payment.
     - MUST set the payment state to `EXPECT_PAYMENT`.
-- MUST reject the payment before the payment times out or when the order expires.
+- If the order expired and the channel has NOT been opened
+    - MUST reject the payment.
+    - MUST set the payment state to `FAILED`.
 
 
 #### 3.2 Onchain Payment Flow
@@ -282,25 +284,18 @@ Example payment object:
 
 **LSP**
 
-
-
-- `id` must be a random UUIDv4 that identifies the order.
-- `created_at` must be a ISO8601 datetime when the order has been created.
-- `state` must be one of these values:
-    - `AWAITING_PAYMENT` when waiting for the payment. This is the initial state.
-    - `OFFER_EXPIRED` Offer expired; No payment received.
-    - `PENDING_CHANNEL_OPEN` Payment received; Waiting on channel open.
-    - `COMPLETED` Order completed. Channel opened.
-- `expires_at` must be a ISO8601 datetime when the order expires.
-- `request` must mirror the client request body with filled default values.
-    - LSP should increase the requested `onchain_fee_rate` depending on the onchain fee environment.
+- MUST monitor the blockchain and update `onchain_payments`.
+- MUST decide when transactions are confirmed and set them as `confirmed: true`.
+- MUST change the payment state to `PAID` when the payment is confirmed.
+- MUST set open.state to `PENDING`.
+- MUST start then channel open flow.
 
 
 TODO: Onchain refunds.
 
 ### 4 Channel Open
 
-After the payment state switched to `HOLD` (lightning) or `PAID` (onchain) AND the user provided `node_id` and `announce`, the LSP MUST attempt a channel open.
+After the open.state switched to `PENDING` AND the user provided `node_id` and `announce`, the LSP MUST attempt a channel open.
 
 
 #### 4.1 Establish Peer Connection
@@ -308,8 +303,8 @@ After the payment state switched to `HOLD` (lightning) or `PAID` (onchain) AND t
 **User**
 
 - SHOULD establish a peer connection with one of the provided node connection strings in `lsp_node_connection_strings`.
-- MUST establish a peer connection to `lsp_node_connection_strings` if `node_connection_string_or_pubkey` only contains a pubkey.
 - MUST establish a peer connection to `lsp_node_connection_strings` if the node is not publicly available, for example behind a NAT.
+- MUST establish a peer connection to `lsp_node_connection_strings` if `node_connection_string_or_pubkey` only contains a pubkey.
 
 
 **LSP**
@@ -317,7 +312,10 @@ After the payment state switched to `HOLD` (lightning) or `PAID` (onchain) AND t
 - MUST establish a peer connection to node_connection_string_or_pubkey IF the user provided a connection string.
 - MUST wait on the user establishing a peer connection IF the user only provided a pubkey.
 - MAY establish a peer connection to node_connection_string_or_pubkey IF the user only provided a pubkey but the connection information is available in the Lightning Gossip.
-- MAY try multiple connection attempts.
+- MAY try multiple times.
+
+In case the connection attempt failed
+- MUST set open.state to `FAILED` and open.fail_reason to `PEERING_FAILED`.
 
 #### 4.1 Open attempt
 
@@ -330,6 +328,23 @@ After the payment state switched to `HOLD` (lightning) or `PAID` (onchain) AND t
     - MUST push `local_balance_satoshi` to the user.
     - MUST use `onchain_fee_rate` or higher.
 
+In case the channel open succeeded
+- MUST set open.state to `SUCCESS` and open.fail_reason to `null`.
+- MUST update the channel object.
+
+In case the channel open failed
+- MUST set open.state to `FAILED` and open.fail_reason to `CHANNEL_REJECTED_BY_DESTINATION`.
+
+
+### 5 Update order
+
+**User**
+- MAY update the `node_id` and `announce` property at any time before the channel is opened.
+    - MUST call `POST /lsp/channel/{id}/update` to update the properties.
+
+> **Rational** The user may provide this information only after the order has been created OR the user may need to correct the provided connection string.
+
+**LSP**
 
 
 

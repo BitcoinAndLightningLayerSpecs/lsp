@@ -300,6 +300,7 @@ components:
               - EXPECT_PAYMENT # Expect payment
               - HOLD # Lighting payment arrived, preimage not released.
               - PAID # Lightning payment arrived, preimage released OR onchain payment arrived.
+              - FAILED 
             example: EXPECT_PAYMENT
           fee_total_satoshi:
             description: "The total fee the lsp will charge to open this channel in satoshi."
@@ -421,8 +422,6 @@ components:
                 enum:
                   - CHANNEL_REJECTED_BY_DESTINATION # For example wumbo not enabled.
                   - PEERING_FAILED # Couldn't establish a peer connection
-                  - REJECTED_BY_LSP # LSP rejected node.
-
       ChannelOpenError:
         type: object
         properties:

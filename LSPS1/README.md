@@ -19,6 +19,10 @@ To allow everybody to adopt this specification, we define a **HTTP** api. We pur
 
 Some requirements are subtle; we have tried to highlight motivations and reasoning behind the results you see here. I'm sure we've fallen short; if you find any part confusing or wrong, please contact us and help us improve.
 
+## OpenAPI
+
+All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notably the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension. All the OpenAPI documents include detailed descriptions of every field.
+
 ## Definitions
 
 ### Datetime
@@ -45,22 +49,10 @@ Channel sides are seen from the user point of view. `local_balance` are the fund
 
 This spec supports two ways to open a channel:
 
-**Sync** The channel is opened by calling `POST /lsp/channel/{id}/open`. The user node_id is provided after at the open call.
+**Sync** The channel is opened by calling `POST /lsp/channel/{id}/open`. The user node_id is provided with the open call.
 Success/error messages are provided in the call response.
 
 **Async** The channel is opened as soon as the payment is confirmed. Success/error messages are provided with `GET /lsp/channel/{id}`.
-
-## Extensions
-
-The API is split between the base api and possible extensions. The base api MUST be implemented. Extensions MAY be implemented and are defined in [extensions](./extensions/).
-
-All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notably the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension. All the OpenAPI documents include detailed descriptions of every field.
-
-| Extension                              	    | Version 	|
-|----------------------------------------------	|---------	|
-| [lnurl_lud2](./extensions/lnurl_lud2/)        | 1       	|
-| [refunds](./extensions/refunds/)          	| 1       	|
-| [jit_channels](./extensions/jit_channels/) 	| 1       	|
 
 ## Flow
 
@@ -68,25 +60,10 @@ All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. I
 
 `GET /lsp/channels` is the entrypoint for each client using the api. It lists the version of the api and all supported extensions in a dictionary.
 
-An extension in `GET /lsp/channels`.`options` MUST include the properties in `AbstractExtensionOptions` and MAY have additional properties based on the individual extensions requirement.
-
-```yaml
-AbstractExtensionOptions: # All extensions derive from this schema.
-    type: object
-    properties:
-        version:
-            type: integer
-            example: 1
-            default: 1
-            description: Version of this extension. Integer starting at 1 counting up.
-```
-
 The user MUST pull `GET /lsp/channels` to read
 
-- the `version` of the api AND `options` and therefore prove compatibility.
+- the `version` of the api AND version of `options` and therefore prove compatibility.
 - `options` properties to determine the api boundries.
-
-The user MAY abort the flow here.
 
 Example `GET /lsp/channels` response: 
 ```JSON
@@ -122,18 +99,19 @@ The base api itself has multiple properties that MUST be defined.
 ```
 
 - `version` MUST be 1.
-- `max_local_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MAY be 0 if pushing satoshi is unsupported.
-- `max_remote_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the remote balance.
-- `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are unsupported.
-- `max_channel_expiry_weeks` MUST be the maximum length in weeks a channel can be leased for.
+- `max_local_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
+- `max_remote_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the remote balance.  MUST be 1 or greater.
+- `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
+- `max_channel_expiry_weeks` MUST be the maximum length in weeks a channel can be leased for. MUST be 1 or greater.
 
+The user MAY abort the flow here.
 
 ### 2. Create Order
 
 The user constructs the request body depending on their needs. 
 
 - The user MUST check if [option_support_large_channel](https://bitcoinops.org/en/topics/large-channels/) is enabled before they order a channel larger than BTC0.16777216.
-- The user MUST call `POST /lsp/channels`.
+- The user MUST call `POST /lsp/channels` to create an order.
 
 **Example request body**
 
@@ -159,18 +137,12 @@ The user constructs the request body depending on their needs.
     - `onchain_fee_rate` MUST be 1 or higher. The LSP may increase this value depending on the onchain fee environment.
     - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
     - `coupon_code` MUST be a string, null, or not defined at all.
-- `open` MAY be null or undefined. These properties MAY be provided with `POST /lsp/channel/{id}/open` later.
+- `open` determines if the channel open is Sync or Async. MUST be provided if Asyc. MUST be null if Sync.
     - `announce` If the channel should be announced to the network. MUST be boolean.
-    - `node_connection_string_or_pubkey` MUST be a node_connection_string or a pubkey. If pubkey the user MUST establish a peer connection with the LSP after the payment. Otherwise the LSP may not be able to establish a peer connection with the node.
+    - `node_connection_string_or_pubkey` MUST be a node_connection_string or a pubkey.
 
 
-The user node can be provided either at order creating or with an additional call to `POST /lsp/channel/{id}/open`.
-
-
- be provided either at the order creation (channel opens as soon as payment is confirmed) or with an additional call to `POST /lsp/channel/{id}/open`.
-> asdf
-
-> **Rationel local_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel. Obsolete with DUAL_FUNDED_CHANNELS? 
+> **Rationel local_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel. Obsolete or can be simplified with DUAL_FUNDED_CHANNELS? 
 
 
 **Example response body**
@@ -217,7 +189,7 @@ HTTP Code: 201 CREATED
 ```
 
 **User**
-- MUST validate `onchain_fee_rate` because the server may have changed the value depending on the onchain fee environment. 
+- MUST validate `onchain_fee_rate` because the server may have increased the value depending on the onchain fee environment. 
 - SHOULD validate the `fee_total_satoshi` is reasonable.
 - SHOULD validate `fee_total_satoshi` + `local_balance_satoshi` = `order_total_satoshi`.
 - MAY abort the flow after.
@@ -228,9 +200,9 @@ HTTP Code: 201 CREATED
 
 ### 3. Payment
 
-This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `btc_address`. Using both methods may lead to the loss of funds.
+This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `btc_address`. Using both methods MAY lead to the loss of funds.
 
-> **Rationel** Onchain Payments are required for payments with higher amounts, especially to push local_balance_satoshi to the user. Lightning payments are the preferred way of payments because they are quick and
+> **Rationel** Onchain Payments are required for payments with higher amounts, especially to push local_balance_satoshi to the user. Lightning payments are the preferred way of payments because they are quick and easily refundable.
 
 Example payment object:
 ```json
@@ -259,17 +231,22 @@ Example payment object:
 - `ln_invoice` 
     - MUST be a Lightning Bolt 11 for order_total_satoshi. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
-    - The `ln_invoice` MUST give the same amount as in `order_total`.
+    - The `ln_invoice` MUST give the same amount as in `order_total_satoshi`.
 - `btc_address` 
-    - MUST be a bitcoin address the user can pay the order_total to if `base_api.min_required_onchain_satoshi` is above or equal order_total. 
+    - MUST be a bitcoin address the user can pay the order_total_satoshi to if `base_api.min_required_onchain_satoshi` is above or equal order_total. 
             - MAY be a bech32 version 0 ("SegWit") or bech32m version 1 ("Taproot") address. The server SHOULD NOT provide any other address type. 
             - The client MAY support other address types.
-    - MUST be null if `base_api.min_required_onchain_satoshi` is null and therefore unsupported.
+    - MUST be null if `base_api.min_required_onchain_satoshi` is null and therefore not supported.
+- `btc_address_confirms` MUST be the number of confirmations that the server
+will accept before considering the payment as confirmed.
+    - If 0, this indicates that the server accepts 0-confirmation payments to
+this address.
+    - MUST be positive or 0.
 - `onchain_payments` 
     - MUST contain all incoming/confirmed outpoints to btc_address. 
     - `outpoint` MUST be an outpoint in the form of [txid:vout](https://btcinformation.org/en/glossary/outpoint).
-    - `satoshi` MUST contain the received satoshi as string.
-    - `confirmed` MUST contain a boolean if the LSP sees the transaction as confirmed. This MAY be instantly (zeroconf) or MAY happen after the required block confirmations.
+    - `satoshi` MUST contain the received satoshi.
+    - `confirmed` MUST contain a boolean if the LSP sees the transaction as confirmed.
     - MUST always be `[]` if `base_api.min_required_onchain_satoshi` is null and therefore unsupported.
 
 
@@ -280,13 +257,12 @@ Example payment object:
 
 - MUST pay the `lightning_invoice`.
 - SHOULD pull `GET /lsp/channel/{id}` to check the success of the payment.
-- The user gets refunded automatically in case the channel open fails.
+- The user gets refunded automatically in case the channel open failed, the order expired, or the payment timed out.
 
 **LSP**
 
 - MUST change the payment state to `HOLD` when the payment arrives.
 - MUST set open.state to `PENDING`.
-- MUST start then channel open flow.
 - If the channel has been opened successfully
     - MUST release the preimage and therefore complete the payment.
     - MUST set the payment state to `PAID`.
@@ -308,13 +284,14 @@ Example payment object:
 **LSP**
 
 - MUST monitor the blockchain and update `onchain_payments`.
-- MUST decide when transactions are confirmed and set them as `confirmed: true`.
+- MUST set the transaction as confirmed after `btc_address_confirms` confirmations.
 - MUST change the payment state to `PAID` when the payment is confirmed.
 - MUST set open.state to `PENDING`.
-- MUST start then channel open flow.
 
 
-TODO: Onchain refunds.
+TODO: Onchain refunds. Ideas: 
+- (Async) User provides a refund_btc_address at the order creation.
+- (Sync) User provides a refund_btc_address afterwards.
 
 
 ### 4 Channel Open
@@ -322,7 +299,7 @@ TODO: Onchain refunds.
 The LSP MUST open the channel under the following conditions
 
 **Async** 
-- The open.state switched to `PENDING` AND the user already provided `node_id` and `announce`.
+- The open.state switched to `PENDING`
 
 **Sync**
 - The open.state switched to `PENDING` AND the user calls `POST /lsp/channel/{id}/open`.
@@ -337,14 +314,14 @@ If `node_connection_string_or_pubkey` contains a full connection string:
 - SHOULD open a peer connection before the channel is being opened.
 - SHOULD establish a peer connection with one of the provided node connection strings in `lsp_node_connection_strings`.
 
-If `node_connection_string_or_pubkey` only contains a pubkey OR the node is not publicly available
+If `node_connection_string_or_pubkey` only contains a pubkey OR the node is not publicly available:
 - MUST open a peer connection before the channel is being opened.
-- MUST establish a peer connection to with one of the provided node connection strings in `lsp_node_connection_strings`.
+- MUST establish a peer connection with one of the provided node connection strings in `lsp_node_connection_strings`.
 
 
 **LSP**
 
-- MUST be established before the channel open.
+
 - MUST establish a peer connection to `node_connection_string_or_pubkey` IF the user provided a full connection string.
 - MUST wait on the user establishing a peer connection IF the user only provided a pubkey.
 - MAY establish a peer connection to `node_connection_string_or_pubkey` IF the user only provided a pubkey and the connection information is available in the Lightning Gossip.
@@ -373,17 +350,9 @@ In case the channel open succeeded
 In case the channel open failed
 - MUST set open.state to `FAILED` and open.fail_reason to `CHANNEL_REJECTED_BY_DESTINATION`.
 
+### 5 Update channel state
 
-### 5 Update order
-
-**User**
-- MAY update the `node_id` and `announce` property at any time before the channel is opened.
-    - MUST call `POST /lsp/channel/{id}/open` to update the properties.
-
-> **Rational** The user may provide this information only after the order has been created OR the user may need to correct the provided connection string.
-
-**LSP**
-
+Todo: Describe channel state. Might be simplified or simply unnecessary.
 
 
 - `channel` must contain the opened channel information. Must be null if the channel opening transaction has not been published yet.
@@ -401,30 +370,6 @@ In case the channel open failed
     - `lsp_node_id` must be the node id if the lsp node.
 
     
-
-
----- OLD ----
-
-
-### 3. Pay order
-
-The client must either pay the `ln_invoice` OR `btc_address`.
-
-**ln_invoice** 
-1. Client must pay the `ln_invoice`. 
-2. The LSP must HOLD the payment and only release the preimage if the channel is opened successfully.
-3. The LSP must change the `payment.status` to `PAID` when receiving the payment.
-4. In case the channel has not been opened, the LSP must reject the payment either before the timeout or when the order expires_at. The LSP sets `payment.status` to `REFUNDED`.
-
-
-**btc_address** 
-1. Client must pay the number of satoshi defined in order_total to the btc_address.
-2. LSP must listen for payments to btc_address and decided how many block confirmations are required to accept the payment. Zeroconf allowed.
-3. LSP must change the payment.status to `PAID` when the required number of satoshi has been confirmed.
-4. In case the channel has not been opened, the LSP must set `payment.status` to `REFUND_AVAILABLE`.
-
-
-### 4. Wait on payment confirmation
 
 
 

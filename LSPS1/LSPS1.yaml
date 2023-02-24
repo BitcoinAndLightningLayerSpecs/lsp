@@ -33,21 +33,24 @@ paths:
             
             ### local_balance
             Indicates if the LSP is willing to push satoshi to the receiver side.
-
+            
             ### onchain_payments
             Indicates if the LSP is willing to receive payments onchain.
-            `min_satoshi` is the number of satoshi that are required for an onchain payment.
             
           content:
               application/json:
                 schema:
-                    $ref: "#/components/schemas/ChannelApiInfo"
+                    $ref: "#/components/schemas/ApiInfoResponse"
                 example:
-                  local_balance:
-                    version: 1
-                  onchain_payments:
-                    min_satoshi: 50000
-                    version: 1
+                  version: 2
+                  website: "http://example.com/contact"
+                  extensions:
+                    base_api:
+                      version: 1
+                      max_local_balance_satoshi: "0"
+                      max_remote_balance_satoshi: "100000000"
+                      min_required_onchain_satoshi: null
+                      max_channel_expiry_weeks: 24
   
     post:
       tags:
@@ -63,16 +66,20 @@ paths:
           content:
               application/json:
                   schema:
-                      $ref: '#/components/schemas/ChannelOrderRequest'
+                      $ref: '#/components/schemas/OrderRequest'
       responses:
         "201":
           description: "Created"
           content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/ChannelOrderResponse"
+                  $ref: "#/components/schemas/OrderResponse"
         "400":
           description: "Validation error."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
               
   /lsp/channels/{id}:
     get:
@@ -95,7 +102,7 @@ paths:
           content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Order"
+                  $ref: "#/components/schemas/OrderResponse"
         "404":
           description: "Not found"
           
@@ -103,9 +110,9 @@ paths:
     post:
       tags:
       - "Channel Request"
-      summary: "Opens a previously paid channel."
+      summary: "Updates where the channel is going to be opened to."
       description: |
-        This endpoint accepts arguments to open a channel to a specific node. It performs an actual channel open and returns success/error.
+        Opens the paid channel to the provided node syncronously.
       operationId: "open-channel-request"
       parameters:
         - in: path
@@ -120,7 +127,7 @@ paths:
           content:
               application/json:
                   schema:
-                      $ref: '#/components/schemas/ChannelOpenRequest'
+                      $ref: '#/components/schemas/ChannelOpenParameters'
       responses:
         "201":
           description: "Success"
@@ -142,71 +149,94 @@ paths:
 
 components:
     schemas:
-      ChannelApiInfo:
+      ApiInfoResponse:
         type: "object"
         properties:
           version:
             type: integer
             description: "Version of this api. See https://github.com/BitcoinAndLightningLayerSpecs/lsp"
-            example: 2
-          extensions:
+            example: 1
+          options:
             type: object
             additionalProperties:
-              $ref: "#/components/schemas/Extension"
+              $ref: "#/components/schemas/ExtensionOptions"
           website:
             type: string
             description: "Website that provides devs a way to get in contact and/or TOS."
             example: "https://blocktank.to/contact"
-
-      # ChannelApiInfo String Extension      
-      BaseExtension:
+      
+      AbstractExtensionOptions: # All extensions derive from this schema.
         type: object
         properties:
           version:
             type: integer
             example: 1
             default: 1
-            nullable: true
             description: Version of this extension. Integer starting at 1 counting up.
-        
-      OnchainPaymentExtension:
-        # Extends BaseExtension
+
+      BaseApiOptionsV1: # Options for the base api.
         allOf:
-          - $ref: "#/components/schemas/BaseExtension"
+          - $ref: "#/components/schemas/AbstractExtensionOptions" # Extends BaseExtension
           - type: object
             properties:
-              min_satoshi:
+              version:
+                type: integer
+                example: 1
+                default: 1
+              max_local_balance_satoshi:
                 type: string
-                description: "Minimal number of satoshi required to be eligable for an onchain payment."
-                example: 50000
+                description: "Maximal number of satoshi that the LSP is willing to push to the user side."
+                example: "100000000"
+              max_remote_balance_satoshi:
+                type: string
+                description: "Maximal number of satoshi that the LSP is willing to contribute to the remote balance."
+                example: "100000000"
+              min_required_onchain_satoshi:
+                type: string
+                description: "Minimal number of satoshi required to allow onchain payments. Null for unsupported."
+                example: "9999"
+                nullable: true
+              max_channel_expiry_weeks:
+                type: integer
+                description: "Maximal number of weeks a channel can be leased for."
+                example: 24
 
-      Extension:
-      # One of these types need to match
-        oneOf:
-          - $ref: "#/components/schemas/BaseExtension"
-          - $ref: "#/components/schemas/OnchainPaymentExtension"
+      ExtensionOptions: # Schema of all allowed options.
+        oneOf: # One of these types need to match
+          - $ref: "#/components/schemas/BaseApiOptionsV1"
     
-      ChannelOrderRequest:
+      OrderRequest:
+        type: object
+        required:
+          - details
+        properties:
+          order:
+            $ref: "#/components/schemas/OrderParameters"
+          open:
+            $ref: "#/components/schemas/ChannelOpenParameters"
+
+      OrderParameters:
         type: "object"
         required:
           - remote_balance
+          - channel_expiry_weeks
         properties:
-          remote_balance:
-            type: integer
+          remote_balance_satoshi:
+            type: string
             description: "Inbound liquidity amount in satoshis. Funds are at the LSP side."
-            example: 5000000
+            example: "5000000"
             minimum: 0
-          local_balance:
-            type: integer
+          local_balance_satoshi:
+            type: string
             description: "Outbound liquidity amount in satoshis. Funds are at the user side."
             default: 0
-            example: 2000000
+            example: "2000000"
             minimum: 0
           onchain_fee_rate:
             type: number
             description: "On-chain fee rate of the channel opening transaction in satoshis per vbyte."
             minimum: 1
-          channel_expiry:
+          channel_expiry_weeks:
             type: integer
             description: "Channel expiration in weeks."
             minimum: 1
@@ -216,183 +246,197 @@ components:
             description: "Coupon code to get a discount on the purchase."
             default: ''
             
-      ChannelOrderResponse:
-        type: "object"
+      OrderResponse:
+        allOf:
+          - type: "object"
+            properties:
+              id:
+                type: string
+                description: "An lsp generated order id used to look-up the status of this request"
+                example: bb4b5d0a-8334-49d8-9463-90a6d413af7c
+              state:
+                description: "The state of the order."
+                type: "string"
+                enum:
+                  - AWAITING_PAYMENT
+                  - OFFER_EXPIRED
+                  - PENDING_CHANNEL_OPEN
+                  - COMPLETED
+                example: COMPLETED
+          - $ref: "#/components/schemas/OrderParameters"
+          - type: "object"
+            properties:
+              lsp_node_connection_strings:
+                type: array
+                description: "A list of connection strings of the LSP for the channel open."
+                example:
+                    - "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735"
+                    - "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@gwdllz5g7vky2q4gr45zguvoajzf33czreca3a3exosftx72ekppkuqd.onion:9735"
+                items:
+                  type: string
+              created_at:
+                description: "Datetime when this order has been created."
+                type: string
+                example: "2012-04-23T18:25:43.511Z"
+              expires_at:
+                description: "Datetime when the order expires."
+                type: string
+                example: "2015-01-25T19:29:44.612Z"
+              open:
+                $ref: "#/components/schemas/ChannelOpen"
+              payment:
+                $ref: "#/components/schemas/PaymentInfo"
+              channel:
+                $ref: "#/components/schemas/ChannelInfo"
+      
+      PaymentInfo:
+        type: object
         properties:
-          id:
-            type: string
-            description: "An lsp generated order id used to look-up the status of this request."
-            example: bb4b5d0a-8334-49d8-9463-90a6d413af7c
-          fee_total:
-            type: integer
-            description: "The total fee in satoshi the LSP will charge to open this channel."
-            example: 8888
-            minimum: 0
-          order_total:
-            type: integer
-            description: "fee_total plus the local_balance requested in satoshi."
-            example: 2008888
-            minimum: 0
-          order_expiry_ts:
-            description: "Number of seconds since epoch when this order can still be paid."
-            type: integer
-            example: 1672661897
-          ln_invoice:
-            type: string
-            description: "A lightning bolt11 invoice to pay the fee for this channel open."
-            example: "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
-          btc_address:
-            type: string
-            nullable: true
-            description: "An on-chain bitcoin address to pay the fee for this channel open."
-            example: "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr"
-          request:
-            $ref: "#/components/schemas/ChannelOrderRequest"
-            
-      Order:
-        type: "object"
-        properties:
-          id:
-            type: string
-            description: "An lsp generated order id used to look-up the status of this request"
-            example: bb4b5d0a-8334-49d8-9463-90a6d413af7c
-          created_at:
-            description: "Number of seconds since epoch when this order was created."
-            type: "number"
-            example: 1675340297
           state:
-            description: "The state of the order."
+            description: "The state of the payment."
             type: "string"
             enum:
-              - AWAITING_PAYMENT
-              - OFFER_EXPIRED
-              - PENDING_CHANNEL_OPEN
-              - COMPLETED
-            example: COMPLETED
-          request:
-            $ref: "#/components/schemas/ChannelOrderRequest"
-          payment:
-            type: object
-            properties:
-              state:
-                description: "The state of the payment."
-                type: "string"
-                enum:
-                  - CREATED
-                  - UNDER_FUNDED
-                  - PAID
-                  - REFUNDED
-                example: PAID
-              order_expiry_ts:
-                description: "Number of seconds since epoch when this order can still be paid."
-                type: integer
-                example: 1672661897
-              fee_total:
-                description: "The total fee the lsp will charge to open this channel in satoshi."
-                type: integer
-                example: 8888
-              order_total:
-                description: "fee_total plus the local_balance requested in satoshi."
-                type: integer
-                example: 2008888
-              amount_paid:
-                description: "Amount paid by client so far in satoshi."
-                type: number
-                example: 1200
-              ln_invoice:
-                description: "A lightning bolt11 invoice to pay the fee for this channel open."
-                type: "string"
-                example: "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
-              btc_address:
-                description: "An on-chain bitcoin address to pay the fee for this channel open."
-                type: "string"
-                nullable: true
-                example: 'bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr'
-              onchain_payments:
-                description: "A list of payments received to btc_address onchain."
-                nullable: true
-                type: "array"
-                items:
-                  type: object
-                  properties:
-                    transaction_id:
-                      type: string
-                      description: "Transaction id"
-                      example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae'
-                    out_point:
-                      type: integer
-                      example: 0
-                    amount:
-                      type: integer
-                      description: "Transaction amount in satoshi"
-                      example: 1200
-                    zero_conf:
-                      type: boolean
-                      description: "If payment was accepted as zero confirmation"
-                      example: false
-          channel:
-            type: object
+              - EXPECT_PAYMENT # Expect payment
+              - HOLD # Lighting payment arrived, preimage not released.
+              - PAID # Lightning payment arrived, preimage released OR onchain payment arrived.
+              - FAILED 
+            example: EXPECT_PAYMENT
+          fee_total_satoshi:
+            description: "The total fee the lsp will charge to open this channel in satoshi."
+            type: string
+            example: "8888"
+          order_total_satoshi:
+            description: "fee_total plus the local_balance requested in satoshi."
+            type: string
+            example: "2008888"
+          lightning_invoice:
+            description: "A lightning bolt11 invoice to pay the fee for this channel open."
+            type: "string"
+            example: "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
+          btc_address:
+            description: "An on-chain bitcoin address to pay the fee for this channel open."
+            type: "string"
             nullable: true
-            properties:
-              state:
-                type: string
-                enum:
-                  - OPENING
-                  - OPENED
-                  - CLOSING
-                  - CLOSED
-              opened_ts:
-                description: "Number of seconds since epoch when the channel has been opened."
-                type: integer
-                example: 1672661897
-              open_transaction:
-                description: "The txid of the channel funding tx once it is broadcast."
-                type: "string"
-                example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1'
-              scid:
-                type: string
-                description: "Short channel id of the channel. Only available after channel confirmed."
-                example: '643904x1419x1'
-                nullable: true
-              expiry_ts:
-                description: "Number of seconds since epoch when the channel can be closed. Only available after channel is opened."
-                type: integer
-                example: 1672661899
-                nullable: true
-              closing_transaction:
-                description: "The txid of the channel closing tx once it is broadcast."
-                type: "string"
-                nullable: true
-                example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1'
-              closed_ts:
-                description: "Number of seconds since epoch when the channel has been closed."
-                type: integer
-                example: 1672661898
-                nullable: true
-              node_id:
-                description: "The node id of the customer node."
-                type: "string"
-                example: "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@xahwmijytzsgjeo5z2spaj2kcmbawdw2bn7kejtbftvazhhvcn5wloqd.onion:9735"
-              lsp_node_id:
-                description: "The node id of the lsp node."
-                type: "string"
-                example: "0296b2db342fcf87ea94d981757fdf4d3e545bd5cef4919f58b5d38dfdd73bf5c9@34.79.58.84:9735"
+            example: 'bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr'
+          onchain_payments:
+            description: "A list of payments received to btc_address onchain."
+            nullable: true
+            type: "array"
+            items:
+              $ref: "#/components/schemas/OnchainPayment"
+            
+      OnchainPayment:
+        type: object
+        properties:
+          outpoint:
+            type: string
+            description: "Outpoint in the form of [txid:vout](https://btcinformation.org/en/glossary/outpoint)."
+            example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1'
+          satoshi:
+            type: string
+            description: "Transaction amount in satoshi"
+            example: "1200"
+          confirmed:
+            type: boolean
+            description: "If the LSP has accepted the payment as confirmed."
+            example: false
           
-      ChannelOpenRequest:
+      ChannelInfo:
+        type: object
+        nullable: true
+        properties:
+          state:
+            type: string
+            enum:
+              - OPENED
+              - CLOSED
+          opened_at:
+            description: "Datetime when the channel has been opened."
+            type: string
+            example: "2012-04-23T18:25:43.511Z"
+          open_transaction:
+            description: "The [txid](https://btcinformation.org/en/glossary/txid) of the channel funding tx once it is broadcast."
+            type: "string"
+            example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae'
+          scid:
+            type: string
+            description: "Short channel id of the channel. Only available after channel confirmed."
+            example: '643904x1419x1'
+            nullable: true
+          expires_at:
+            description: "Datetime when the channel can be closed. Only available after channel is opened."
+            type: string
+            example: "2012-04-23T18:25:43.511Z"
+          closing_transaction:
+            description: "The [txid](https://btcinformation.org/en/glossary/txid) of the channel closing tx once it is broadcast."
+            type: "string"
+            nullable: true
+            example: '0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae'
+          closed_at:
+            description: "Datetime when the channel has been closed."
+            type: string
+            example: "2012-04-23T18:25:43.511Z"
+          node_id:
+            description: "The node id of the customer node."
+            type: "string"
+            example: "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20"
+          lsp_node_id:
+            description: "The node id of the lsp node."
+            type: "string"
+            example: "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f"
+
+      ChannelOpenParameters:
         type: "object"
         required:
-          - announce_channel
-          - node_connection_string
+          - announce
+          - node_connection_string_or_pubkey
         properties:
-          announce_channel:
+          announce:
             type: boolean
             description: "If the channel should be announced to the network. Also known as private/public channels."
             example: true
-          node_connection_string:
+          node_connection_string_or_pubkey:
             type: string
-            description: "Node connection string to open the channel to."
-            example: "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735"
-            
+            description: "Node connection string or pubkey to open the channel to."
+            example: "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735"
+      
+      ChannelOpen:
+        allOf:
+          - $ref: "#/components/schemas/ChannelOpenParameters"
+          - type: object
+            properties:
+              state:
+                type: string
+                enum:
+                  - PRECONDITIONS_FAILED # Channel is not ready to be opened yet.
+                  - PENDING # Channel is about to being opened.
+                  - FAILED  # Open with to the given node failed.
+                  - SUCCESS # Channel open success
+                example: PENDING
+              fail_reason:
+                type: string
+                description: "Reason the channel could not be opened."
+                nullable: true
+                example: null
+                enum:
+                  - CHANNEL_REJECTED_BY_DESTINATION # For example wumbo not enabled.
+                  - PEERING_FAILED # Couldn't establish a peer connection
+      ChannelOpenError:
+        type: object
+        properties:
+          error:
+            type: string
+            description: "Reason the channel couldn't be opened."
+            enum:
+              - CHANNEL_REJECTED_BY_DESTINATION # For example wumbo not enabled.
+              - PEERING_FAILED # Couldn't establish a peer connection
+              - REJECTED_BY_LSP # LSP rejected node.
+              - PAYMENT_REQUIRED
+          message:
+            type: string
+            description: "Human readable message"
+            example: "ok"
+
       ChannelOpenResponse:
         type: "object"
         properties:
@@ -402,7 +446,7 @@ components:
             example: true
           message:
             type: string
-            description: "Human readable message."
+
             example: "ok"
           fail_reason:
             type: string
@@ -419,7 +463,20 @@ components:
             type: string
             nullable: true
             description: "Node connection string that tried to connect."
-         
+
+      BadRequestResponse:
+        type: object
+        properties:
+          message:
+            type: string
+            description: "Human readable message that describe the error"
+            example: "Property remote_balance must be above or equal 1."
+          code:
+            type: string
+            description: "Error code"
+            example: "BAD_REQUEST"
+            enum:
+              - "BAD_REQUEST"       
           
           
           

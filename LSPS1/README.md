@@ -41,6 +41,15 @@ All satoshi values MUST be represented as string and NOT integer values. Make su
 
 Channel sides are seen from the user point of view. `local_balance` are the funds on the user side. `remote_balance` are the funds on the LSP side.
 
+### Sync vs Async Channel Open
+
+This spec supports two ways to open a channel:
+
+**Sync** The channel is opened by calling `POST /lsp/channel/{id}/open`. The user node_id is provided after at the open call.
+Success/error messages are provided in the call response.
+
+**Async** The channel is opened as soon as the payment is confirmed. Success/error messages are provided with `GET /lsp/channel/{id}`.
+
 ## Extensions
 
 The API is split between the base api and possible extensions. The base api MUST be implemented. Extensions MAY be implemented and are defined in [extensions](./extensions/).
@@ -143,6 +152,7 @@ The user constructs the request body depending on their needs.
   }
 }
 ```
+
 - `order` object MUST be provided.
     - `remote_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_remote_balance_satoshi`.
     - `local_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_local_balance_satoshi`. Todo: Rejection error message.
@@ -154,7 +164,11 @@ The user constructs the request body depending on their needs.
     - `node_connection_string_or_pubkey` MUST be a node_connection_string or a pubkey. If pubkey the user MUST establish a peer connection with the LSP after the payment. Otherwise the LSP may not be able to establish a peer connection with the node.
 
 
-> **Rationel open** The user node can be provided either at the order creation (channel opens as soon as payment is confirmed) or with an additional call to `POST /lsp/channel/{id}/open` (syncronously).
+The user node can be provided either at order creating or with an additional call to `POST /lsp/channel/{id}/open`.
+
+
+ be provided either at the order creation (channel opens as soon as payment is confirmed) or with an additional call to `POST /lsp/channel/{id}/open`.
+> asdf
 
 > **Rationel local_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel. Obsolete with DUAL_FUNDED_CHANNELS? 
 
@@ -302,25 +316,38 @@ Example payment object:
 
 TODO: Onchain refunds.
 
+
 ### 4 Channel Open
 
-After the open.state switched to `PENDING` AND the user provided `node_id` and `announce`, the LSP MUST attempt a channel open.
+The LSP MUST open the channel under the following conditions
+
+**Async** 
+- The open.state switched to `PENDING` AND the user already provided `node_id` and `announce`.
+
+**Sync**
+- The open.state switched to `PENDING` AND the user calls `POST /lsp/channel/{id}/open`.
+
 
 
 #### 4.1 Establish Peer Connection
 
 **User**
 
+If `node_connection_string_or_pubkey` contains a full connection string:
+- SHOULD open a peer connection before the channel is being opened.
 - SHOULD establish a peer connection with one of the provided node connection strings in `lsp_node_connection_strings`.
-- MUST establish a peer connection to `lsp_node_connection_strings` if the node is not publicly available, for example behind a NAT.
-- MUST establish a peer connection to `lsp_node_connection_strings` if `node_connection_string_or_pubkey` only contains a pubkey.
+
+If `node_connection_string_or_pubkey` only contains a pubkey OR the node is not publicly available
+- MUST open a peer connection before the channel is being opened.
+- MUST establish a peer connection to with one of the provided node connection strings in `lsp_node_connection_strings`.
 
 
 **LSP**
 
-- MUST establish a peer connection to node_connection_string_or_pubkey IF the user provided a connection string.
+- MUST be established before the channel open.
+- MUST establish a peer connection to `node_connection_string_or_pubkey` IF the user provided a full connection string.
 - MUST wait on the user establishing a peer connection IF the user only provided a pubkey.
-- MAY establish a peer connection to node_connection_string_or_pubkey IF the user only provided a pubkey but the connection information is available in the Lightning Gossip.
+- MAY establish a peer connection to `node_connection_string_or_pubkey` IF the user only provided a pubkey and the connection information is available in the Lightning Gossip.
 - MAY try multiple times.
 
 In case the connection attempt failed
@@ -335,7 +362,9 @@ In case the connection attempt failed
     - MUST open the channel with a capacity of `remote_balance_satoshi` + `local_balance_satoshi`.
         - MAY overprovision.
     - MUST push `local_balance_satoshi` to the user.
-    - MUST use `onchain_fee_rate` or higher.
+        - MAY overprovision.
+    - MUST use `onchain_fee_rate`.
+        - MAY overprovision.
 
 In case the channel open succeeded
 - MUST set open.state to `SUCCESS` and open.fail_reason to `null`.

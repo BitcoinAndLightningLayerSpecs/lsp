@@ -106,13 +106,13 @@ paths:
         "404":
           description: "Not found"
           
-  /lsp/channels/{id}/update:
+  /lsp/channels/{id}/open:
     post:
       tags:
       - "Channel Request"
       summary: "Updates where the channel is going to be opened to."
       description: |
-        Updates the node_id and the announce flag for the channel open.
+        Opens the paid channel to the provided node syncronously.
       operationId: "open-channel-request"
       parameters:
         - in: path
@@ -172,7 +172,6 @@ components:
             type: integer
             example: 1
             default: 1
-            nullable: true
             description: Version of this extension. Integer starting at 1 counting up.
 
       BaseApiOptionsV1: # Options for the base api.

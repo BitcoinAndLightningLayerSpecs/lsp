@@ -69,7 +69,6 @@ AbstractExtensionOptions: # All extensions derive from this schema.
             type: integer
             example: 1
             default: 1
-            nullable: true
             description: Version of this extension. Integer starting at 1 counting up.
 ```
 
@@ -121,9 +120,11 @@ The base api itself has multiple properties that MUST be defined.
 
 
 ### 2. Create Order
-Client constructs the request body depending on their needs. 
-- Client MUST respect the base_api.options. 
-- Client MUST cals `POST /lsp/channels`.
+
+The user constructs the request body depending on their needs. 
+
+- The user MUST check if [option_support_large_channel](https://bitcoinops.org/en/topics/large-channels/) is enabled before they order a channel larger than BTC0.16777216.
+- The user MUST call `POST /lsp/channels`.
 
 **Example request body**
 
@@ -142,15 +143,21 @@ Client constructs the request body depending on their needs.
   }
 }
 ```
-
-- `order.remote_balance_satoshi` must be 1 or greater. Must be below or equal `base_api.max_remote_balance_satoshi`.
-- `order.local_balance_satoshi` must be 0 or greater. Must be below or equal `base_api.max_local_balance_satoshi`. Todo: Rejection error message.
-- `order.onchain_fee_rate` must be 1 or higher. The LSP may increase this value depending on the onchain fee environment.
-- `order.channel_expiry_weeks` must be 1 or greater. Must be below or equal `base_api.max_channel_expiry_weeks`.
-- `order.coupon_code` must be a string, null, or not defined at all.
-- `open` MAY be null or undefined. This info can be provided with `POST /lsp/channel/{id}/update` later.
+- `order` object MUST be provided.
+    - `remote_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_remote_balance_satoshi`.
+    - `local_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_local_balance_satoshi`. Todo: Rejection error message.
+    - `onchain_fee_rate` MUST be 1 or higher. The LSP may increase this value depending on the onchain fee environment.
+    - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
+    - `coupon_code` MUST be a string, null, or not defined at all.
+- `open` MAY be null or undefined. These properties MAY be provided with `POST /lsp/channel/{id}/open` later.
     - `announce` If the channel should be announced to the network. MUST be boolean.
     - `node_connection_string_or_pubkey` MUST be a node_connection_string or a pubkey. If pubkey the user MUST establish a peer connection with the LSP after the payment. Otherwise the LSP may not be able to establish a peer connection with the node.
+
+
+> **Rationel open** The user node can be provided either at the order creation (channel opens as soon as payment is confirmed) or with an additional call to `POST /lsp/channel/{id}/open` (syncronously).
+
+> **Rationel local_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel. Obsolete with DUAL_FUNDED_CHANNELS? 
+
 
 **Example response body**
 
@@ -208,6 +215,8 @@ HTTP Code: 201 CREATED
 ### 3. Payment
 
 This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `btc_address`. Using both methods may lead to the loss of funds.
+
+> **Rationel** Onchain Payments are required for payments with higher amounts, especially to push local_balance_satoshi to the user. Lightning payments are the preferred way of payments because they are quick and
 
 Example payment object:
 ```json
@@ -340,7 +349,7 @@ In case the channel open failed
 
 **User**
 - MAY update the `node_id` and `announce` property at any time before the channel is opened.
-    - MUST call `POST /lsp/channel/{id}/update` to update the properties.
+    - MUST call `POST /lsp/channel/{id}/open` to update the properties.
 
 > **Rational** The user may provide this information only after the order has been created OR the user may need to correct the provided connection string.
 
@@ -365,6 +374,7 @@ In case the channel open failed
     
 
 
+---- OLD ----
 
 
 ### 3. Pay order
@@ -389,12 +399,4 @@ The client must either pay the `ln_invoice` OR `btc_address`.
 
 
 
-
----
-
-2. Client must call `POST /lsp/channels` with the values demanded to create an order. The response includes prices, a lightning invoice and a bitcoin address in case the extension `onchain_payment` is supported.
-3. Client may pay the order with their method of choice before the order expires.
-4. Client should pull `GET /lsp/channels/{id}` to determine the status of their payment. As soon as `payment.state` switches to `PAID` they can attempt a channel open.
-5. Client must call `POST /lsp/channels/{id}/open` with the nessecary parameters for a channel open. The LSP must directly attempt a channel open and responds with the result. The client gets direct feedback if the attempt succeeded.
-6. The `channel` object in `GET /lsp/channels/{id}` must show the state of the channel. `expiry_ts` shows when the LSP is allowed to close the channel again.
 

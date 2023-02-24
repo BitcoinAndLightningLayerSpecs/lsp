@@ -134,12 +134,13 @@ The user constructs the request body depending on their needs.
 - `order` object MUST be provided.
     - `remote_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_remote_balance_satoshi`.
     - `local_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_local_balance_satoshi`. Todo: Rejection error message.
-    - `onchain_fee_rate` MUST be 1 or higher. The LSP may increase this value depending on the onchain fee environment.
+    - `onchain_fee_rate` MUST be 1 or higher. The LSP may increase this value depending on the onchain fee environment. MAY be unspecified, the LSP will determine the fee rate. 
     - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
     - `coupon_code` MUST be a string, null, or not defined at all.
 - `open` determines if the channel open is Sync or Async. MUST be provided if Asyc. MUST be null if Sync.
     - `announce` If the channel should be announced to the network. MUST be boolean.
     - `node_connection_string_or_pubkey` MUST be a node_connection_string or a pubkey.
+
 
 
 > **Rationel local_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel. Obsolete or can be simplified with DUAL_FUNDED_CHANNELS? 
@@ -198,11 +199,13 @@ HTTP Code: 201 CREATED
 
 - 400 Bad request - Request body validation error.
 
+Todo: Define error type better. [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R346)
+
 ### 3. Payment
 
 This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `btc_address`. Using both methods MAY lead to the loss of funds.
 
-> **Rationel** Onchain Payments are required for payments with higher amounts, especially to push local_balance_satoshi to the user. Lightning payments are the preferred way of payments because they are quick and easily refundable.
+> **Rationel** Onchain Payments are required for payments with higher amounts, especially to push local_balance_satoshi to the user. Onchain payments are also useful to onboard new user to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
 Example payment object:
 ```json
@@ -350,9 +353,9 @@ In case the channel open succeeded
 In case the channel open failed
 - MUST set open.state to `FAILED` and open.fail_reason to `CHANNEL_REJECTED_BY_DESTINATION`.
 
-### 5 Update channel state
+### 5 Channel Object
 
-Todo: Describe channel state. Might be simplified or simply unnecessary.
+Todo: Describe channel object. Might be simplified or simply unnecessary.
 
 
 - `channel` must contain the opened channel information. Must be null if the channel opening transaction has not been published yet.
@@ -374,3 +377,9 @@ Todo: Describe channel state. Might be simplified or simply unnecessary.
 
 
 
+### Open Questions
+
+- How do we handle channel batching? [Channel batching by Zmn](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R319)
+- How long is the LSP allowed to wait for the channel open (async case)?
+- How to handle 0conf channels? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R147).
+- Can we make the order stateless? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R269) *Severin: Would be cool. Worst case a DDoS can also be prevented with classic rate limiting.

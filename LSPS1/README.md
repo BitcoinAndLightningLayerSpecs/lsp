@@ -29,13 +29,13 @@ All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. I
 
 All datetimes are represented as [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) in the form of `2023-02-23T08:47:30.511Z` UTC.
 
-> **Rational** ISO8601 is human readable, it's a standard endorsed by [W3C](http://www.w3.org/TR/NOTE-datetime), and [RFC3339](https://www.rfc-editor.org/rfc/rfc3339), sortable, and supported widely.
+> **Rationale** ISO8601 is human readable, it's a standard endorsed by [W3C](http://www.w3.org/TR/NOTE-datetime), and [RFC3339](https://www.rfc-editor.org/rfc/rfc3339), sortable, and supported widely.
 
 ### Satoshi
 
 All satoshi values MUST be represented as string and NOT integer values. Make sure you check your integer limits.
 
-> **Rational** Plenty of json parsers use a 32bit signed integer for integer parsing. Max safe value is 2,147,483,647; 2,147,483,647sat = BTC21.474,836,47 which is too low.
+> **Rationale** Plenty of json parsers use a 32bit signed integer for integer parsing. Max safe value is 2,147,483,647; 2,147,483,647sat = BTC21.474,836,47 which is too low.
 
 ### Actors
 
@@ -143,7 +143,7 @@ The user constructs the request body depending on their needs.
 
 
 
-> **Rationel local_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel. Obsolete or can be simplified with DUAL_FUNDED_CHANNELS? 
+> **Rationale local_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel. Obsolete or can be simplified with DUAL_FUNDED_CHANNELS? 
 
 
 **Example response body**
@@ -205,7 +205,7 @@ Todo: Define error type better. [Zmn proposal](https://github.com/BitcoinAndLigh
 
 This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `btc_address`. Using both methods MAY lead to the loss of funds.
 
-> **Rationel** Onchain Payments are required for payments with higher amounts, especially to push local_balance_satoshi to the user. Onchain payments are also useful to onboard new user to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
+> **Rationale** Onchain Payments are required for payments with higher amounts, especially to push local_balance_satoshi to the user. Onchain payments are also useful to onboard new user to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
 Example payment object:
 ```json

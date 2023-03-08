@@ -13,11 +13,6 @@ The goal of this specification is to provide a standardized LSP API to purchase 
 
 **Wallets** that purchase a channel from the LSP directly.
 
-**Websites** that provide a UI for channel purchases. This should enable channel marketplaces and LSP channel purchase websites.
-
-To allow everybody to adopt this specification, we define a **HTTP** api. We purposefully decided against a lightning native api to not have to rely on any lightning implementation developers time and therefore reduced adoption potential.
-
-Some requirements are subtle; we have tried to highlight motivations and reasoning behind the results you see here. I'm sure we've fallen short; if you find any part confusing or wrong, please contact us and help us improve.
 
 ## OpenAPI
 
@@ -33,7 +28,7 @@ All datetimes are represented as [ISO8601](https://en.wikipedia.org/wiki/ISO_860
 
 ### Satoshi
 
-All satoshi values MUST be represented as string and NOT integer values. Make sure you check your integer limits.
+All satoshi values MUST be represented as a string and NOT integer values. Make sure you check your integer limits to avoid overflows.
 
 > **Rationale** Plenty of json parsers use a 32bit signed integer for integer parsing. Max safe value is 2,147,483,647; 2,147,483,647sat = BTC21.474,836,47 which is too low.
 
@@ -43,7 +38,7 @@ All satoshi values MUST be represented as string and NOT integer values. Make su
 
 ### Channel sides
 
-Channel sides are seen from the user point of view. `local_balance` are the funds on the user side. `remote_balance` are the funds on the LSP side.
+Channel sides are seen from the user point of view. `user_balance` are the funds on the user side. `lsp_balance` are the funds on the LSP side.
 
 ### Sync vs Async Channel Open
 
@@ -73,8 +68,8 @@ Example `GET /lsp/channels` response:
   "extensions": {
     "base_api": {
       "version": 1,
-      "max_local_balance_satoshi": "0",
-      "max_remote_balance_satoshi": "100000000",
+      "max_user_balance_satoshi": "0",
+      "max_lsp_balance_satoshi": "100000000",
       "min_required_onchain_satoshi": null,
       "max_channel_expiry_weeks": 24
     }
@@ -90,8 +85,8 @@ The base api itself has multiple properties that MUST be defined.
 "options": {
     "base_api": {
         "version": 1,
-        "max_local_balance_satoshi": "0",
-        "max_remote_balance_satoshi": "100000000",
+        "max_user_balance_satoshi": "0",
+        "max_lsp_balance_satoshi": "100000000",
         "min_required_onchain_satoshi": null,
         "max_channel_expiry_weeks": 24
     }
@@ -99,8 +94,8 @@ The base api itself has multiple properties that MUST be defined.
 ```
 
 - `version` MUST be 1.
-- `max_local_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
-- `max_remote_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the remote balance.  MUST be 1 or greater.
+- `max_user_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
+- `max_lsp_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the their balance.  MUST be 1 or greater.
 - `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
 - `max_channel_expiry_weeks` MUST be the maximum length in weeks a channel can be leased for. MUST be 1 or greater.
 
@@ -118,8 +113,8 @@ The user constructs the request body depending on their needs.
 ```json
 {
   "order": {
-    "remote_balance_satoshi": "5000000",
-    "local_balance_satoshi": "2000000",
+    "lsp_balance_satoshi": "5000000",
+    "user_balance_satoshi": "2000000",
     "onchain_fee_rate": 1,
     "channel_expiry_weeks": 12,
     "coupon_code": ""
@@ -132,8 +127,8 @@ The user constructs the request body depending on their needs.
 ```
 
 - `order` object MUST be provided.
-    - `remote_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_remote_balance_satoshi`.
-    - `local_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_local_balance_satoshi`. Todo: Rejection error message.
+    - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
+    - `user_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_user_balance_satoshi`. Todo: Rejection error message.
     - `onchain_fee_rate` MUST be 1 or higher. The LSP may increase this value depending on the onchain fee environment. MAY be unspecified, the LSP will determine the fee rate. 
     - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
     - `coupon_code` MUST be a string, null, or not defined at all.
@@ -143,7 +138,7 @@ The user constructs the request body depending on their needs.
 
 
 
-> **Rationale local_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel. Obsolete or can be simplified with DUAL_FUNDED_CHANNELS? 
+> **Rationale user_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel.
 
 
 **Example response body**
@@ -154,8 +149,8 @@ HTTP Code: 201 CREATED
 {
   "id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
   "state": "AWAITING_PAYMENT",
-  "remote_balance_satoshi": "5000000",
-  "local_balance_satoshi": "2000000",
+  "lsp_balance_satoshi": "5000000",
+  "user_balance_satoshi": "2000000",
   "onchain_fee_rate": 1,
   "channel_expiry_weeks": 12,
   "coupon_code": "",
@@ -192,7 +187,7 @@ HTTP Code: 201 CREATED
 **User**
 - MUST validate `onchain_fee_rate` because the server may have increased the value depending on the onchain fee environment. 
 - SHOULD validate the `fee_total_satoshi` is reasonable.
-- SHOULD validate `fee_total_satoshi` + `local_balance_satoshi` = `order_total_satoshi`.
+- SHOULD validate `fee_total_satoshi` + `user_balance_satoshi` = `order_total_satoshi`.
 - MAY abort the flow after.
 
 **Errors**
@@ -205,7 +200,7 @@ Todo: Define error type better. [Zmn proposal](https://github.com/BitcoinAndLigh
 
 This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `btc_address`. Using both methods MAY lead to the loss of funds.
 
-> **Rationale** Onchain Payments are required for payments with higher amounts, especially to push local_balance_satoshi to the user. Onchain payments are also useful to onboard new user to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
+> **Rationale** Onchain Payments are required for payments with higher amounts, especially to push user_balance_satoshi to the user. Onchain payments are also useful to onboard new user to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
 Example payment object:
 ```json
@@ -230,7 +225,7 @@ Example payment object:
     - `HOLD` Lighting payment arrived, preimage NOT released.
     - `PAID` Lightning payment arrived, preimage released OR full `order_total_satoshi` onchain payment arrived.
 - `fee_total_satoshi` MUST be the total fee the LSP will charge to open this channel in satoshi.
-- `order_total_satoshi` MUST be the fee_total_satoshi plus the local_balance_satoshi requested in satoshi.
+- `order_total_satoshi` MUST be the fee_total_satoshi plus the user_balance_satoshi requested in satoshi.
 - `ln_invoice` 
     - MUST be a Lightning Bolt 11 for order_total_satoshi. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
@@ -339,9 +334,9 @@ In case the connection attempt failed
 
 - MUST attempt a channel open to `node_connection_string_or_pubkey`.
     - MUST respect the `announce` flag.
-    - MUST open the channel with a capacity of `remote_balance_satoshi` + `local_balance_satoshi`.
+    - MUST open the channel with a capacity of `lsp_balance_satoshi` + `user_balance_satoshi`.
         - MAY overprovision.
-    - MUST push `local_balance_satoshi` to the user.
+    - MUST push `user_balance_satoshi` to the user.
         - MAY overprovision.
     - MUST use `onchain_fee_rate`.
         - MAY overprovision.

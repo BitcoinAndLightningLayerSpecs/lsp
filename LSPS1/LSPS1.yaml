@@ -31,7 +31,7 @@ paths:
           description: |
             ## Extensions
             
-            ### local_balance
+            ### user_balance
             Indicates if the LSP is willing to push satoshi to the receiver side.
             
             ### onchain_payments
@@ -47,8 +47,8 @@ paths:
                   extensions:
                     base_api:
                       version: 1
-                      max_local_balance_satoshi: "0"
-                      max_remote_balance_satoshi: "100000000"
+                      max_user_balance_satoshi: "0"
+                      max_lsp_balance_satoshi: "100000000"
                       min_required_onchain_satoshi: null
                       max_channel_expiry_weeks: 24
   
@@ -183,13 +183,13 @@ components:
                 type: integer
                 example: 1
                 default: 1
-              max_local_balance_satoshi:
+              max_user_balance_satoshi:
                 type: string
                 description: "Maximal number of satoshi that the LSP is willing to push to the user side."
                 example: "100000000"
-              max_remote_balance_satoshi:
+              max_lsp_balance_satoshi:
                 type: string
-                description: "Maximal number of satoshi that the LSP is willing to contribute to the remote balance."
+                description: "Maximal number of satoshi that the LSP is willing to contribute to the lsp balance."
                 example: "100000000"
               min_required_onchain_satoshi:
                 type: string
@@ -221,12 +221,12 @@ components:
           - remote_balance
           - channel_expiry_weeks
         properties:
-          remote_balance_satoshi:
+          lsp_balance_satoshi:
             type: string
             description: "Inbound liquidity amount in satoshis. Funds are at the LSP side."
             example: "5000000"
             minimum: 0
-          local_balance_satoshi:
+          user_balance_satoshi:
             type: string
             description: "Outbound liquidity amount in satoshis. Funds are at the user side."
             default: 0
@@ -306,7 +306,7 @@ components:
             type: string
             example: "8888"
           order_total_satoshi:
-            description: "fee_total plus the local_balance requested in satoshi."
+            description: "fee_total plus the user_balance requested in satoshi."
             type: string
             example: "2008888"
           lightning_invoice:
@@ -470,7 +470,7 @@ components:
           message:
             type: string
             description: "Human readable message that describe the error"
-            example: "Property remote_balance must be above or equal 1."
+            example: "Property lsp_balance must be above or equal 1."
           code:
             type: string
             description: "Error code"

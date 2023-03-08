@@ -31,14 +31,15 @@ All satoshi values MUST be represented as a string and NOT integer values. Make 
 
 ### Node connection string
 
-Node connection strings like `lsp_connection_string` or `user_connection_string` MUST match one of the following grammars:
+Node connection strings like `lsp_connection_string` MUST match one of the following grammars:
 
 * `<node> '@' <ip> `:` <port>`, with the last `:` after `@` considered a separator for the port number.
 * `<node> '@' '[' <ip> ']' ':' <port>`, with any `:` inside `<ip>` considered part of the IP address.
 * `<node> '@' <tor_onion_v3_address> ':' <port>`, with the last `:` after `@` considered a separator for the port number.
 
+Word definition:
 
-* `<node>` MUST be a node id (pubkey).
+* `<node>` MUST be a node id (pubkey). For example: "0200000000a3eff613189ca6c4070c89206ad658e286751eca1f29262948247a5f".
 * `<ip>` MUST be a IPv4 OR IPv6 address.
 * `<tor_onion_v3_address>` MUST be a tor onion v3 address.
 * `<port>` MUST be a [port](https://en.wikipedia.org/wiki/Port_(computer_networking)) number.
@@ -49,8 +50,7 @@ Node connection strings like `lsp_connection_string` or `user_connection_string`
 
 ### Channel sides
 
-Channel sides are seen from the user point of view. `user_balance` are the funds on the user side. `lsp_balance` are the funds on the LSP side.
-
+`user_balance` are the funds on the user side. `lsp_balance` are the funds on the LSP side.
 
 ## Flow
 
@@ -140,7 +140,7 @@ The user constructs the request body depending on their needs.
     - `refund_btc_address` MUST be a  or null
 - `open` MUST be provided.
     - `announce` If the channel should be announced to the network. MUST be boolean.
-    - `user_connection_string_or_pubkey` MUST be a node connection string or a pubkey.
+    - `user_connection_string_or_pubkey` MUST be a node connection string OR a node id (pubkey).
 
 
 > **Rationale user_balance_satoshi** User MAY want to have initial spending balance on their wallet or start with a balanced channel.

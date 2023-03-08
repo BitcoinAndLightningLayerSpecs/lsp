@@ -266,7 +266,7 @@ components:
           - $ref: "#/components/schemas/OrderParameters"
           - type: "object"
             properties:
-              lsp_node_connection_strings:
+              lsp_connection_strings:
                 type: array
                 description: "A list of connection strings of the LSP for the channel open."
                 example:
@@ -389,13 +389,13 @@ components:
         type: "object"
         required:
           - announce
-          - node_connection_string_or_pubkey
+          - user_connection_string_or_pubkey
         properties:
           announce:
             type: boolean
             description: "If the channel should be announced to the network. Also known as private/public channels."
             example: true
-          node_connection_string_or_pubkey:
+          user_connection_string_or_pubkey:
             type: string
             description: "Node connection string or pubkey to open the channel to."
             example: "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735"
@@ -459,7 +459,7 @@ components:
               - PAYMENT_REQUIRED
               - ALREADY_OPEN
             example: null
-          lsp_node_connection_string:
+          lsp_connection_string:
             type: string
             nullable: true
             description: "Node connection string that tried to connect."

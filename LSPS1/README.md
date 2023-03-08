@@ -121,7 +121,7 @@ The user constructs the request body depending on their needs.
   },
   "open": {
     "announce": true,
-    "node_connection_string_or_pubkey": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735"
+    "user_connection_string_or_pubkey": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735"
   }
 }
 ```
@@ -134,7 +134,7 @@ The user constructs the request body depending on their needs.
     - `coupon_code` MUST be a string, null, or not defined at all.
 - `open` determines if the channel open is Sync or Async. MUST be provided if Asyc. MUST be null if Sync.
     - `announce` If the channel should be announced to the network. MUST be boolean.
-    - `node_connection_string_or_pubkey` MUST be a node_connection_string or a pubkey.
+    - `user_connection_string_or_pubkey` MUST be a node connection string or a pubkey.
 
 
 
@@ -154,7 +154,7 @@ HTTP Code: 201 CREATED
   "onchain_fee_rate": 1,
   "channel_expiry_weeks": 12,
   "coupon_code": "",
-  "lsp_node_connection_strings": [
+  "lsp_connection_strings": [
     "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735",
     "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@gwdllz5g7vky2q4gr45zguvoajzf33czreca3a3exosftx72ekppkuqd.onion:9735"
   ],
@@ -162,7 +162,7 @@ HTTP Code: 201 CREATED
   "expires_at": "2015-01-25T19:29:44.612Z",
   "open": {
     "announce": true,
-    "node_connection_string_or_pubkey": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735",
+    "client_connection_string_or_pubkey": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735",
     "state": "PENDING",
     "fail_reason": null
   },
@@ -308,21 +308,21 @@ The LSP MUST open the channel under the following conditions
 
 **User**
 
-If `node_connection_string_or_pubkey` contains a full connection string:
+If `user_connection_string_or_pubkey` contains a full connection string:
 - SHOULD open a peer connection before the channel is being opened.
-- SHOULD establish a peer connection with one of the provided node connection strings in `lsp_node_connection_strings`.
+- SHOULD establish a peer connection with one of the provided node connection strings in `lsp_connection_strings`.
 
-If `node_connection_string_or_pubkey` only contains a pubkey OR the node is not publicly available:
+If `user_connection_string_or_pubkey` only contains a pubkey OR the node is not publicly available:
 - MUST open a peer connection before the channel is being opened.
-- MUST establish a peer connection with one of the provided node connection strings in `lsp_node_connection_strings`.
+- MUST establish a peer connection with one of the provided node connection strings in `lsp_connection_strings`.
 
 
 **LSP**
 
 
-- MUST establish a peer connection to `node_connection_string_or_pubkey` IF the user provided a full connection string.
+- MUST establish a peer connection to `user_connection_string_or_pubkey` IF the user provided a full connection string.
 - MUST wait on the user establishing a peer connection IF the user only provided a pubkey.
-- MAY establish a peer connection to `node_connection_string_or_pubkey` IF the user only provided a pubkey and the connection information is available in the Lightning Gossip.
+- MAY establish a peer connection to `user_connection_string_or_pubkey` IF the user only provided a pubkey and the connection information is available in the Lightning Gossip.
 - MAY try multiple times.
 
 In case the connection attempt failed
@@ -332,7 +332,7 @@ In case the connection attempt failed
 
 **LSP**
 
-- MUST attempt a channel open to `node_connection_string_or_pubkey`.
+- MUST attempt a channel open to `user_connection_string_or_pubkey`.
     - MUST respect the `announce` flag.
     - MUST open the channel with a capacity of `lsp_balance_satoshi` + `user_balance_satoshi`.
         - MAY overprovision.

@@ -29,6 +29,20 @@ All satoshi values MUST be represented as a string and NOT integer values. Make 
 
 > **Rationale** Plenty of json parsers use a 32bit signed integer for integer parsing. Max safe value is 2,147,483,647; 2,147,483,647sat = BTC21.474,836,47 which is too low.
 
+### Node connection string
+
+Node connection strings like `lsp_connection_string` or `user_connection_string` MUST match one of the following grammars:
+
+* `<node> '@' <ip> `:` <port>`, with the last `:` after `@` considered a separator for the port number.
+* `<node> '@' '[' <ip> ']' ':' <port>`, with any `:` inside `<ip>` considered part of the IP address.
+* `<node> '@' <tor_onion_v3_address> ':' <port>`, with the last `:` after `@` considered a separator for the port number.
+
+
+* `<node>` MUST be a node id (pubkey).
+* `<ip>` MUST be a IPv4 OR IPv6 address.
+* `<tor_onion_v3_address>` MUST be a tor onion v3 address.
+* `<port>` MUST be a [port](https://en.wikipedia.org/wiki/Port_(computer_networking)) number.
+
 ### Actors
 
 `LSP` is the API provider. `User` is the user/client of the API.
@@ -55,7 +69,7 @@ Example `GET /lsp/channels` response:
 {
   "version": 2,
   "website": "http://example.com/contact",
-  "extensions": {
+  "options": {
     "base_api": {
       "version": 1,
       "max_user_balance_satoshi": "0",
@@ -107,7 +121,8 @@ The user constructs the request body depending on their needs.
     "user_balance_satoshi": "2000000",
     "onchain_fee_rate": 1,
     "channel_expiry_weeks": 12,
-    "coupon_code": ""
+    "coupon_code": "",
+    "refund_btc_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
   },
   "open": {
     "announce": true,
@@ -122,6 +137,7 @@ The user constructs the request body depending on their needs.
     - `onchain_fee_rate` MUST be 1 or higher. MAY be unspecified, the LSP will determine the fee rate. The LSP MAY increase this value depending on the onchain fee environment.
     - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
     - `coupon_code` MUST be a string or null.
+    - `refund_btc_address` MUST be a  or null
 - `open` MUST be provided.
     - `announce` If the channel should be announced to the network. MUST be boolean.
     - `user_connection_string_or_pubkey` MUST be a node connection string or a pubkey.

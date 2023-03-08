@@ -307,7 +307,7 @@ components:
               - EXPECT_PAYMENT # Expect payment
               - HOLD # Lighting payment arrived, preimage not released.
               - PAID # Lightning payment arrived, preimage released OR onchain payment arrived.
-              - FAILED 
+              - REFUNDED # Refund sent
             example: EXPECT_PAYMENT
           fee_total_satoshi:
             description: "The total fee the lsp will charge to open this channel in satoshi."
@@ -321,13 +321,13 @@ components:
             description: "A lightning bolt11 invoice to pay the fee for this channel open."
             type: "string"
             example: "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
-          btc_address:
-            description: "An on-chain bitcoin address to pay the fee for this channel open."
+          onchain_address:
+            description: "An onchain bitcoin address to pay the fee for this channel open."
             type: "string"
             nullable: true
             example: 'bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr'
           onchain_payments:
-            description: "A list of payments received to btc_address onchain."
+            description: "A list of payments received to onchain_address."
             nullable: true
             type: "array"
             items:

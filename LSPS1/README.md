@@ -9,10 +9,7 @@
 
 ## Motivation
 
-The goal of this specification is to provide a standardized LSP API to purchase channels. Two client types are supported:
-
-**Wallets** that purchase a channel from the LSP directly.
-
+The goal of this specification is to provide a standardized LSP API for wallets to purchase a channel from the LSP directly.
 
 ## OpenAPI
 
@@ -281,15 +278,12 @@ this address.
 - MUST set open.state to `PENDING`.
 
 
-TODO: Onchain refunds. Ideas: 
-- (Async) User provides a refund_btc_address at the order creation.
+TODO: Onchain refunds. Ideas: User provides a refund_btc_address at the order creation.
 
 
 ### 4 Channel Open
 
-The LSP MUST open the channel under the following conditions
-
-**Async** 
+The LSP MUST open the channel under the following conditions:
 - The open.state switched to `PENDING`
 
 
@@ -297,25 +291,13 @@ The LSP MUST open the channel under the following conditions
 
 **User**
 
-If `user_connection_string_or_pubkey` contains a full connection string:
-- SHOULD open a peer connection before the channel is being opened.
-- SHOULD establish a peer connection with one of the provided node connection strings in `lsp_connection_strings`.
-
-If `user_connection_string_or_pubkey` only contains a pubkey OR the node is not publicly available:
-- MUST open a peer connection before the channel is being opened.
-- MUST establish a peer connection with one of the provided node connection strings in `lsp_connection_strings`.
-
+- MUST open a peer connection with one of the provided node connection strings in `lsp_connection_strings` before the channel is being opened.
 
 **LSP**
 
+- MAY establish a peer connection to `user_connection_string_or_pubkey`.
 
-- MUST establish a peer connection to `user_connection_string_or_pubkey` IF the user provided a full connection string.
-- MUST wait on the user establishing a peer connection IF the user only provided a pubkey.
-- MAY establish a peer connection to `user_connection_string_or_pubkey` IF the user only provided a pubkey and the connection information is available in the Lightning Gossip.
-- MAY try multiple times.
-
-In case the connection attempt failed
-- MUST set open.state to `FAILED` and open.fail_reason to `PEERING_FAILED`.
+// Todo: What happens if the user never opens a connection but paid the invoice. When refund?
 
 #### 4.1 Open attempt
 

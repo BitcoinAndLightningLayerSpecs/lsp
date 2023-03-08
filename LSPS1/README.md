@@ -137,7 +137,10 @@ The user constructs the request body depending on their needs.
     - `onchain_fee_rate` MUST be 1 or higher. MAY be unspecified, the LSP will determine the fee rate. The LSP MAY increase this value depending on the onchain fee environment.
     - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
     - `coupon_code` MUST be a string or null.
-    - `refund_btc_address` MUST be a  or null
+    - `refund_onchain_address` 
+      - MUST be a bech32 version 0 ("SegWit") or bech32m version 1 ("Taproot") address or null.
+      - The server MAY support other address types.
+      - If null the LSP MUST disable onchain payments in the order.
 - `open` MUST be provided.
     - `announce` If the channel should be announced to the network. MUST be boolean.
     - `user_connection_string_or_pubkey` MUST be a node connection string OR a node id (pubkey).

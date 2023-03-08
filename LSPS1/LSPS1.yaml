@@ -247,6 +247,12 @@ components:
             default: ''
             nullable: true
             maxLength: 128
+          refund_onchain_address:
+            type: string
+            description: "Onchain address that a refund is sent to in case the channel open failed."
+            default: null
+            nullable: true
+            example: "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
             
       OrderResponse:
         allOf:

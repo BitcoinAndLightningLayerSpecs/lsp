@@ -245,6 +245,8 @@ components:
             type: string
             description: "Coupon code to get a discount on the purchase."
             default: ''
+            nullable: true
+            maxLength: 128
             
       OrderResponse:
         allOf:

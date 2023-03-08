@@ -34,20 +34,12 @@ All satoshi values MUST be represented as a string and NOT integer values. Make 
 
 ### Actors
 
-`LSP` is the API provider. `User` is the user of the API.
+`LSP` is the API provider. `User` is the user/client of the API.
 
 ### Channel sides
 
 Channel sides are seen from the user point of view. `user_balance` are the funds on the user side. `lsp_balance` are the funds on the LSP side.
 
-### Sync vs Async Channel Open
-
-This spec supports two ways to open a channel:
-
-**Sync** The channel is opened by calling `POST /lsp/channel/{id}/open`. The user node_id is provided with the open call.
-Success/error messages are provided in the call response.
-
-**Async** The channel is opened as soon as the payment is confirmed. Success/error messages are provided with `GET /lsp/channel/{id}`.
 
 ## Flow
 
@@ -61,6 +53,7 @@ The user MUST pull `GET /lsp/channels` to read
 - `options` properties to determine the api boundries.
 
 Example `GET /lsp/channels` response: 
+
 ```JSON
 {
   "version": 2,
@@ -129,16 +122,17 @@ The user constructs the request body depending on their needs.
 - `order` object MUST be provided.
     - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
     - `user_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_user_balance_satoshi`. Todo: Rejection error message.
-    - `onchain_fee_rate` MUST be 1 or higher. The LSP may increase this value depending on the onchain fee environment. MAY be unspecified, the LSP will determine the fee rate. 
+    - `onchain_fee_rate` MUST be 1 or higher. MAY be unspecified, the LSP will determine the fee rate. The LSP MAY increase this value depending on the onchain fee environment.
     - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
-    - `coupon_code` MUST be a string, null, or not defined at all.
-- `open` determines if the channel open is Sync or Async. MUST be provided if Asyc. MUST be null if Sync.
+    - `coupon_code` MUST be a string or null.
+- `open` MUST be provided.
     - `announce` If the channel should be announced to the network. MUST be boolean.
     - `user_connection_string_or_pubkey` MUST be a node connection string or a pubkey.
 
 
+> **Rationale user_balance_satoshi** User MAY want to have initial spending balance on their wallet or start with a balanced channel.
 
-> **Rationale user_balance_satoshi** User may want to have initial spending balance on their wallet or start with a balanced channel.
+> **Rationale coupon_code** User MAY provide a coupon_code to claim a discount on the order. 
 
 
 **Example response body**
@@ -188,7 +182,7 @@ HTTP Code: 201 CREATED
 - MUST validate `onchain_fee_rate` because the server may have increased the value depending on the onchain fee environment. 
 - SHOULD validate the `fee_total_satoshi` is reasonable.
 - SHOULD validate `fee_total_satoshi` + `user_balance_satoshi` = `order_total_satoshi`.
-- MAY abort the flow after.
+- MAY abort the flow here.
 
 **Errors**
 
@@ -289,7 +283,6 @@ this address.
 
 TODO: Onchain refunds. Ideas: 
 - (Async) User provides a refund_btc_address at the order creation.
-- (Sync) User provides a refund_btc_address afterwards.
 
 
 ### 4 Channel Open
@@ -298,10 +291,6 @@ The LSP MUST open the channel under the following conditions
 
 **Async** 
 - The open.state switched to `PENDING`
-
-**Sync**
-- The open.state switched to `PENDING` AND the user calls `POST /lsp/channel/{id}/open`.
-
 
 
 #### 4.1 Establish Peer Connection

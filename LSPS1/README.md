@@ -406,3 +406,4 @@ The user asks for a high onchain_fee_rate end expects a quick channel open. The 
 - How long is the LSP allowed to wait for the channel open (async case)?
 - How to handle 0conf channels? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R147).
 - Can we make the order stateless? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R269) *Severin: Would be cool. Worst case a DDoS can also be prevented with classic rate limiting.
+- JIT channels

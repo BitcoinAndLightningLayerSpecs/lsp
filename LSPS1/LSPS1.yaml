@@ -31,7 +31,7 @@ paths:
           description: |
             ## Extensions
             
-            ### local_balance
+            ### user_balance
             Indicates if the LSP is willing to push satoshi to the receiver side.
             
             ### onchain_payments
@@ -47,8 +47,8 @@ paths:
                   extensions:
                     base_api:
                       version: 1
-                      max_local_balance_satoshi: "0"
-                      max_remote_balance_satoshi: "100000000"
+                      max_user_balance_satoshi: "0"
+                      max_lsp_balance_satoshi: "100000000"
                       min_required_onchain_satoshi: null
                       max_channel_expiry_weeks: 24
   
@@ -183,13 +183,13 @@ components:
                 type: integer
                 example: 1
                 default: 1
-              max_local_balance_satoshi:
+              max_user_balance_satoshi:
                 type: string
                 description: "Maximal number of satoshi that the LSP is willing to push to the user side."
                 example: "100000000"
-              max_remote_balance_satoshi:
+              max_lsp_balance_satoshi:
                 type: string
-                description: "Maximal number of satoshi that the LSP is willing to contribute to the remote balance."
+                description: "Maximal number of satoshi that the LSP is willing to contribute to the lsp balance."
                 example: "100000000"
               min_required_onchain_satoshi:
                 type: string
@@ -221,12 +221,12 @@ components:
           - remote_balance
           - channel_expiry_weeks
         properties:
-          remote_balance_satoshi:
+          lsp_balance_satoshi:
             type: string
             description: "Inbound liquidity amount in satoshis. Funds are at the LSP side."
             example: "5000000"
             minimum: 0
-          local_balance_satoshi:
+          user_balance_satoshi:
             type: string
             description: "Outbound liquidity amount in satoshis. Funds are at the user side."
             default: 0
@@ -245,6 +245,14 @@ components:
             type: string
             description: "Coupon code to get a discount on the purchase."
             default: ''
+            nullable: true
+            maxLength: 128
+          refund_onchain_address:
+            type: string
+            description: "Onchain address that a refund is sent to in case the channel open failed."
+            default: null
+            nullable: true
+            example: "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
             
       OrderResponse:
         allOf:
@@ -266,7 +274,7 @@ components:
           - $ref: "#/components/schemas/OrderParameters"
           - type: "object"
             properties:
-              lsp_node_connection_strings:
+              lsp_connection_strings:
                 type: array
                 description: "A list of connection strings of the LSP for the channel open."
                 example:
@@ -299,27 +307,27 @@ components:
               - EXPECT_PAYMENT # Expect payment
               - HOLD # Lighting payment arrived, preimage not released.
               - PAID # Lightning payment arrived, preimage released OR onchain payment arrived.
-              - FAILED 
+              - REFUNDED # Refund sent
             example: EXPECT_PAYMENT
           fee_total_satoshi:
             description: "The total fee the lsp will charge to open this channel in satoshi."
             type: string
             example: "8888"
           order_total_satoshi:
-            description: "fee_total plus the local_balance requested in satoshi."
+            description: "fee_total plus the user_balance requested in satoshi."
             type: string
             example: "2008888"
           lightning_invoice:
             description: "A lightning bolt11 invoice to pay the fee for this channel open."
             type: "string"
             example: "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
-          btc_address:
-            description: "An on-chain bitcoin address to pay the fee for this channel open."
+          onchain_address:
+            description: "An onchain bitcoin address to pay the fee for this channel open."
             type: "string"
             nullable: true
             example: 'bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr'
           onchain_payments:
-            description: "A list of payments received to btc_address onchain."
+            description: "A list of payments received to onchain_address."
             nullable: true
             type: "array"
             items:
@@ -389,13 +397,13 @@ components:
         type: "object"
         required:
           - announce
-          - node_connection_string_or_pubkey
+          - user_connection_string_or_pubkey
         properties:
           announce:
             type: boolean
             description: "If the channel should be announced to the network. Also known as private/public channels."
             example: true
-          node_connection_string_or_pubkey:
+          user_connection_string_or_pubkey:
             type: string
             description: "Node connection string or pubkey to open the channel to."
             example: "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735"
@@ -459,7 +467,7 @@ components:
               - PAYMENT_REQUIRED
               - ALREADY_OPEN
             example: null
-          lsp_node_connection_string:
+          lsp_connection_string:
             type: string
             nullable: true
             description: "Node connection string that tried to connect."
@@ -470,7 +478,7 @@ components:
           message:
             type: string
             description: "Human readable message that describe the error"
-            example: "Property remote_balance must be above or equal 1."
+            example: "Property lsp_balance must be above or equal 1."
           code:
             type: string
             description: "Error code"

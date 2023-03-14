@@ -36,6 +36,8 @@ Describes the basics of how clients and LSPs communicate to each other.
 ### **LSPS1** [Channel Request](LSPS1/README.md)
 A channel purchase API to buy channels from an LSP.
 
+### **LSPS2** [JIT Channels](LSPS2/README.md)
+Describes how a client can buy channels from an LSP, by paying via a deduction from their incoming payments, creating a channel just-in-time to receive the incoming payment.
 
 ## Services
 List of Lightning Service Providers in alphabetic order that currently or will support LSP specs in future.

@@ -86,7 +86,7 @@ Example `GET /lsp/channels` response:
       "max_user_balance_satoshi": "0",
       "max_lsp_balance_satoshi": "100000000",
       "min_required_onchain_satoshi": null,
-      "max_channel_expiry_weeks": 24
+      "max_channel_expiry_blocks": 20160
     }
   }
 }
@@ -103,7 +103,7 @@ The base api itself has multiple properties that MUST be defined.
         "max_user_balance_satoshi": "0",
         "max_lsp_balance_satoshi": "100000000",
         "min_required_onchain_satoshi": null,
-        "max_channel_expiry_weeks": 24
+        "max_channel_expiry_blocks": 20160
     }
 }
 ```
@@ -112,7 +112,7 @@ The base api itself has multiple properties that MUST be defined.
 - `max_user_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
 - `max_lsp_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the their balance.  MUST be 1 or greater.
 - `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
-- `max_channel_expiry_weeks` MUST be the maximum length in weeks a channel can be leased for. MUST be 1 or greater.
+- `max_channel_expiry_blocks` MUST be the maximum length in blocks a channel can be leased for. MUST be 1 or greater.
 
 The user MAY abort the flow here.
 
@@ -131,7 +131,7 @@ The user constructs the request body depending on their needs.
     "lsp_balance_satoshi": "5000000",
     "user_balance_satoshi": "2000000",
     "onchain_fee_rate": 1,
-    "channel_expiry_weeks": 12,
+    "channel_expiry_blocks": 144,
     "coupon_code": "",
     "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
   },
@@ -146,7 +146,7 @@ The user constructs the request body depending on their needs.
     - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
     - `user_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_user_balance_satoshi`. Todo: Rejection error message.
     - `onchain_fee_rate` MUST be 1 or higher. MAY be unspecified, the LSP will determine the fee rate. The LSP MAY increase this value depending on the onchain fee environment.
-    - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
+    - `channel_expiry_blocks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_blocks`.
     - `coupon_code` MUST be a string or null.
     - `refund_onchain_address` 
       - MUST be an onchain address or null.
@@ -172,7 +172,7 @@ HTTP Code: 201 CREATED
   "lsp_balance_satoshi": "5000000",
   "user_balance_satoshi": "2000000",
   "onchain_fee_rate": 1,
-  "channel_expiry_weeks": 12,
+  "channel_expiry_blocks": 12,
   "coupon_code": "",
   "lsp_connection_strings": [
     "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735",
@@ -384,7 +384,7 @@ Todo: Describe channel object. Might be simplified or simply unnecessary.
     - `opened_at` MUST be a datetime when the opening transaction has been published.
     - `open_transaction` MUST be the id the opening transaction.
     - `scid` MUST be the short channel id. MUST be null before the channel is confirmed onchain.
-    - `expires_at` MUST be a datetime when the channel may be closed by the LSP. MUST respect `channel_expiry_weeks`. MAY overprovision.
+    - `expires_at` MUST be a datetime when the channel may be closed by the LSP. MUST respect `channel_expiry_blocks`. MAY overprovision.
     - `closing_transaction` MUST be the id of the closing transaction.
     - `closed_at` MUST be a datetime when the closing transaction has been published.
     - `user_pubkey` MUST be the node id of the user node.

@@ -50,7 +50,7 @@ paths:
                       max_user_balance_satoshi: "0"
                       max_lsp_balance_satoshi: "100000000"
                       min_required_onchain_satoshi: null
-                      max_channel_expiry_weeks: 24
+                      max_channel_expiry_blocks: 144
   
     post:
       tags:
@@ -196,9 +196,9 @@ components:
                 description: "Minimal number of satoshi required to allow onchain payments. Null for unsupported."
                 example: "9999"
                 nullable: true
-              max_channel_expiry_weeks:
+              max_channel_expiry_blocks:
                 type: integer
-                description: "Maximal number of weeks a channel can be leased for."
+                description: "Maximal number of blocks a channel can be leased for."
                 example: 24
 
       ExtensionOptions: # Schema of all allowed options.
@@ -219,7 +219,7 @@ components:
         type: "object"
         required:
           - remote_balance
-          - channel_expiry_weeks
+          - channel_expiry_blocks
         properties:
           lsp_balance_satoshi:
             type: string
@@ -236,9 +236,9 @@ components:
             type: number
             description: "On-chain fee rate of the channel opening transaction in satoshis per vbyte."
             minimum: 1
-          channel_expiry_weeks:
+          channel_expiry_blocks:
             type: integer
-            description: "Channel expiration in weeks."
+            description: "Channel expiration in blocks."
             minimum: 1
             example: 12
           coupon_code:

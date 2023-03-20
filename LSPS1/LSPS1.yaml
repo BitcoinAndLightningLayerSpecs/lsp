@@ -45,6 +45,8 @@ paths:
                   versions: [2]
                   website: "http://example.com/contact"
                   options:
+                    minimum_depth: 0
+                    supports_zero_channel_reserve: true
                     max_user_balance_satoshi: "0"
                     max_lsp_balance_satoshi: "100000000"
                     min_required_onchain_satoshi: null
@@ -169,6 +171,15 @@ components:
       ApiOptions: # Options for the base api.
         type: object
         properties:
+          minimum_depth:
+            type: integer
+            example: 0
+            description: The number of blocks it requires for the LSP to send `channel_ready` (previously `funding_locked`).
+            minimum: 0
+          supports_zero_channel_reserve:
+            type: boolean
+            example: true
+            description: Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
           max_user_balance_satoshi:
             type: string
             description: "Maximal number of satoshi that the LSP is willing to push to the user side."

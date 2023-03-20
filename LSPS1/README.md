@@ -81,6 +81,8 @@ Example `GET /lsp/channels` response:
   "versions": [2],
   "website": "http://example.com/contact",
   "options": {
+      "minimum_depth": 0,
+      "supports_zero_channel_reserve": true,
       "max_user_balance_satoshi": "0",
       "max_lsp_balance_satoshi": "100000000",
       "min_required_onchain_satoshi": null,
@@ -95,6 +97,8 @@ The api itself has multiple properties that MUST be defined.
 
 ```json
 "options": {
+        "minimum_depth": 0,
+        "supports_zero_channel_reserve": true,
         "max_user_balance_satoshi": "0",
         "max_lsp_balance_satoshi": "100000000",
         "min_required_onchain_satoshi": null,
@@ -102,7 +106,9 @@ The api itself has multiple properties that MUST be defined.
 }
 ```
 
-- `versions` MUST be `[2]`.
+- `minimum_depth` MUST set to the number of blocks it requires for the LSP to send `channel_ready` (previously `funding_locked`).
+  - MAY be 0 to allow 0conf channels.
+- `supports_zero_channel_reserve` SHOULD set to true if the lsp supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
 - `max_user_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
 - `max_lsp_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the their balance.  MUST be 1 or greater.
 - `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
@@ -307,7 +313,7 @@ Example payment object:
       - The number of satoshi to refund 
         - MUST be `order_total_satoshi` MINUS transaction size * onchain_fee_rate. The LSP MUST choose a reasonable fee rate.
         - MAY overprovision.
-      - The LSP MUST bump the fees in case the transaction doesn't resolve within 12hrs.
+      - The LSP MUST bump the fees in case the transaction doesn't resolve within 6hrs.
     - MUST set the payment state to `REFUNDED`.
 
 
@@ -339,8 +345,10 @@ The LSP MUST open the channel under the following conditions:
         - MAY overprovision.
     - MUST push `user_balance_satoshi` to the user.
         - MAY overprovision.
-    - MUST use a high enough onchain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the user payment confirmed.
+    - MUST use a high enough onchain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the user paid the order and established a peer connection.
         - MAY overprovision.
+- MUST send `channel_ready` after the funding transaction has `minimum_depth` confirmations.
+- MUST allow zero channel reserves if `supports_zero_channel_reserve`.
 
 In case the channel open succeeded
 - MUST set open.state to `SUCCESS` and open.fail_reason to `null`.
@@ -378,10 +386,3 @@ Todo: Describe channel object. Might be simplified or simply unnecessary.
     - `lsp_pubkey` MUST be the node id if the lsp node.
 
     
-
-
-
-
-### Open Questions
-
-- How to handle 0conf channels? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R147).

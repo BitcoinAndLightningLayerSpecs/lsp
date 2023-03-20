@@ -113,7 +113,7 @@ The base api itself has multiple properties that MUST be defined.
 
 The user MAY abort the flow here.
 
-### 2. Create Order
+### 1. Create Order
 
 The user constructs the request body depending on their needs. 
 
@@ -212,14 +212,13 @@ HTTP Code: 201 CREATED
 - SHOULD validate `fee_total_satoshi` + `user_balance_satoshi` = `order_total_satoshi`.
 - MAY abort the flow here.
 
-
 **Errors**
 
 - 400 Bad request - Request body validation error.
 
 Todo: Define error type better. [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R346)
 
-### 3. Payment
+### 2. Payment
 
 This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
 
@@ -273,7 +272,7 @@ Example payment object:
     - `confirmed` MUST contain a boolean if the LSP sees the transaction as confirmed.
 
 
-#### 3.1 Lightning Payment Flow
+#### 2.1 Lightning Payment Flow
 
 **User**
 
@@ -294,7 +293,7 @@ Example payment object:
 
 
 
-#### 3.2 Onchain Payment Flow
+#### 2.2 Onchain Payment Flow
 
 **User**
 
@@ -321,13 +320,13 @@ Example payment object:
 removes any confusion on how much the LPS needs to refund.
 
 
-### 4 Channel Open
+### 3 Channel Open
 
 The LSP MUST open the channel under the following conditions:
 - The open.state switched to `PENDING`
 
 
-#### 4.1 Establish Peer Connection
+#### 3.1 Establish Peer Connection
 
 **User**
 
@@ -338,7 +337,7 @@ The LSP MUST open the channel under the following conditions:
 - MAY establish a peer connection to `user_connection_string_or_pubkey`.
 
 
-#### 4.1 Open attempt
+#### 3.2 Open attempt
 
 **LSP**
 - MUST wait for a peer connection before attempting a channel open.

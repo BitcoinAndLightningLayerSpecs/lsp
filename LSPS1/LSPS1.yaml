@@ -218,10 +218,10 @@ components:
             default: 0
             example: "2000000"
             minimum: 0
-          onchain_fee_rate:
+          confirms_within_blocks:
             type: number
-            description: "On-chain fee rate of the channel opening transaction in satoshis per vbyte."
-            minimum: 1
+            description: "Within how many blocks MUST the funding transaction be confirmed after the user paid the order."
+            minimum: 0
           channel_expiry_blocks:
             type: integer
             description: "Channel expiration in blocks."

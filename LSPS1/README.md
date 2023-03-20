@@ -81,23 +81,20 @@ Example `GET /lsp/channels` response:
   "versions": [2],
   "website": "http://example.com/contact",
   "options": {
-    "base_api": {
       "max_user_balance_satoshi": "0",
       "max_lsp_balance_satoshi": "100000000",
       "min_required_onchain_satoshi": null,
       "max_channel_expiry_blocks": 20160
-    }
   }
 }
 ```
 
-#### Base api options
+#### Api options
 
-The base api itself has multiple properties that MUST be defined.
+The api itself has multiple properties that MUST be defined.
 
 ```json
 "options": {
-        "versions": [2],
         "max_user_balance_satoshi": "0",
         "max_lsp_balance_satoshi": "100000000",
         "min_required_onchain_satoshi": null,
@@ -144,7 +141,7 @@ The user constructs the request body depending on their needs.
 - `order` object MUST be provided.
     - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
     - `user_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_user_balance_satoshi`. Todo: Rejection error message.
-    - `confirms_within_blocks` MUST be 1 or higher.
+    - `confirms_within_blocks` MUST be 0 or higher.
     - `channel_expiry_blocks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_blocks`.
     - `coupon_code` MUST be a string or null.
     - `refund_onchain_address` 

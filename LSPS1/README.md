@@ -67,22 +67,21 @@ The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as lo
 
 ### API information
 
-`GET /lsp/channels` is the entrypoint for each client using the api. It lists the version of the api and all supported extensions in a dictionary.
+`GET /lsp/channels` is the entrypoint for each client using the api. It lists the versions of the api and all options in a dictionary.
 
 The user MUST pull `GET /lsp/channels` to read
 
-- the `version` of the api AND version of `options` and therefore prove compatibility.
+- the `versions` of the api and therefore prove compatibility.
 - `options` properties to determine the api boundries.
 
 Example `GET /lsp/channels` response: 
 
 ```JSON
 {
-  "version": 2,
+  "versions": [2],
   "website": "http://example.com/contact",
   "options": {
     "base_api": {
-      "version": 1,
       "max_user_balance_satoshi": "0",
       "max_lsp_balance_satoshi": "100000000",
       "min_required_onchain_satoshi": null,
@@ -98,17 +97,15 @@ The base api itself has multiple properties that MUST be defined.
 
 ```json
 "options": {
-    "base_api": {
-        "version": 1,
+        "versions": [2],
         "max_user_balance_satoshi": "0",
         "max_lsp_balance_satoshi": "100000000",
         "min_required_onchain_satoshi": null,
         "max_channel_expiry_blocks": 20160
-    }
 }
 ```
 
-- `version` MUST be 1.
+- `versions` MUST be `[2]`.
 - `max_user_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
 - `max_lsp_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the their balance.  MUST be 1 or greater.
 - `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
@@ -127,6 +124,7 @@ The user constructs the request body depending on their needs.
 
 ```json
 {
+  "api_version": 2,
   "order": {
     "lsp_balance_satoshi": "5000000",
     "user_balance_satoshi": "2000000",
@@ -142,6 +140,7 @@ The user constructs the request body depending on their needs.
 }
 ```
 
+- `api_version` MUST be `2`. MUST match one of the versions listed by the API.
 - `order` object MUST be provided.
     - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
     - `user_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_user_balance_satoshi`. Todo: Rejection error message.

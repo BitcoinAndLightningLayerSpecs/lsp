@@ -42,15 +42,13 @@ paths:
                 schema:
                     $ref: "#/components/schemas/ApiInfoResponse"
                 example:
-                  version: 2
+                  versions: [2]
                   website: "http://example.com/contact"
-                  extensions:
-                    base_api:
-                      version: 1
-                      max_user_balance_satoshi: "0"
-                      max_lsp_balance_satoshi: "100000000"
-                      min_required_onchain_satoshi: null
-                      max_channel_expiry_blocks: 144
+                  options:
+                    max_user_balance_satoshi: "0"
+                    max_lsp_balance_satoshi: "100000000"
+                    min_required_onchain_satoshi: null
+                    max_channel_expiry_blocks: 144
   
     post:
       tags:
@@ -149,67 +147,55 @@ paths:
 
 components:
     schemas:
+
       ApiInfoResponse:
         type: "object"
         properties:
-          version:
-            type: integer
-            description: "Version of this api. See https://github.com/BitcoinAndLightningLayerSpecs/lsp"
-            example: 1
+          versions:
+            type: array
+            items:
+              type: integer
+            description: "Supported versions of this api. See https://github.com/BitcoinAndLightningLayerSpecs/lsp"
+            example: [2]
           options:
             type: object
             additionalProperties:
-              $ref: "#/components/schemas/ExtensionOptions"
+              $ref: "#/components/schemas/ApiOptions"
           website:
             type: string
             description: "Website that provides devs a way to get in contact and/or TOS."
             example: "https://blocktank.to/contact"
-      
-      AbstractExtensionOptions: # All extensions derive from this schema.
+
+      ApiOptions: # Options for the base api.
         type: object
         properties:
-          version:
+          max_user_balance_satoshi:
+            type: string
+            description: "Maximal number of satoshi that the LSP is willing to push to the user side."
+            example: "100000000"
+          max_lsp_balance_satoshi:
+            type: string
+            description: "Maximal number of satoshi that the LSP is willing to contribute to the lsp balance."
+            example: "100000000"
+          min_required_onchain_satoshi:
+            type: string
+            description: "Minimal number of satoshi required to allow onchain payments. Null for unsupported."
+            example: "9999"
+            nullable: true
+          max_channel_expiry_blocks:
             type: integer
-            example: 1
-            default: 1
-            description: Version of this extension. Integer starting at 1 counting up.
-
-      BaseApiOptionsV1: # Options for the base api.
-        allOf:
-          - $ref: "#/components/schemas/AbstractExtensionOptions" # Extends BaseExtension
-          - type: object
-            properties:
-              version:
-                type: integer
-                example: 1
-                default: 1
-              max_user_balance_satoshi:
-                type: string
-                description: "Maximal number of satoshi that the LSP is willing to push to the user side."
-                example: "100000000"
-              max_lsp_balance_satoshi:
-                type: string
-                description: "Maximal number of satoshi that the LSP is willing to contribute to the lsp balance."
-                example: "100000000"
-              min_required_onchain_satoshi:
-                type: string
-                description: "Minimal number of satoshi required to allow onchain payments. Null for unsupported."
-                example: "9999"
-                nullable: true
-              max_channel_expiry_blocks:
-                type: integer
-                description: "Maximal number of blocks a channel can be leased for."
-                example: 24
-
-      ExtensionOptions: # Schema of all allowed options.
-        oneOf: # One of these types need to match
-          - $ref: "#/components/schemas/BaseApiOptionsV1"
+            description: "Maximal number of blocks a channel can be leased for."
+            example: 24
     
       OrderRequest:
         type: object
         required:
           - details
         properties:
+          api_version:
+            type: integer
+            example: 2
+            description: "API version that is used in this request."
           order:
             $ref: "#/components/schemas/OrderParameters"
           open:

@@ -128,7 +128,7 @@ The user constructs the request body depending on their needs.
   "order": {
     "lsp_balance_satoshi": "5000000",
     "user_balance_satoshi": "2000000",
-    "onchain_fee_rate": 1,
+    "confirms_within_blocks": 1,
     "channel_expiry_blocks": 144,
     "coupon_code": "",
     "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
@@ -144,7 +144,7 @@ The user constructs the request body depending on their needs.
 - `order` object MUST be provided.
     - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
     - `user_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_user_balance_satoshi`. Todo: Rejection error message.
-    - `onchain_fee_rate` MUST be 1 or higher. MAY be unspecified, the LSP will determine the fee rate. The LSP MAY increase this value depending on the onchain fee environment.
+    - `confirms_within_blocks` MUST be 1 or higher.
     - `channel_expiry_blocks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_blocks`.
     - `coupon_code` MUST be a string or null.
     - `refund_onchain_address` 
@@ -170,7 +170,7 @@ HTTP Code: 201 CREATED
   "state": "AWAITING_PAYMENT",
   "lsp_balance_satoshi": "5000000",
   "user_balance_satoshi": "2000000",
-  "onchain_fee_rate": 1,
+  "confirms_within_blocks": 1,
   "channel_expiry_blocks": 12,
   "coupon_code": "",
   "lsp_connection_strings": [
@@ -207,7 +207,6 @@ HTTP Code: 201 CREATED
 - SHOULD order the `lsp_connection_strings` on the desirability of a user connecting to it with the top element being the most desirable.
 
 **User**
-- MUST validate `onchain_fee_rate` because the server may have increased the value depending on the onchain fee environment. 
 - SHOULD validate the `fee_total_satoshi` is reasonable.
 - SHOULD validate `fee_total_satoshi` + `user_balance_satoshi` = `order_total_satoshi`.
 - MAY abort the flow here.
@@ -309,15 +308,11 @@ Example payment object:
 - If the order expired and the channel has NOT been opened, OR the channel open failed.
     - MUST refund the user to `refund_onchain_address`.
       - The number of satoshi to refund 
-        - MUST be `order_total_satoshi` MINUS transaction size * `onchain_fee_rate` (previously defined in the order).
-        - MUST be the same even in case of a fee bump of the LSP.
-        - MAY be overprovisioned.
-      - The LSP MUST bump the fees in case the transaction doesn't resolve within 24hrs.
+        - MUST be `order_total_satoshi` MINUS transaction size * onchain_fee_rate. The LSP MUST choose a reasonable fee rate.
+        - MAY overprovision.
+      - The LSP MUST bump the fees in case the transaction doesn't resolve within 12hrs.
     - MUST set the payment state to `REFUNDED`.
 
-
-> **Rationale refund satoshi** Using the previously negotiated and defined `onchain_fee_rate` to calculate how much satoshi should be refunded,
-removes any confusion on how much the LPS needs to refund.
 
 
 ### 3 Channel Open
@@ -347,7 +342,7 @@ The LSP MUST open the channel under the following conditions:
         - MAY overprovision.
     - MUST push `user_balance_satoshi` to the user.
         - MAY overprovision.
-    - MUST use `onchain_fee_rate`.
+    - MUST use a high enough onchain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the user payment confirmed.
         - MAY overprovision.
 
 In case the channel open succeeded
@@ -363,11 +358,8 @@ In case the channel open failed
 **LSP**
 
 - MAY open channels in batches, opening multiple channels in one transaction.
-  - In that case, it would use the largest requested `on_chain_fee_rate` for the batched transaction.
-- MAY implement RBF for channel opening.
-  - In that case, the client will see multiple parallel channel open requests, each one being a different version of the channel opening transaction.
+  - In this case, the LSP MUST still ensure that the funding transaction gets confirmed after a maximum of `confirms_within_blocks` after the user payment completed.
 
-// Todo: How does RBF work with 0conf?
 
 ### 5 Channel Object
 
@@ -395,13 +387,4 @@ Todo: Describe channel object. Might be simplified or simply unnecessary.
 
 ### Open Questions
 
-- How does batching work in this case? 
-The user asks for a high onchain_fee_rate end expects a quick channel open. The lsp requires at least 3 block confirmations. The lsp batches the open and and therefore publishes the funding transaction only 2hrs after? The user kind of made a bad deal here.
-
-- How does 0conf with RBF work?
-  - Proactive option similar to `minimum_depth`?
-
-- How long is the LSP allowed to wait for the channel open (async case)?
 - How to handle 0conf channels? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R147).
-- Can we make the order stateless? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R269) *Severin: Would be cool. Worst case a DDoS can also be prevented with classic rate limiting.
-- JIT channels

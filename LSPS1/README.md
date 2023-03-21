@@ -67,56 +67,56 @@ The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as lo
 
 ### API information
 
-`GET /lsp/channels` is the entrypoint for each client using the api. It lists the version of the api and all supported extensions in a dictionary.
+`GET /lsp/channels` is the entrypoint for each client using the api. It lists the versions of the api and all options in a dictionary.
 
 The user MUST pull `GET /lsp/channels` to read
 
-- the `version` of the api AND version of `options` and therefore prove compatibility.
+- the `versions` of the api and therefore prove compatibility.
 - `options` properties to determine the api boundries.
 
 Example `GET /lsp/channels` response: 
 
 ```JSON
 {
-  "version": 2,
+  "versions": [2],
   "website": "http://example.com/contact",
   "options": {
-    "base_api": {
-      "version": 1,
+      "minimum_depth": 0,
+      "supports_zero_channel_reserve": true,
       "max_user_balance_satoshi": "0",
       "max_lsp_balance_satoshi": "100000000",
       "min_required_onchain_satoshi": null,
-      "max_channel_expiry_weeks": 24
-    }
+      "max_channel_expiry_blocks": 20160
   }
 }
 ```
 
-#### Base api options
+#### Api options
 
-The base api itself has multiple properties that MUST be defined.
+The api itself has multiple properties that MUST be defined.
 
 ```json
 "options": {
-    "base_api": {
-        "version": 1,
+        "minimum_depth": 0,
+        "supports_zero_channel_reserve": true,
         "max_user_balance_satoshi": "0",
         "max_lsp_balance_satoshi": "100000000",
         "min_required_onchain_satoshi": null,
-        "max_channel_expiry_weeks": 24
-    }
+        "max_channel_expiry_blocks": 20160
 }
 ```
 
-- `version` MUST be 1.
+- `minimum_depth` MUST set to the number of blocks it requires for the LSP to send `channel_ready` (previously `funding_locked`).
+  - MAY be 0 to allow 0conf channels.
+- `supports_zero_channel_reserve` SHOULD set to true if the lsp supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
 - `max_user_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
 - `max_lsp_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the their balance.  MUST be 1 or greater.
 - `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
-- `max_channel_expiry_weeks` MUST be the maximum length in weeks a channel can be leased for. MUST be 1 or greater.
+- `max_channel_expiry_blocks` MUST be the maximum length in blocks a channel can be leased for. MUST be 1 or greater.
 
 The user MAY abort the flow here.
 
-### 2. Create Order
+### 1. Create Order
 
 The user constructs the request body depending on their needs. 
 
@@ -127,11 +127,12 @@ The user constructs the request body depending on their needs.
 
 ```json
 {
+  "api_version": 2,
   "order": {
     "lsp_balance_satoshi": "5000000",
     "user_balance_satoshi": "2000000",
-    "onchain_fee_rate": 1,
-    "channel_expiry_weeks": 12,
+    "confirms_within_blocks": 1,
+    "channel_expiry_blocks": 144,
     "coupon_code": "",
     "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
   },
@@ -142,11 +143,12 @@ The user constructs the request body depending on their needs.
 }
 ```
 
+- `api_version` MUST be `2`. MUST match one of the versions listed by the API.
 - `order` object MUST be provided.
     - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
     - `user_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_user_balance_satoshi`. Todo: Rejection error message.
-    - `onchain_fee_rate` MUST be 1 or higher. MAY be unspecified, the LSP will determine the fee rate. The LSP MAY increase this value depending on the onchain fee environment.
-    - `channel_expiry_weeks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_weeks`.
+    - `confirms_within_blocks` MUST be 0 or higher.
+    - `channel_expiry_blocks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_blocks`.
     - `coupon_code` MUST be a string or null.
     - `refund_onchain_address` 
       - MUST be an onchain address or null.
@@ -171,8 +173,8 @@ HTTP Code: 201 CREATED
   "state": "AWAITING_PAYMENT",
   "lsp_balance_satoshi": "5000000",
   "user_balance_satoshi": "2000000",
-  "onchain_fee_rate": 1,
-  "channel_expiry_weeks": 12,
+  "confirms_within_blocks": 1,
+  "channel_expiry_blocks": 12,
   "coupon_code": "",
   "lsp_connection_strings": [
     "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735",
@@ -208,11 +210,9 @@ HTTP Code: 201 CREATED
 - SHOULD order the `lsp_connection_strings` on the desirability of a user connecting to it with the top element being the most desirable.
 
 **User**
-- MUST validate `onchain_fee_rate` because the server may have increased the value depending on the onchain fee environment. 
 - SHOULD validate the `fee_total_satoshi` is reasonable.
 - SHOULD validate `fee_total_satoshi` + `user_balance_satoshi` = `order_total_satoshi`.
 - MAY abort the flow here.
-
 
 **Errors**
 
@@ -220,7 +220,7 @@ HTTP Code: 201 CREATED
 
 Todo: Define error type better. [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R346)
 
-### 3. Payment
+### 2. Payment
 
 This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
 
@@ -274,7 +274,7 @@ Example payment object:
     - `confirmed` MUST contain a boolean if the LSP sees the transaction as confirmed.
 
 
-#### 3.1 Lightning Payment Flow
+#### 2.1 Lightning Payment Flow
 
 **User**
 
@@ -295,7 +295,7 @@ Example payment object:
 
 
 
-#### 3.2 Onchain Payment Flow
+#### 2.2 Onchain Payment Flow
 
 **User**
 
@@ -311,24 +311,20 @@ Example payment object:
 - If the order expired and the channel has NOT been opened, OR the channel open failed.
     - MUST refund the user to `refund_onchain_address`.
       - The number of satoshi to refund 
-        - MUST be `order_total_satoshi` MINUS transaction size * `onchain_fee_rate` (previously defined in the order).
-        - MUST be the same even in case of a fee bump of the LSP.
-        - MAY be overprovisioned.
-      - The LSP MUST bump the fees in case the transaction doesn't resolve within 24hrs.
+        - MUST be `order_total_satoshi` MINUS transaction size * onchain_fee_rate. The LSP MUST choose a reasonable fee rate.
+        - MAY overprovision.
+      - The LSP MUST bump the fees in case the transaction doesn't resolve within 6hrs.
     - MUST set the payment state to `REFUNDED`.
 
 
-> **Rationale refund satoshi** Using the previously negotiated and defined `onchain_fee_rate` to calculate how much satoshi should be refunded,
-removes any confusion on how much the LPS needs to refund.
 
-
-### 4 Channel Open
+### 3 Channel Open
 
 The LSP MUST open the channel under the following conditions:
 - The open.state switched to `PENDING`
 
 
-#### 4.1 Establish Peer Connection
+#### 3.1 Establish Peer Connection
 
 **User**
 
@@ -339,7 +335,7 @@ The LSP MUST open the channel under the following conditions:
 - MAY establish a peer connection to `user_connection_string_or_pubkey`.
 
 
-#### 4.1 Open attempt
+#### 3.2 Open attempt
 
 **LSP**
 - MUST wait for a peer connection before attempting a channel open.
@@ -349,8 +345,10 @@ The LSP MUST open the channel under the following conditions:
         - MAY overprovision.
     - MUST push `user_balance_satoshi` to the user.
         - MAY overprovision.
-    - MUST use `onchain_fee_rate`.
+    - MUST use a high enough onchain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the user paid the order and established a peer connection.
         - MAY overprovision.
+- MUST send `channel_ready` after the funding transaction has `minimum_depth` confirmations.
+- MUST allow zero channel reserves if `supports_zero_channel_reserve`.
 
 In case the channel open succeeded
 - MUST set open.state to `SUCCESS` and open.fail_reason to `null`.
@@ -365,11 +363,8 @@ In case the channel open failed
 **LSP**
 
 - MAY open channels in batches, opening multiple channels in one transaction.
-  - In that case, it would use the largest requested `on_chain_fee_rate` for the batched transaction.
-- MAY implement RBF for channel opening.
-  - In that case, the client will see multiple parallel channel open requests, each one being a different version of the channel opening transaction.
+  - In this case, the LSP MUST still ensure that the funding transaction gets confirmed after a maximum of `confirms_within_blocks` after the user payment completed.
 
-// Todo: How does RBF work with 0conf?
 
 ### 5 Channel Object
 
@@ -384,26 +379,14 @@ Todo: Describe channel object. Might be simplified or simply unnecessary.
     - `opened_at` MUST be a datetime when the opening transaction has been published.
     - `open_transaction` MUST be the id the opening transaction.
     - `scid` MUST be the short channel id. MUST be null before the channel is confirmed onchain.
-    - `expires_at` MUST be a datetime when the channel may be closed by the LSP. MUST respect `channel_expiry_weeks`. MAY overprovision.
+    - `expires_at` MUST be a datetime when the channel may be closed by the LSP. MUST respect `channel_expiry_blocks`. MAY overprovision.
     - `closing_transaction` MUST be the id of the closing transaction.
     - `closed_at` MUST be a datetime when the closing transaction has been published.
     - `user_pubkey` MUST be the node id of the user node.
     - `lsp_pubkey` MUST be the node id if the lsp node.
 
     
+# Open Questions
 
-
-
-
-### Open Questions
-
-- How does batching work in this case? 
-The user asks for a high onchain_fee_rate end expects a quick channel open. The lsp requires at least 3 block confirmations. The lsp batches the open and and therefore publishes the funding transaction only 2hrs after? The user kind of made a bad deal here.
-
-- How does 0conf with RBF work?
-  - Proactive option similar to `minimum_depth`?
-
-- How long is the LSP allowed to wait for the channel open (async case)?
-- How to handle 0conf channels? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R147).
-- Can we make the order stateless? [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R269) *Severin: Would be cool. Worst case a DDoS can also be prevented with classic rate limiting.
-- JIT channels
+- Do we allow 0conf for high lsp_balance_satoshi? Do we need something like `max_lsp_balance_satoshi` depending on the `minimum_depth`?
+- Error handling

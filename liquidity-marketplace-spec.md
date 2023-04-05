@@ -1,5 +1,6 @@
 # Liquidity marketplace spec
 
+# !!! OBSOLETE - will be reviewd after other proposals are finished !!!
 
 ## Version: 0.0.1
 

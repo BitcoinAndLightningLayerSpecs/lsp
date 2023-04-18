@@ -256,7 +256,7 @@ Example payment object:
 - `fee_total_satoshi` MUST be the total fee the LSP will charge to open this channel in satoshi.
 - `order_total_satoshi` MUST be the fee_total_satoshi plus the user_balance_satoshi requested in satoshi.
 - `ln_invoice` 
-    - MUST be a Lightning Bolt 11 for order_total_satoshi. 
+    - MUST be a Lightning BOLT 11 invoice for an amount of `order_total_satoshi`. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
     - The `ln_invoice` MUST give the same amount as in `order_total_satoshi`.
 - `onchain_address` 

@@ -220,7 +220,6 @@ HTTP Code: 201 CREATED
 
 - 400 Bad request - Request body validation error.
 
-Todo: Define error type better. [Zmn proposal](https://github.com/BitcoinAndLightningLayerSpecs/lsp/pull/21/files#diff-603325abb5c270c90ec7c4c60eec7cb1aae620a8155519c65f974ba33ee63c54R346)
 
 ### 2. Payment
 

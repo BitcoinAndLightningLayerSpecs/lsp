@@ -46,8 +46,10 @@ Word definition:
 
 ### Onchain addresses
 
-- All onchain addresses MUST be a bech32 version 0 ("SegWit") or bech32m version 1 ("Taproot") address or null.
+- All onchain addresses MUST be a [bech32](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) version 0 ("SegWit") or [bech32m](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki) version 1 ("Taproot") address or null.
 - The lsp/user MAY support other address types.
+
+> **Rationale** Onchain addresses MUST be null in case onchain payments are unsupported. This MUST be clearly indicated though. See options dictionary.
 
 ### Actors
 

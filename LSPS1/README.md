@@ -39,9 +39,9 @@ Node connection strings like `lsp_connection_string` MUST match one of the follo
 
 Word definition:
 
-* `<node>` MUST be a node id (pubkey). For example: "0200000000a3eff613189ca6c4070c89206ad658e286751eca1f29262948247a5f".
-* `<ip>` MUST be a IPv4 OR IPv6 address.
-* `<tor_onion_v3_address>` MUST be a tor onion v3 address.
+* `<node>` MUST be a node id (pubkey). For example: "0200000000a3eff613189ca6c4070c89206ad658e286751eca1f29262948247a5f". See [BOLT08](https://github.com/lightning/bolts/blob/master/08-transport.md?plain=1#L5).
+* `<ip>` MUST be a IPv4 OR IPv6 address. See [InetAddressIPv4 in RFC4001](https://datatracker.ietf.org/doc/html/rfc4001) and [RFC 5952 for IPv6](https://datatracker.ietf.org/doc/html/rfc5952).
+* `<tor_onion_v3_address>` MUST be a tor onion v3 address. See [prop224](https://gitweb.torproject.org/torspec.git/tree/proposals/224-rend-spec-ng.txt).
 * `<port>` MUST be a [port](https://en.wikipedia.org/wiki/Port_(computer_networking)) number.
 
 ### Onchain addresses

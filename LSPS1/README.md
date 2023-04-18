@@ -33,7 +33,7 @@ All satoshi values MUST be represented as a string and NOT integer values. Make 
 
 Node connection strings like `lsp_connection_string` MUST match one of the following grammars:
 
-* `<node> '@' <ip> `:` <port>`, with the last `:` after `@` considered a separator for the port number.
+* `<node> '@' <ip> `:` <port>`, with the last `:` considered a separator for the port number.
 * `<node> '@' '[' <ip> ']' ':' <port>`, with any `:` inside `<ip>` considered part of the IP address.
 * `<node> '@' <tor_onion_v3_address> ':' <port>`, with the last `:` after `@` considered a separator for the port number.
 

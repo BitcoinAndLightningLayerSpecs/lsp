@@ -69,9 +69,9 @@ The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as lo
 
 ### 1. lsps1.info
 
-| Method     | lsps1.info |
-|--------    |------------|
-| Idempotent | Yes        |
+| JSONRPC Method | lsps1.info |
+|--------        |------------|
+| Idempotent     | Yes        |
 
 
 `lsps1.info` is the entrypoint for each client using the api. It lists the versions of the api and all options in a dictionary.
@@ -113,9 +113,9 @@ No errors are defined for this method.
 
 ### 2. lsps1.create_order 
 
-| Method     | lsps1.create_order |
-|--------    |------------        |
-| Idempotent | No                 |
+| JSONRPC Method     | lsps1.create_order |
+|--------            |------------        |
+| Idempotent         | No                 |
 
 
 - Before the user creates an order they MUST check if [option_support_large_channel](https://bitcoinops.org/en/topics/large-channels/) is enabled before they order a channel larger than BTC0.16777216.
@@ -173,10 +173,6 @@ The request is constructed depending on the user's needs.
   "confirms_within_blocks": 1,
   "channel_expiry_blocks": 12,
   "coupon_code": "",
-  "lsp_connection_strings": [
-    "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735",
-    "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@gwdllz5g7vky2q4gr45zguvoajzf33czreca3a3exosftx72ekppkuqd.onion:9735"
-  ],
   "created_at": "2012-04-23T18:25:43.511Z",
   "expires_at": "2015-01-25T19:29:44.612Z",
   "open": {
@@ -203,9 +199,6 @@ The request is constructed depending on the user's needs.
 }
 ```
 
-**LSP**
-- SHOULD order the `lsp_connection_strings` on the desirability of a user connecting to it with the top element being the most desirable.
-
 **User**
 - SHOULD validate the `fee_total_satoshi` is reasonable.
 - SHOULD validate `fee_total_satoshi` + `user_balance_satoshi` = `order_total_satoshi`.
@@ -221,9 +214,9 @@ TBD: Add more errors
 
 ### 2.1 lsps1.get_order 
 
-| Method     | lsps1.get_order |
-|--------    |------------     |
-| Idempotent | Yes             |
+| JSONRPC Method | lsps1.get_order |
+|--------        |------------     |
+| Idempotent     | Yes             |
 
 The user MAY check the current status of the order at any point.
 
@@ -246,10 +239,6 @@ The user MAY check the current status of the order at any point.
   "confirms_within_blocks": 1,
   "channel_expiry_blocks": 12,
   "coupon_code": "",
-  "lsp_connection_strings": [
-    "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735",
-    "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@gwdllz5g7vky2q4gr45zguvoajzf33czreca3a3exosftx72ekppkuqd.onion:9735"
-  ],
   "created_at": "2012-04-23T18:25:43.511Z",
   "expires_at": "2015-01-25T19:29:44.612Z",
   "open": {
@@ -388,20 +377,6 @@ This section describes the payment object returned by `lsps1.create_order` and `
 
 The LSP MUST open the channel under the following conditions:
 - The open.state switched to `PENDING`
-
-
-#### 4.1 Establish Peer Connection
-
-**User**
-
-- MUST open a peer connection with one of the provided node connection strings in `lsp_connection_strings` before the channel is being opened.
-- SHOULD choose the best connection string depending on their requirements.
-
-**LSP**
-- MAY establish a peer connection to `user_connection_string_or_pubkey`.
-
-
-#### 4.2 Open attempt
 
 **LSP**
 - MUST wait for a peer connection before attempting a channel open.

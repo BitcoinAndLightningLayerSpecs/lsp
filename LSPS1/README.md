@@ -1,4 +1,4 @@
-# LSPS1 channel request
+# LSPS1 Channel Request
 
 | Name    	| channel_request               |
 |---------	|------------------------------	|
@@ -65,18 +65,19 @@ The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as lo
 
 > **Rationale** The lsp may need to "bin" UTXOs.
 
-## Flow
+## API
 
-### API information
+### 1. lsps1.info
 
-`GET /lsp/channels` is the entrypoint for each client using the api. It lists the versions of the api and all options in a dictionary.
+| Method     | lsps1.info |
+|--------    |------------|
+| Idempotent | Yes        |
 
-The user MUST pull `GET /lsp/channels` to read
 
-- the `versions` of the api and therefore prove compatibility.
-- `options` properties to determine the api boundries.
+`lsps1.info` is the entrypoint for each client using the api. It lists the versions of the api and all options in a dictionary.
+The user MUST call `lsps1.info` first.
 
-Example `GET /lsp/channels` response: 
+**Example response** 
 
 ```JSON
 {
@@ -93,21 +94,9 @@ Example `GET /lsp/channels` response:
 }
 ```
 
-#### Api options
 
-The api itself has multiple properties that MUST be defined.
 
-```json
-"options": {
-        "minimum_depth": 0,
-        "supports_zero_channel_reserve": true,
-        "max_user_balance_satoshi": "0",
-        "max_lsp_balance_satoshi": "100000000",
-        "min_required_onchain_satoshi": null,
-        "max_channel_expiry_blocks": 20160
-}
-```
-
+- `versions` MUST compare the version of the api and therefore prove compatibility.
 - `minimum_depth` MUST set to the number of blocks it requires for the LSP to send `channel_ready` (previously `funding_locked`).
   - MAY be 0 to allow 0conf channels.
 - `supports_zero_channel_reserve` SHOULD set to true if the lsp supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
@@ -116,16 +105,24 @@ The api itself has multiple properties that MUST be defined.
 - `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
 - `max_channel_expiry_blocks` MUST be the maximum length in blocks a channel can be leased for. MUST be 1 or greater.
 
-The user MAY abort the flow here.
 
-### 1. Create Order
 
-The user constructs the request body depending on their needs. 
+**Errors**
 
-- The user MUST check if [option_support_large_channel](https://bitcoinops.org/en/topics/large-channels/) is enabled before they order a channel larger than BTC0.16777216.
-- The user MUST call `POST /lsp/channels` to create an order.
+No errors are defined for this method.
 
-**Example request body**
+### 2. lsps1.create_order 
+
+| Method     | lsps1.create_order |
+|--------    |------------        |
+| Idempotent | No                 |
+
+
+- Before the user creates an order they MUST check if [option_support_large_channel](https://bitcoinops.org/en/topics/large-channels/) is enabled before they order a channel larger than BTC0.16777216.
+
+The request is constructed depending on the user's needs. 
+
+**Example request**
 
 ```json
 {
@@ -145,7 +142,7 @@ The user constructs the request body depending on their needs.
 }
 ```
 
-- `api_version` MUST be `2`. MUST match one of the versions listed by the API.
+- `api_version` MUST be `2`. MUST match one of the versions listed by `lsps1.info.versions`.
 - `order` object MUST be provided.
     - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
     - `user_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_user_balance_satoshi`. Todo: Rejection error message.
@@ -165,9 +162,7 @@ The user constructs the request body depending on their needs.
 > **Rationale coupon_code** User MAY provide a coupon_code to claim a discount on the order. 
 
 
-**Example response body**
-
-HTTP Code: 201 CREATED
+**Example response**
 
 ```json
 {
@@ -218,19 +213,89 @@ HTTP Code: 201 CREATED
 
 **Errors**
 
-- 400 Bad request - Request body validation error.
+| Code   | Message        | Description |
+| ----   | -------        | ----------- |
+| -32602 | Invalid params | Invalid method parameter(s). |
+
+TBD: Add more errors
+
+### 2.1 lsps1.get_order 
+
+| Method     | lsps1.get_order |
+|--------    |------------     |
+| Idempotent | Yes             |
+
+The user MAY check the current status of the order at any point.
+
+**Example request**
+
+```json
+{
+  "order_id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c"
+}
+```
+
+**Example response**
+
+```json
+{
+  "id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
+  "state": "AWAITING_PAYMENT",
+  "lsp_balance_satoshi": "5000000",
+  "user_balance_satoshi": "2000000",
+  "confirms_within_blocks": 1,
+  "channel_expiry_blocks": 12,
+  "coupon_code": "",
+  "lsp_connection_strings": [
+    "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@3.33.236.230:9735",
+    "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f@gwdllz5g7vky2q4gr45zguvoajzf33czreca3a3exosftx72ekppkuqd.onion:9735"
+  ],
+  "created_at": "2012-04-23T18:25:43.511Z",
+  "expires_at": "2015-01-25T19:29:44.612Z",
+  "open": {
+    "announce": true,
+    "client_connection_string_or_pubkey": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735",
+    "state": "PENDING",
+    "fail_reason": null
+  },
+  "payment": {
+    "state": "EXPECT_PAYMENT",
+    "fee_total_satoshi": "8888",
+    "order_total_satoshi": "2008888",
+    "lightning_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05",
+    "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
+    "onchain_payments": [
+      {
+        "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
+        "satoshi": "1200",
+        "confirmed": false
+           }
+    ]
+  },
+  "channel": null
+}
+```
+
+The response is the same as defined in `lsps1.create_order`.
+
+**Errors**
+
+| Code   | Message        | Description |
+| ----   | -------        | ----------- |
+| 404 | Not found | Order with the requested order_id has not been found. |
 
 
-### 2. Payment
+### 3. Payment
 
-This section describes the payment object returned by `POST /lsp/channel` and `GET /lsp/channel/{id}`. The user MUST pay the `lightning_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
+This section describes the payment object returned by `lsps1.create_order` and `lsps1.get_order`. The user MUST pay the `lightning_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
 
 > **Rationale** Onchain Payments are required for payments with higher amounts, especially to push user_balance_satoshi to the user. Onchain payments are also useful to onboard new user to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
 **Before the payment**
-- The user SHOULD already open a peer connection to the LSP. This will allow the LSP to open then channel instantly on payment arrival. See 4.1 Establish Peer Connection.
+- The user SHOULD already open a peer connection to the LSP. This will allow the LSP to open then channel instantly on payment arrival. See *4.1 Establish Peer Connection*.
 
-Example payment object:
+**Payment object**
+
 ```json
 "payment": {
     "state": "EXPECT_PAYMENT",
@@ -262,8 +327,8 @@ Example payment object:
 - `onchain_address` 
     - MUST be an onchain address the user can pay the order_total_satoshi to.
     - MUST be null 
-      - if `base_api.min_required_onchain_satoshi` is above or equal order_total.
-      - if `base_api.min_required_onchain_satoshi` is null and therefore not supported.
+      - if `options.min_required_onchain_satoshi` is above or equal order_total.
+      - if `options.min_required_onchain_satoshi` is null and therefore not supported.
       - if `refund_onchain_address` is null.
 - `onchain_address_confirms` 
     - MUST be the number of confirmations that the server will accept before considering the payment as confirmed. If 0, this indicates that the server accepts 0-confirmation payments to this address.
@@ -275,12 +340,12 @@ Example payment object:
     - `confirmed` MUST contain a boolean if the LSP sees the transaction as confirmed.
 
 
-#### 2.1 Lightning Payment Flow
+#### 3.1 Lightning Payment
 
 **User**
 
 - MUST pay the `lightning_invoice`.
-- SHOULD pull `GET /lsp/channel/{id}` to check the success of the payment.
+- SHOULD pull `lsps1.get_order` to check the success of the payment.
 - The user gets refunded automatically in case the channel open failed, the order expired, or the payment timed out.
 
 **LSP**
@@ -296,12 +361,12 @@ Example payment object:
 
 
 
-#### 2.2 Onchain Payment Flow
+#### 3.2 Onchain Payment Flow
 
 **User**
 
 - MUST pay `order_total_satoshi` to `onchain_address`.
-- MAY pull `GET /lsp/channel/{id}` to check the success of the payment.
+- MAY pull `lsps1.get_order` to check the success of the payment.
 
 **LSP**
 
@@ -319,13 +384,13 @@ Example payment object:
 
 
 
-### 3 Channel Open
+### 4 Channel Open
 
 The LSP MUST open the channel under the following conditions:
 - The open.state switched to `PENDING`
 
 
-#### 3.1 Establish Peer Connection
+#### 4.1 Establish Peer Connection
 
 **User**
 
@@ -336,7 +401,7 @@ The LSP MUST open the channel under the following conditions:
 - MAY establish a peer connection to `user_connection_string_or_pubkey`.
 
 
-#### 3.2 Open attempt
+#### 4.2 Open attempt
 
 **LSP**
 - MUST wait for a peer connection before attempting a channel open.
@@ -369,7 +434,7 @@ In case the channel open failed
 
 ### 5 Channel Object
 
-Todo: Describe channel object. Might be simplified or simply unnecessary.
+Todo: Describe channel object. Might be simplified or even unnecessary.
 
 
 - `channel` MUST contain the opened channel information. MUST be null if the channel opening transaction has not been published yet.

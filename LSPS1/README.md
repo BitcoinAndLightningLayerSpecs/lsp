@@ -243,7 +243,7 @@ Example payment object:
         "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
         "satoshi": "1200",
         "confirmed": false
-            }
+        }
     ]
 },
 ```

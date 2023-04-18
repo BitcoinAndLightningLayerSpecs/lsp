@@ -386,8 +386,3 @@ Todo: Describe channel object. Might be simplified or simply unnecessary.
     - `user_pubkey` MUST be the node id of the user node.
     - `lsp_pubkey` MUST be the node id if the lsp node.
 
-    
-# Open Questions
-
-- Do we allow 0conf for high lsp_balance_satoshi? Do we need something like `max_lsp_balance_satoshi` depending on the `minimum_depth`?
-- Error handling

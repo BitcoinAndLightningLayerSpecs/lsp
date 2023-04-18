@@ -1,10 +1,10 @@
 # LSPS1 channel request
 
-| Name    	| base_api                      |
+| Name    	| channel_request               |
 |---------	|------------------------------	|
 | Version 	| 2                             |
-| OpenApi 	| [LSPS1.yaml](./LSPS1.yaml) 	|
-
+| OpenApi 	| [LSPS1.yaml](./LSPS1.yaml) 	  |
+| Status    | For Implementation            |
 
 
 ## Motivation

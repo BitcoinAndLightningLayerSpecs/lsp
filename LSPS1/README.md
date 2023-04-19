@@ -60,6 +60,28 @@ The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as lo
 
 > **Rationale** The lsp may need to "bin" UTXOs.
 
+### Errors
+
+LSP will return errors according to the JSONRPC 2.0 specification (see [LSPS0 Error Handling](https://github.com/BitcoinAndLightningLayerSpecs/lsp/tree/main/LSPS0#error-handling)).
+
+**LSP**
+- MAY return an `code` that is not listed above.
+
+**Client**
+- MUST be able to handle an `code` that is not listed
+  above.
+  - SHOULD report an unrecognized error code simply as
+    "unrecognized error code".
+  - **Rationale** This allows clients written for older versions
+    of this specification to work with LSPs written for newer
+    versions.
+- SHOULD NOT display an unrecognized `code`, `message` or `data` to the user.
+  **Rationale** Unrecognized `code`s may be misinterpreted
+  or misunderstood by users.
+
+Any error MAY include a `message` field that is a human-readable string. The `message` field is intended to provide a short description of the error. The `message` field is not intended to be parsed by the client or shown to the user. It is intended as a developer hint to help the client developer debug the error.
+
+
 ## API
 
 ### 1. lsps1.info
@@ -113,7 +135,7 @@ The client MUST call `lsps1.info` first.
 
 **Errors**
 
-No errors are defined for this method.
+No additional errors are defined for this method.
 
 ### 2. lsps1.create_order 
 
@@ -213,7 +235,7 @@ The request is constructed depending on the client's needs.
 | Code   | Message         | Data | Description |
 | ----   | -------         | ----------- | ---- |
 | -32602 | Invalid params  | {"property": %invalid_property%, "message": %human_message% }    | Invalid method parameter(s). |
-| 1000   | Option mismatch |  {"property": %option_mismatch_property% }   | The order doesnt match the options defined in `lsps1.info.options`. |
+| 1000   | Option mismatch |  {"property": %option_mismatch_property%, "message": %human_message% }   | The order doesnt match the options defined in `lsps1.info.options`. |
 | 1001   | Client rejected |  {"message": %human_message% }   | The LSP rejected the client. |
 
 - LSP MUST validate the order against the options defined in `lsps1.info.options`. LSP MUST return an `1000` error in case of a mismatch.
@@ -222,21 +244,15 @@ The request is constructed depending on the client's needs.
 
 - LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.
   - %invalid_property% MUST be one of the fields in the request body. MUST use `.` to separate nested fields.
-  - %human_message% MUST be a human description of the error.
   - Example: `{ "property": "open.client_connection_string_or_pubkey", "message": "Invalid pubkey" }`.
-
-> **Rationale %human_message%** It's not always clear why the request field is invalid. This is a developer hint and SHOULD NOT be shown to the client.
 
 - LSP MUST validate the `coupon_code` field and return an error if the coupon is invalid.
 
-> **Rationale coupon_code validation** The client should be informed if the coupon code is invalid. Ignoring the invalid code and creating an invoice without the discount is not a good user experience. Ignoring the invalid code will also NOT prevent anybody bruteforcing the coupon code because the client will still detect if the LSP has given a discount.
-
+> **Rationale coupon_code validation** The client should be informed if the coupon code is invalid. Ignoring the invalid code and creating an invoice without the discount is not good UX. Ignoring the invalid code will also NOT prevent anybody bruteforcing the coupon code because the client will still detect if the LSP has given a discount.
 
 - LSP MAY reject a client by it's node_id or IP. In this case, the LSP MUST return a `1001` error.
-  - %human_message% MUST be a human description of the error. MAY simply be "Client rejected".
+  - %human_message% MAY simply be "Client rejected".
   - Example: `{ "message": "Node id banned." }`.
-
-> **Rationale %human_description%** The LSP may want to explain to developers why the client was rejected. This is optional so the LSP MAY simply return "Client rejected". This message SHOULD NOT be shown to the user.
 
 
 ### 2.1 lsps1.get_order 

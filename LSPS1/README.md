@@ -3,17 +3,12 @@
 | Name    	| channel_request               |
 |---------	|------------------------------	|
 | Version 	| 2                             |
-| OpenApi 	| [LSPS1.yaml](./LSPS1.yaml) 	  |
 | Status    | For Implementation            |
 
 
 ## Motivation
 
 The goal of this specification is to provide a standardized LSP API for wallets to purchase a channel from the LSP directly.
-
-## OpenAPI
-
-All specs are defined in the [OpenAPI](https://www.openapis.org/about) format. It can be viewed with various editors, most notably the [Swagger Editor](https://editor.swagger.io/) or the [vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) extension. All the OpenAPI documents include detailed descriptions of every field.
 
 ## Definitions
 

@@ -218,7 +218,6 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 {
   "id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
   "api_version": 2,
-  "state": "AWAITING_PAYMENT", ?????
   "lsp_balance_satoshi": "5000000",
   "client_balance_satoshi": "2000000",
   "confirms_within_blocks": 1,
@@ -249,8 +248,9 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 }
 ```
 
-- `id` *string* An lsp generated order id.
+- `id` *string* Id of this specific order.
   - MUST be unique.
+  - MUST be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
 - `api_version` *integer* Version of the api that has been used to create the order.
 - `lsp_balance_satoshi` *satoshi* Mirrored from the request.
 - `client_balance_satoshi` *satoshi* Mirrored from the request.
@@ -288,11 +288,11 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 | 1001   | Client rejected |  {"message": %human_message% }   | The LSP rejected the client. |
 
 - LSP MUST validate the order against the options defined in `lsps1.info.options`. LSP MUST return an `1000` error in case of a mismatch.
-  - %option_mismatch_property% MUST be one of the fields in `lsps1.info.options`.
+  - `%option_mismatch_property%` MUST be one of the fields in `lsps1.info.options`.
   - Example: `{ "property": "min_client_balance_satoshi" }`.
 
 - LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.
-  - %invalid_property% MUST be one of the fields in the request body. MUST use `.` to separate nested fields.
+  - `%invalid_property%` MUST be one of the fields in the request body. MUST use `.` to separate nested fields.
   - Example: `{ "property": "open.node_id", "message": "Invalid pubkey" }`.
 
 - LSP MUST validate the `coupon_code` field and return an error if the coupon is invalid.
@@ -302,6 +302,8 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 - LSP MAY reject a client by it's node_id or IP. In this case, the LSP MUST return a `1001` error.
   - %human_message% MAY simply be "Client rejected".
   - Example: `{ "message": "Node id banned." }`.
+
+> **Rationale Client rejected** LSPs can reject a client for example for misbehaviour. LSPs can reject a node on two levels: Prevent a peer connection OR disable order creation. Preventing a peer connection might not work in case you still want to allow other functions to keep working, for example an existing channel.
 
 
 ### 2.1 lsps1.get_order 
@@ -331,7 +333,7 @@ The client MAY check the current status of the order at any point.
 
 ### 3. Payment
 
-This section describes the payment object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `lightning_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
+This section describes the payment object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `ln_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
 
 > **Rationale** Onchain Payments are required for payments with higher amounts, especially to push client_balance_satoshi to the client. Onchain payments are also useful to onboard new users to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
@@ -344,7 +346,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
     "state": "EXPECT_PAYMENT",
     "fee_total_satoshi": "8888",
     "order_total_satoshi": "2008888",
-    "lightning_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97...",
+    "ln_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97...",
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "onchain_payments": [
         {

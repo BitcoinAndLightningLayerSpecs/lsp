@@ -77,7 +77,7 @@ The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as lo
 `lsps1.info` is the entrypoint for each client using the api. It lists the versions of the api and all options in a dictionary.
 The user MUST call `lsps1.info` first.
 
-**Example response** 
+**Response** 
 
 ```JSON
 {
@@ -86,10 +86,14 @@ The user MUST call `lsps1.info` first.
   "options": {
       "minimum_depth": 0,
       "supports_zero_channel_reserve": true,
-      "max_user_balance_satoshi": "0",
-      "max_lsp_balance_satoshi": "100000000",
       "min_required_onchain_satoshi": null,
-      "max_channel_expiry_blocks": 20160
+      "max_channel_expiry_blocks": 20160,
+      "min_user_balance_satoshi": "20000",
+      "max_user_balance_satoshi": "100000000",
+      "min_lsp_balance_satoshi": "0",
+      "max_lsp_balance_satoshi": "100000000",
+      "min_channel_balance_satoshi": "50000",
+      "max_channel_balance_satoshi": "100000000"
   }
 }
 ```
@@ -100,10 +104,15 @@ The user MUST call `lsps1.info` first.
 - `minimum_depth` MUST set to the number of blocks it requires for the LSP to send `channel_ready` (previously `funding_locked`).
   - MAY be 0 to allow 0conf channels.
 - `supports_zero_channel_reserve` SHOULD set to true if the lsp supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-- `max_user_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
-- `max_lsp_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the their balance.  MUST be 1 or greater.
 - `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the user to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
 - `max_channel_expiry_blocks` MUST be the maximum length in blocks a channel can be leased for. MUST be 1 or greater.
+- `min_user_balance_satoshi` MUST be the minimum number of satoshi that the user MUST request. MUST be 0 or greater.
+- `max_user_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the user. MUST be 0 or a positive integer.
+- `min_lsp_balance_satoshi` MUST be the minimum number of satoshi that the LSP will provide to the user. MUST be 0 or greater.
+- `max_lsp_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the their balance.  MUST be 0 or greater.
+- `min_channel_balance_satoshi` MUST be the minimal channel size calculated by the sum of the requested `user_balance_satoshi` and `lsp_balance_satoshi`. MUST be 0 or greater.
+- `max_channel_balance_satoshi` MUST be the maximum channel size calculated by the sum of the requested `user_balance_satoshi` and `lsp_balance_satoshi`. MUST be 0 or greater.
+
 
 
 
@@ -122,7 +131,7 @@ No errors are defined for this method.
 
 The request is constructed depending on the user's needs. 
 
-**Example request**
+**Request**
 
 ```json
 {
@@ -162,7 +171,7 @@ The request is constructed depending on the user's needs.
 > **Rationale coupon_code** User MAY provide a coupon_code to claim a discount on the order. 
 
 
-**Example response**
+**Response**
 
 ```json
 {
@@ -206,11 +215,34 @@ The request is constructed depending on the user's needs.
 
 **Errors**
 
-| Code   | Message        | Description |
-| ----   | -------        | ----------- |
-| -32602 | Invalid params | Invalid method parameter(s). |
+| Code   | Message         | Data | Description |
+| ----   | -------         | ----------- | ---- |
+| -32602 | Invalid params  | {"property": %invalid_property%, "message": %human_message% }    | Invalid method parameter(s). |
+| 1000   | Option mismatch |  {"property": %option_mismatch_property% }   | The order doesnt match the options defined in `lsps1.info.options`. |
+| 1001   | Client rejected |  {"message": %human_message% }   | The LSP rejected the client. |
 
-TBD: Add more errors
+- LSP MUST validate the order against the options defined in `lsps1.info.options`. LSP MUST return an `1000` error in case of a mismatch.
+  - %option_mismatch_property% MUST be one of the fields in `lsps1.info.options`.
+  - Example: `{ "property": "min_user_balance_satoshi" }`.
+
+- LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.
+  - %invalid_property% MUST be one of the fields in the request body. MUST use `.` to separate nested fields.
+  - %human_message% MUST be a human description of the error.
+  - Example: `{ "property": "open.user_connection_string_or_pubkey", "message": "Invalid pubkey" }`.
+
+> **Rationale %human_message%** It's not always clear why the request field is invalid. This is a developer hint and SHOULD NOT be shown to the user.
+
+- LSP MUST validate the `coupon_code` field and return an error if the coupon is invalid.
+
+> **Rationale coupon_code validation** The user should be informed if the coupon code is invalid. Ignoring the invalid code and creating an invoice without the discount is not a good user experience. Ignoring the invalid code will also NOT prevent anybody bruteforcing the coupon code because the client will still detect if the LSP has given a discount.
+
+
+- LSP MAY reject a client by it's node_id or IP. In this case, the LSP MUST return a `1001` error.
+  - %human_message% MUST be a human description of the error. MAY simply be "Client rejected".
+  - Example: `{ "message": "Node id banned." }`.
+
+> **Rationale %human_description%** The LSP may want to explain to developers why the client was rejected. This is optional so the LSP MAY simply return "Client rejected". This message SHOULD NOT be shown to the user.
+
 
 ### 2.1 lsps1.get_order 
 
@@ -220,7 +252,7 @@ TBD: Add more errors
 
 The user MAY check the current status of the order at any point.
 
-**Example request**
+**Request**
 
 ```json
 {
@@ -228,7 +260,7 @@ The user MAY check the current status of the order at any point.
 }
 ```
 
-**Example response**
+**Response**
 
 ```json
 {

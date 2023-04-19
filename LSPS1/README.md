@@ -24,22 +24,11 @@ All satoshi values MUST be represented as a string and NOT integer values. Make 
 
 > **Rationale** Plenty of json parsers use a 32bit signed integer for integer parsing. Max safe value is 2,147,483,647; 2,147,483,647sat = BTC21.474,836,47 which is too low.
 
-### Node connection string
+### Node id
 
-Node connection strings like `lsp_connection_string` MUST match one of the following grammars:
+- MUST be a node id (pubkey). For example: "0200000000a3eff613189ca6c4070c89206ad658e286751eca1f29262948247a5f". See [BOLT08](https://github.com/lightning/bolts/blob/master/08-transport.md?plain=1#L5).
 
-* `<node> '@' <ip> `:` <port>`, with the last `:` considered a separator for the port number.
-* `<node> '@' '[' <ip> ']' ':' <port>`, with any `:` inside `<ip>` considered part of the IP address.
-* `<node> '@' <tor_onion_v3_address> ':' <port>`, with the last `:` after `@` considered a separator for the port number.
-
-Word definition:
-
-* `<node>` MUST be a node id (pubkey). For example: "0200000000a3eff613189ca6c4070c89206ad658e286751eca1f29262948247a5f". See [BOLT08](https://github.com/lightning/bolts/blob/master/08-transport.md?plain=1#L5).
-* `<ip>` MUST be a IPv4 OR IPv6 address. See [InetAddressIPv4 in RFC4001](https://datatracker.ietf.org/doc/html/rfc4001) and [RFC 5952 for IPv6](https://datatracker.ietf.org/doc/html/rfc5952).
-* `<tor_onion_v3_address>` MUST be a tor onion v3 address. See [prop224](https://gitweb.torproject.org/torspec.git/tree/proposals/224-rend-spec-ng.txt).
-* `<port>` MUST be a [port](https://en.wikipedia.org/wiki/Port_(computer_networking)) number.
-
-### Onchain addresses
+### Onchain address
 
 - All onchain addresses MUST be a [bech32](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki) version 0 ("SegWit") or [bech32m](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki) version 1 ("Taproot") address or null.
 - The lsp/client MAY support other address types.
@@ -81,6 +70,13 @@ LSP will return errors according to the JSONRPC 2.0 specification (see [LSPS0 Er
 
 Any error MAY include a `message` field that is a human-readable string. The `message` field is intended to provide a short description of the error. The `message` field is not intended to be parsed by the client or shown to the user. It is intended as a developer hint to help the client developer debug the error.
 
+## Overview
+
+1. Client calls `lsps1.info` to get the LSP's API version and options.
+2. Client calls `lsps1.create_order` to create an order.
+3. Client pays the order either onchain or offchain.
+4. LSP opens the channel as soon as they payment is confirmed.
+5. LSP refunds the client in case the channel open failed.
 
 ## API
 
@@ -117,25 +113,37 @@ The client MUST call `lsps1.info` first.
 
 
 
-- `versions` MUST compare the version of the api and therefore prove compatibility.
-- `minimum_depth` MUST set to the number of blocks it requires for the LSP to send `channel_ready` (previously `funding_locked`).
-  - MAY be 0 to allow 0conf channels.
-- `supports_zero_channel_reserve` SHOULD set to true if the lsp supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-- `min_required_onchain_satoshi` MUST be the number of satoshi (`order_total_satoshi` see below) that are required for the client to pay funds onchain. The LSP MUST allow onchain payments equal or above this value. MAY be null if onchain payments are NOT supported.
-- `max_channel_expiry_blocks` MUST be the maximum length in blocks a channel can be leased for. MUST be 1 or greater.
-- `min_client_balance_satoshi` MUST be the minimum number of satoshi that the client MUST request. MUST be 0 or greater.
-- `max_client_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to push to the client. MUST be 0 or a positive integer.
-- `min_lsp_balance_satoshi` MUST be the minimum number of satoshi that the LSP will provide to the client. MUST be 0 or greater.
-- `max_lsp_balance_satoshi` MUST be the maximum number of satoshi that the LSP is willing to contribute to the their balance.  MUST be 0 or greater.
-- `min_channel_balance_satoshi` MUST be the minimal channel size calculated by the sum of the requested `client_balance_satoshi` and `lsp_balance_satoshi`. MUST be 0 or greater.
-- `max_channel_balance_satoshi` MUST be the maximum channel size calculated by the sum of the requested `client_balance_satoshi` and `lsp_balance_satoshi`. MUST be 0 or greater.
+- `versions` *List of integers* List of all supported API versions by the LSP.
+  - Client MUST compare the version of the api and therefore prove compatibility.
+- `website` *string* Website of the LSP.
+- `options` *dictionary* Dictionary of all options supported by the LSP.
+  - `minimum_depth` *integer* Number of blocks it requires to send `channel_ready` (previously `funding_locked`, aka number of confirmations).
+    - MAY be 0 to allow 0conf channels.
+    - MUST be 0 or greater.
+  - `supports_zero_channel_reserve` *boolean* Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
+  - `min_required_onchain_satoshi` *satoshi or null* Indicates the minimum amount of satoshi (`order_total_satoshi` see below) that is required for the LSP to accept a payment onchain.
+    - The LSP MUST allow onchain payments equal or above this value. 
+    - MUST be 0 or greater.
+    - MAY be null if onchain payments are NOT supported.
+  - `max_channel_expiry_blocks` *integer* The maximum number of blocks a channel can be leased for.
+    - MUST be 1 or greater.
+  - `min_client_balance_satoshi` *satoshi* Minimum number of satoshi that the client MUST request.
+    - MUST be 0 or greater.
+  - `max_client_balance_satoshi` *satoshi* Maximum number of satoshi that the client MUST request.
+    - MUST be 0 or greater.
+  - `min_lsp_balance_satoshi` *satoshi* Minimum number of satoshi that the LSP will provide to the channel.
+    - MUST be 0 or greater.
+  - `max_lsp_balance_satoshi` *satoshi* Maximum number of satoshi that the LSP will provide to the channel.
+    - MUST be 0 or greater.
+  - `min_channel_balance_satoshi` *satoshi* Minimal channel size calculated by the sum of the requested `client_balance_satoshi` and `lsp_balance_satoshi`.
+    - MUST be 0 or greater.
+  - `max_channel_balance_satoshi` *satoshi* Maximum channel size calculated by the sum of the requested `client_balance_satoshi` and `lsp_balance_satoshi`
+    - MUST be 0 or greater.
+
+Every `min/max` options pair MUST ensure that `min <= max`.
 
 
-
-
-**Errors**
-
-No additional errors are defined for this method.
+**Errors** No additional errors are defined for this method.
 
 ### 2. lsps1.create_order 
 
@@ -143,8 +151,6 @@ No additional errors are defined for this method.
 |--------            |------------        |
 | Idempotent         | No                 |
 
-
-- Before the client creates an order they MUST check if [option_support_large_channel](https://bitcoinops.org/en/topics/large-channels/) is enabled before they order a channel larger than BTC0.16777216.
 
 The request is constructed depending on the client's needs. 
 
@@ -163,37 +169,54 @@ The request is constructed depending on the client's needs.
   },
   "open": {
     "announce": true,
-    "client_connection_string_or_pubkey": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735"
+    "node_id": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20"
   }
 }
 ```
 
-- `api_version` MUST be `2`. MUST match one of the versions listed by `lsps1.info.versions`.
-- `order` object MUST be provided.
-    - `lsp_balance_satoshi` MUST be 1 or greater. MUST be below or equal `base_api.max_lsp_balance_satoshi`.
-    - `client_balance_satoshi` MUST be 0 or greater. MUST be below or equal `base_api.max_client_balance_satoshi`. Todo: Rejection error message.
-    - `confirms_within_blocks` MUST be 0 or higher.
-    - `channel_expiry_blocks` MUST be 1 or greater. MUST be below or equal `base_api.max_channel_expiry_blocks`.
-    - `coupon_code` MUST be a string or null.
-    - `refund_onchain_address` 
-      - MUST be an onchain address or null.
-      - If null the LSP MUST disable onchain payments in the order.
+
+
+- `api_version` *integer* API version that the client wants to work with.
+  - MUST be `2` for this version of the spec. 
+  - MUST match one of the versions listed in `lsps1.info.versions`.
+- `order` MUST be provided.
+    - `lsp_balance_satoshi` *satoshi* How many satoshi the LSP will provide on their side.
+      - MUST be 1 or greater. 
+      - MUST be equal or below `base_api.max_lsp_balance_satoshi`.
+      - MUST be equal or greater `base_api.min_lsp_balance_satoshi`.
+    - `client_balance_satoshi` *satoshi* How many satoshi the client will provide on their side. The client send these funds to the LSP. The LSP will push these funds back to the client.
+      - MUST be 0 or greater. 
+      - MUST be below or equal `base_api.max_client_balance_satoshi`.
+      - MUST be greater or equal `base_api.min_client_balance_satoshi`.
+    - `confirms_within_blocks` *integer* Number of blocks the client wants to wait maximally for the channel to be confirmed.
+      - MUST be 0 or greater.
+      - LSP MAY always confirm the channel faster than requested.
+    - `channel_expiry_blocks` *integer* How long the channel is leased for in block time.
+      - MUST be 1 or greater. 
+      - MUST be below or equal `base_api.max_channel_expiry_blocks`.
+    - `coupon_code` *string* Code that the client wants to use to claim a discount.
+      - Client MAY omit this field.
+    - `refund_onchain_address` *Onchain address* Address where the LSP will send the funds if the order fails.
+      - Client MAY omit this field.
+      - LSP MUST disable onchain payments if the client did omit this field.
 - `open` MUST be provided.
-    - `announce` If the channel should be announced to the network. MUST be boolean.
-    - `client_connection_string_or_pubkey` MUST be a node connection string OR a node id (pubkey).
+    - `announce` *boolean* If the channel should be announced to the network (also known as public).
+    - `node_id` *node_id* LSP will open the channel to this node.
 
 
 > **Rationale client_balance_satoshi** Client MAY want to have initial spending balance on their wallet or start with a balanced channel.
 
 > **Rationale coupon_code** Client MAY provide a coupon_code to claim a discount on the order. 
 
+The client MUST check if [option_support_large_channel](https://bitcoinops.org/en/topics/large-channels/) is enabled before they order a channel larger than 16,777,216 satoshi.
 
 **Response**
 
 ```json
 {
   "id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
-  "state": "AWAITING_PAYMENT",
+  "api_version": 2,
+  "state": "AWAITING_PAYMENT", ?????
   "lsp_balance_satoshi": "5000000",
   "client_balance_satoshi": "2000000",
   "confirms_within_blocks": 1,
@@ -203,7 +226,7 @@ The request is constructed depending on the client's needs.
   "expires_at": "2015-01-25T19:29:44.612Z",
   "open": {
     "announce": true,
-    "client_connection_string_or_pubkey": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735",
+    "node_id": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20",
     "state": "PENDING",
     "fail_reason": null
   },
@@ -225,6 +248,27 @@ The request is constructed depending on the client's needs.
 }
 ```
 
+- `id` *string* An lsp generated order id.
+  - MUST be unique.
+- `api_version` *integer* Version of the api that has been used to create the order.
+- `lsp_balance_satoshi` *satoshi* Mirrored from the request.
+- `client_balance_satoshi` *satoshi* Mirrored from the request.
+- `confirms_within_blocks` *integer* Mirrored from the request.
+- `channel_expiry_blocks` *integer* Mirrored from the request.
+- `coupon_code` *string* Mirrored from the request.
+  - MUST be an empty string if the coupon_code was not provided.
+- `created_at` *datetime* Datetime when the order was created.
+- `expires_at` *datetime* Datetime when the order expires.
+- `open` describes channel open information.
+  - `announce` *boolean* Mirrored from the request.
+  - `node_id` *node_id* Mirrored from the request.
+  - `state` *string enum* Current state of the channel open.
+    - `PENDING` LSP is waiting for the client to pay.
+    - `OPENING` LSP is opening the channel.
+    - `OPEN` Channel is open.
+    - `FAILED` Channel open failed.
+
+
 **Client**
 - SHOULD validate the `fee_total_satoshi` is reasonable.
 - SHOULD validate `fee_total_satoshi` + `client_balance_satoshi` = `order_total_satoshi`.
@@ -244,7 +288,7 @@ The request is constructed depending on the client's needs.
 
 - LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.
   - %invalid_property% MUST be one of the fields in the request body. MUST use `.` to separate nested fields.
-  - Example: `{ "property": "open.client_connection_string_or_pubkey", "message": "Invalid pubkey" }`.
+  - Example: `{ "property": "open.node_id", "message": "Invalid pubkey" }`.
 
 - LSP MUST validate the `coupon_code` field and return an error if the coupon is invalid.
 
@@ -287,7 +331,6 @@ This section describes the payment object returned by `lsps1.create_order` and `
 > **Rationale** Onchain Payments are required for payments with higher amounts, especially to push client_balance_satoshi to the client. Onchain payments are also useful to onboard new users to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
 **Before the payment**
-- The client SHOULD already open a peer connection to the LSP. This will allow the LSP to open then channel instantly on payment arrival. See *4.1 Establish Peer Connection*.
 
 **Payment object**
 
@@ -386,13 +429,13 @@ The LSP MUST open the channel under the following conditions:
 
 **LSP**
 - MUST wait for a peer connection before attempting a channel open.
-- MUST attempt a channel open to `client_connection_string_or_pubkey`.
+- MUST attempt a channel open to `node_id`.
     - MUST respect the `announce` flag.
     - MUST open the channel with a capacity of `lsp_balance_satoshi` + `client_balance_satoshi`.
         - MAY overprovision.
     - MUST push `client_balance_satoshi` to the client.
         - MAY overprovision.
-    - MUST use a high enough onchain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the client paid the order and established a peer connection.
+    - MUST use a high enough onchain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the client paid the order.
         - MAY overprovision.
 - MUST send `channel_ready` after the funding transaction has `minimum_depth` confirmations.
 - MUST allow zero channel reserves if `supports_zero_channel_reserve`.

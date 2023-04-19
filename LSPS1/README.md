@@ -260,50 +260,13 @@ The user MAY check the current status of the order at any point.
 }
 ```
 
-**Response**
-
-```json
-{
-  "id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
-  "state": "AWAITING_PAYMENT",
-  "lsp_balance_satoshi": "5000000",
-  "user_balance_satoshi": "2000000",
-  "confirms_within_blocks": 1,
-  "channel_expiry_blocks": 12,
-  "coupon_code": "",
-  "created_at": "2012-04-23T18:25:43.511Z",
-  "expires_at": "2015-01-25T19:29:44.612Z",
-  "open": {
-    "announce": true,
-    "client_connection_string_or_pubkey": "03d4e028a0d4a90868ec202ab684fb0085779defea9ca7553e06146557631eec20@3.33.236.230:9735",
-    "state": "PENDING",
-    "fail_reason": null
-  },
-  "payment": {
-    "state": "EXPECT_PAYMENT",
-    "fee_total_satoshi": "8888",
-    "order_total_satoshi": "2008888",
-    "lightning_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05",
-    "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
-    "onchain_payments": [
-      {
-        "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
-        "satoshi": "1200",
-        "confirmed": false
-           }
-    ]
-  },
-  "channel": null
-}
-```
-
-The response is the same as defined in `lsps1.create_order`.
+**Response** is the same as defined in `lsps1.create_order`.
 
 **Errors**
 
-| Code   | Message        | Description |
-| ----   | -------        | ----------- |
-| 404 | Not found | Order with the requested order_id has not been found. |
+| Code   | Message | Data      | Description |
+| ----   | ------- | ---       | ----------- |
+| 404    | Not found  | {}        | Order with the requested order_id has not been found. |
 
 
 ### 3. Payment

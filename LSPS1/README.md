@@ -87,7 +87,7 @@ Any error MAY include a `message` field that is a human-readable string. The `me
 | Idempotent     | Yes        |
 
 
-`lsps1.info` is the entrypoint for each client using the api. It lists the versions of the api and all options in a dictionary.
+`lsps1.info` is the entrypoint for each client using the api. It lists the supported versions of the api and all options in a dictionary.
 The client MUST call `lsps1.info` first.
 
 **Response** 
@@ -113,31 +113,31 @@ The client MUST call `lsps1.info` first.
 
 
 
-- `versions` *List of integers* List of all supported API versions by the LSP.
-  - Client MUST compare the version of the api and therefore prove compatibility.
-- `website` *string* Website of the LSP.
-- `options` *dictionary* Dictionary of all options supported by the LSP.
-  - `minimum_depth` *integer* Number of blocks it requires to send `channel_ready` (previously `funding_locked`, aka number of confirmations).
+- `versions` *List of integers*: List of all supported API versions by the LSP.
+  - Client MUST compare the version of the api and therefore ensure compatibility.
+- `website` *string*: Website of the LSP.
+- `options` *dictionary*: Dictionary of all options supported by the LSP.
+  - `minimum_depth` *integer*: Number of blocks it requires to send `channel_ready` (previously `funding_locked`, aka number of confirmations).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
-  - `supports_zero_channel_reserve` *boolean* Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-  - `min_required_onchain_satoshi` *satoshi or null* Indicates the minimum amount of satoshi (`order_total_satoshi` see below) that is required for the LSP to accept a payment onchain.
+  - `supports_zero_channel_reserve` *boolean*: Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
+  - `min_required_onchain_satoshi` *satoshi or null*: Indicates the minimum amount of satoshi (`order_total_satoshi` see below) that is required for the LSP to accept a payment onchain.
     - The LSP MUST allow onchain payments equal or above this value. 
     - MUST be 0 or greater.
     - MAY be null if onchain payments are NOT supported.
-  - `max_channel_expiry_blocks` *integer* The maximum number of blocks a channel can be leased for.
+  - `max_channel_expiry_blocks` *integer*: The maximum number of blocks a channel can be leased for.
     - MUST be 1 or greater.
-  - `min_client_balance_satoshi` *satoshi* Minimum number of satoshi that the client MUST request.
+  - `min_client_balance_satoshi` *satoshi*: Minimum number of satoshi that the client MUST request.
     - MUST be 0 or greater.
-  - `max_client_balance_satoshi` *satoshi* Maximum number of satoshi that the client MUST request.
+  - `max_client_balance_satoshi` *satoshi*: Maximum number of satoshi that the client MUST request.
     - MUST be 0 or greater.
-  - `min_lsp_balance_satoshi` *satoshi* Minimum number of satoshi that the LSP will provide to the channel.
+  - `min_lsp_balance_satoshi` *satoshi*: Minimum number of satoshi that the LSP will provide to the channel.
     - MUST be 0 or greater.
-  - `max_lsp_balance_satoshi` *satoshi* Maximum number of satoshi that the LSP will provide to the channel.
+  - `max_lsp_balance_satoshi` *satoshi*: Maximum number of satoshi that the LSP will provide to the channel.
     - MUST be 0 or greater.
-  - `min_channel_balance_satoshi` *satoshi* Minimal channel size calculated by the sum of the requested `client_balance_satoshi` and `lsp_balance_satoshi`.
+  - `min_channel_balance_satoshi` *satoshi*: Minimal channel size calculated by the sum of the requested `client_balance_satoshi` and `lsp_balance_satoshi`.
     - MUST be 0 or greater.
-  - `max_channel_balance_satoshi` *satoshi* Maximum channel size calculated by the sum of the requested `client_balance_satoshi` and `lsp_balance_satoshi`
+  - `max_channel_balance_satoshi` *satoshi*: Maximum channel size calculated by the sum of the requested `client_balance_satoshi` and `lsp_balance_satoshi`
     - MUST be 0 or greater.
 
 Every `min/max` options pair MUST ensure that `min <= max`.

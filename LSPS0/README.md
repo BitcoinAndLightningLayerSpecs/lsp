@@ -523,6 +523,13 @@ payload, indicating it supports LSPS1 and LSPS3 (in addition to LSPS0):
 }
 ```
 
+## Common Schemas
+
+As the transport layer uses JSON, we often need to agree upon how particular
+types of data are encoded into JSON.
+This is described in the separate [Common Schemas](common-schemas.md)
+document.
+
 ## Notes On Implementation
 
 > **Non-normative** This section is not intended to imply that particular

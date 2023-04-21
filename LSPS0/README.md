@@ -274,7 +274,7 @@ Clients conversely MUST ignore unrecognized keys.
 Other LSPS specifications SHOULD specify some API call where LSPs
 can indicate which version(s) of that LSPS specification it
 supports, and SHOULD specify how clients can indicate which
-version it wnats to use.
+version it wants to use.
 For example, an LSPS specification might indicate a "get
 information" API call that is stable across versions, which
 returns a `versions` array that indicates which versions of that

@@ -1,6 +1,6 @@
 # LSPS1 Channel Request
 
-| Name    	| channel_request               |
+| Name    	| `channel_request`               |
 |---------	|------------------------------	|
 | Version 	| 2                             |
 | Status    | For Implementation            |

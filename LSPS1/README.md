@@ -56,7 +56,7 @@ Any error MAY include a `message` field that is a human-readable string. The `me
 1. Client calls `lsps1.info` to get the LSP's API version and options.
 2. Client calls `lsps1.create_order` to create an order.
 3. Client pays the order either onchain or offchain.
-4. LSP opens the channel as soon as they payment is confirmed.
+4. LSP opens the channel as soon as the payment is confirmed.
 5. LSP refunds the client in case the channel open failed.
 
 ## API

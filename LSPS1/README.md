@@ -28,7 +28,7 @@ This specification uses data types defined in [LSPS0 Common Schemas](LSPS0/commo
 
 The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as long as it benefits the client.
 
-> **Rationale** The lsp may need to "bin" UTXOs.
+> **Rationale** The LSP may need to "bin" UTXOs.
 
 ### Errors
 

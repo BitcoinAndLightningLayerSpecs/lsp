@@ -27,7 +27,7 @@ All LSPS specifications include a "Status" field.
 Describes the basics of how clients and LSPs communicate to each other.
 
 ### **LSPS.1** [Channel Request](LSPS1/README.md)
-A unified channel request API standard for services to buy channels from LSP.
+A unified channel request API standard for buying channels from an LSP.
 
 
 

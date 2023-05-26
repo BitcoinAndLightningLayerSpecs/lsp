@@ -1,7 +1,7 @@
 # LSPS1 Channel Request
 
-| Name    	| channel_request               |
-|---------	|------------------------------	|
+| Name    	| `channel_request`             |
+|---------- |------------------------------	|
 | Version 	| 2                             |
 | Status    | For Implementation            |
 
@@ -32,24 +32,7 @@ The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as lo
 
 ### Errors
 
-LSP will return errors according to the JSONRPC 2.0 specification (see [LSPS0 Error Handling](https://github.com/BitcoinAndLightningLayerSpecs/lsp/tree/main/LSPS0#error-handling)).
-
-**LSP**
-- MAY return an `code` that is not listed above.
-
-**Client**
-- MUST be able to handle an `code` that is not listed
-  above.
-  - SHOULD report an unrecognized error code simply as
-    "unrecognized error code".
-  - **Rationale** This allows clients written for older versions
-    of this specification to work with LSPs written for newer
-    versions.
-- SHOULD NOT display an unrecognized `code`, `message` or `data` to the user.
-  **Rationale** Unrecognized `code`s may be misinterpreted
-  or misunderstood by users.
-
-Any error MAY include a `message` field that is a human-readable string. The `message` field is intended to provide a short description of the error. The `message` field is not intended to be parsed by the client or shown to the user. It is intended as a developer hint to help the client developer debug the error.
+LSP will return errors according to the [JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification (see [LSPS0 Error Handling](https://github.com/BitcoinAndLightningLayerSpecs/lsp/tree/main/LSPS0#error-handling)).
 
 ## Overview
 
@@ -63,9 +46,9 @@ Any error MAY include a `message` field that is a human-readable string. The `me
 
 ### 1. lsps1.info
 
-| JSONRPC Method | lsps1.info |
-|--------        |------------|
-| Idempotent     | Yes        |
+| JSON-RPC Method | lsps1.info |
+|---------------- |----------- |
+| Idempotent      | Yes        |
 
 
 `lsps1.info` is the entrypoint for each client using the api. It lists the supported versions of the api and all options in a dictionary.
@@ -133,9 +116,9 @@ Every `min/max` options pair MUST ensure that `min <= max`.
 
 ### 2. lsps1.create_order 
 
-| JSONRPC Method     | lsps1.create_order |
-|--------            |------------        |
-| Idempotent         | No                 |
+| JSON-RPC Method     | lsps1.create_order |
+|-------------------- |------------------- |
+| Idempotent          | No                 |
 
 
 The request is constructed depending on the client's needs. 
@@ -287,9 +270,9 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 ### 2.1 lsps1.get_order 
 
-| JSONRPC Method | lsps1.get_order |
-|--------        |------------     |
-| Idempotent     | Yes             |
+| JSON-RPC Method | lsps1.get_order |
+|---------------- |---------------- |
+| Idempotent      | Yes             |
 
 The client MAY check the current status of the order at any point.
 

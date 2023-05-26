@@ -26,8 +26,8 @@ All LSPS specifications include a "Status" field.
 ### **LSPS0** [Transport Layer](LSPS0/README.md)
 Describes the basics of how clients and LSPs communicate to each other.
 
-### **LSPS.1** [Channel Request](LSPS1/README.md)
-A unified channel request API standard for services to buy channels from LSP.
+### **LSPS1** [Channel Request](LSPS1/README.md)
+A unified channel request API to buy channels from an LSP.
 
 
 

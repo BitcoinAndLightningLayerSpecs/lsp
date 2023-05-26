@@ -235,7 +235,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - `FAILED` Channel open failed.
 - `payment <object>` Contains everything about payments, see [3. Payment](#3-payment).
 - `channel <object or null>` Contains information about the channel, see [5 Channel Object](5-channel-object).
-  - MUST be null if the channel is not opened yet.
+  - MUST be null if the channel funding transaction is not published yet.
   
 
 **Client**
@@ -297,7 +297,7 @@ The client MAY check the current status of the order at any point.
 
 ### 3. Payment
 
-This section describes the payment object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `ln_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
+This section describes the payment object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `bolt11_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
 
 > **Rationale** On-chain Payments are required for payments with higher amounts, especially to push `client_balance_sat` to the client. On-chain payments are also useful to onboard new users to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
@@ -309,7 +309,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
     "state": "EXPECT_PAYMENT",
     "fee_total_sat": "8888",
     "order_total_sat": "2008888",
-    "ln_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97...",
+    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97...",
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "onchain_block_confirmations_required": 1,
     "minimum_fee_for_0conf": 253,
@@ -331,7 +331,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
 - `fee_total_sat <LSPS0.sat>` The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat <LSPS0.sat>` What the client needs to pay in total to open the requested channel.
   - MUST be the fee_total_sat plus the client_balance_sat requested in satoshi.
-- `ln_invoice <string>`
+- `bolt11_invoice <string>`
     - MUST be a Lightning BOLT 11 invoice for the number of `order_total_sat`. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
     - MUST be at most 2048 characters long.
@@ -361,7 +361,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
 
 **Client**
 
-- MUST pay the `ln_invoice`.
+- MUST pay the `bolt11_invoice`.
 - SHOULD pull `lsps1.get_order` to check the success of the payment.
 - The client gets refunded automatically in case the channel open failed, the order expires, or just before the payment times out.
 

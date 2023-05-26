@@ -109,9 +109,9 @@ The client MUST call `lsps1.info` first.
     - MUST be 0 or greater.
   - `max_initial_lsp_balance_sat` *LSPS0.sat* Maximum number of satoshi that the LSP will provide to the channel.
     - MUST be 0 or greater.
-  - `min_channel_balance_sat` *LSPS0.sat* Minimal channel size calculated by the sum of the requested `client_balance_sat` and `lsp_balance_sat`.
+  - `min_channel_balance_sat` *LSPS0.sat* Minimal channel size.
     - MUST be 0 or greater.
-  - `max_channel_balance_sat` *LSPS0.sat* Maximum channel size calculated by the sum of the requested `client_balance_sat` and `lsp_balance_sat`
+  - `max_channel_balance_sat` *LSPS0.sat* Maximum channel size.
     - MUST be 0 or greater.
 
 Every `min/max` options pair MUST ensure that `min <= max`.

@@ -170,7 +170,7 @@ The request is constructed depending on the client's needs.
       - Maximum length is 512 characters.
     - `refund_onchain_address <LSPS0.onchain_address>` Address where the LSP will send the funds if the order fails.
       - Client MAY omit this field.
-      - LSP MUST disable on-chain payments if the client did omit this field.
+      - LSP MUST disable on-chain payments if the client omits this field.
 - `announceChannel <boolean>` If the channel should be announced to the network (also known as public).
 
 
@@ -192,10 +192,8 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "token": "",
   "created_at": "2012-04-23T18:25:43.511Z",
   "expires_at": "2015-01-25T19:29:44.612Z",
-  "open": {
-    "announceChannel": true,
-    "state": "PENDING",
-  },
+  "announceChannel": true,
+  "state": "PENDING",
   "payment": {
     "state": "EXPECT_PAYMENT",
     "fee_total_sat": "8888",
@@ -229,13 +227,12 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - Maximum length is 512 characters.
 - `created_at <LSPS0.datetime>` Datetime when the order was created.
 - `expires_at <LSPS0.datetime>` Datetime when the order expires.
-- `open <object>` Describes channel open information.
-  - `announceChannel <boolean>` Mirrored from the request.
-  - `state <string enum>` Current state of the channel open.
-    - `PENDING` LSP is waiting for the client to pay.
-    - `OPENING` LSP is opening the channel.
-    - `OPEN` Channel is open.
-    - `FAILED` Channel open failed.
+- `announceChannel <boolean>` Mirrored from the request.
+- `state <string enum>` Current state of the channel open.
+  - `PENDING` LSP is waiting for the client to pay.
+  - `OPENING` LSP is opening the channel.
+  - `OPEN` Channel is open.
+  - `FAILED` Channel open failed.
 - `payment <object>` Contains everything about payments (see description further down).
 - `channel <object or null>` Contains information about the channel (see description further down).
   - MUST be null if the channel is not opened yet.
@@ -260,7 +257,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 - LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.
   - `%invalid_property%` MUST be one of the fields in the request body. MUST use `.` to separate nested fields.
-  - Example: `{ "property": "open.announceChannel", "message": "Not a boolean" }`.
+  - Example: `{ "property": "announceChannel", "message": "Not a boolean" }`.
 
 - LSP MUST validate the `token` field and return an error if the token is invalid.
 
@@ -371,7 +368,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
 **LSP**
 
 - MUST change the payment state to `HOLD` when the payment arrived.
-- MUST set open.state to `PENDING`.
+- MUST set state to `PENDING`.
 - If the channel has been opened successfully
     - MUST release the preimage and therefore complete the payment.
     - MUST set the payment state to `PAID`.
@@ -403,7 +400,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
 **LSP** State change
 
 - MUST change the payment state to `PAID` when all the payments for the order are confirmed.
-- MUST set open.state to `PENDING`.
+- MUST set state to `PENDING`.
 - If the order expired and the channel has NOT been opened, OR the channel open failed.
     - MUST refund the client to `refund_onchain_address`.
       - The number of satoshi to refund 
@@ -442,11 +439,11 @@ The LSP MUST open the channel under the following conditions:
 - MUST allow zero channel reserves if `supports_zero_channel_reserve`.
 
 In case the channel open succeeds
-- MUST set open.state to `SUCCESS`.
+- MUST set state to `SUCCESS`.
 - MUST update the channel object.
 
 In case the channel open failed
-- MUST set open.state to `FAILED`.
+- MUST set state to `FAILED`.
 
 
 ##### Note about Channel Batching

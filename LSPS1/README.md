@@ -26,7 +26,7 @@ This specification uses data types defined in [LSPS0 Common Schemas](LSPS0/commo
 
 ### Overprovisioning
 
-The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as long as it benefits the client.
+The LSP is allowed to overprovision channels/on-chain-payments/on-chain-fees as long as it benefits the client.
 
 > **Rationale** The lsp may need to "bin" UTXOs.
 
@@ -34,13 +34,13 @@ The LSP is allowed to overprovision channels/onchain-payments/onchain-fees as lo
 
 LSP will return errors according to the [JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification (see [LSPS0 Error Handling](https://github.com/BitcoinAndLightningLayerSpecs/lsp/tree/main/LSPS0#error-handling)).
 
-## Overview
+## Order Flow Overview
 
-1. Client calls `lsps1.info` to get the LSP's API version and options.
-2. Client calls `lsps1.create_order` to create an order.
-3. Client pays the order either onchain or offchain.
-4. LSP opens the channel as soon as they payment is confirmed.
-5. LSP refunds the client in case the channel open failed.
+* Client calls `lsps1.info` to get the LSP's API version and options.
+* Client calls `lsps1.create_order` to create an order.
+* Client pays the order either on-chain or off-chain.
+* LSP opens the channel as soon as they payment is confirmed.
+  * Channel open failed: LSP refunds the client.
 
 ## API
 
@@ -86,14 +86,14 @@ The client MUST call `lsps1.info` first.
   - `minimum_depth_channel` *uint8* Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends `channel_ready` (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
-  - `minimum_onchain_payment_confirmations` *uint8* Minimum number of block confirmations before the LSP accepts an onchain payment as confirmed. This is a lower bound. The LSP MAY set `onchain_block_confirmations_required` in the order even higher.
+  - `minimum_onchain_payment_confirmations` *uint8* Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY set `onchain_block_confirmations_required` in the order even higher.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
   - `supports_zero_channel_reserve` *boolean* Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-  - `min_required_onchain_sat` *LSPS0.sat or null* Indicates the minimum amount of satoshi (`order_total_sat` see below) that is required for the LSP to accept a payment onchain.
-    - The LSP MUST allow onchain payments equal or above this value. 
+  - `min_required_onchain_sat` *LSPS0.sat or null* Indicates the minimum amount of satoshi (`order_total_sat` see below) that is required for the LSP to accept a payment on-chain.
+    - The LSP MUST allow on-chain payments equal or above this value. 
     - MUST be 0 or greater.
-    - MAY be null if onchain payments are NOT supported.
+    - MAY be null if on-chain payments are NOT supported.
   - `max_channel_expiry_blocks` *uint32* The maximum number of blocks a channel can be leased for.
     - MUST be 1 or greater.
   - `min_client_balance_sat` *LSPS0.sat* Minimum number of satoshi that the client MUST request.
@@ -165,7 +165,7 @@ The request is constructed depending on the client's needs.
       - Maximum length is 512 characters.
     - `refund_onchain_address` *LSPS0.onchain_address* Address where the LSP will send the funds if the order fails.
       - Client MAY omit this field.
-      - LSP MUST disable onchain payments if the client did omit this field.
+      - LSP MUST disable on-chain payments if the client did omit this field.
 - `announceChannel` *boolean* If the channel should be announced to the network (also known as public).
 
 
@@ -297,7 +297,7 @@ The client MAY check the current status of the order at any point.
 
 This section describes the payment object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `ln_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
 
-> **Rationale** Onchain Payments are required for payments with higher amounts, especially to push `client_balance_sat` to the client. Onchain payments are also useful to onboard new users to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
+> **Rationale** On-chain Payments are required for payments with higher amounts, especially to push `client_balance_sat` to the client. On-chain payments are also useful to onboard new users to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
 
 **Payment object**
@@ -324,8 +324,8 @@ This section describes the payment object returned by `lsps1.create_order` and `
 - `state`: *string enum* MUST be one of these values:
     - `EXPECT_PAYMENT` Payment expected.
     - `HOLD` Lighting payment arrived, preimage NOT released.
-    - `PAID` Lightning payment arrived, preimage released OR full `order_total_sat` onchain payment arrived.
-    - `REFUNDED` Lightning payment or onchain payment has been refunded.
+    - `PAID` Lightning payment arrived, preimage released OR full `order_total_sat` on-chain payment arrived.
+    - `REFUNDED` Lightning payment or on-chain payment has been refunded.
 - `fee_total_sat` *LSPS0.sat* The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` *LSPS0.sat* What the client needs to pay in total to open the requested channel.
   - MUST be the fee_total_sat plus the client_balance_sat requested in satoshi.
@@ -333,27 +333,27 @@ This section describes the payment object returned by `lsps1.create_order` and `
     - MUST be a Lightning BOLT 11 invoice for the number of `order_total_sat`. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
     - MUST be a maximum of 2048 characters.
-- `onchain_address` *LSPS0.onchain_address* Onchain address the client can pay the order_total_sat to
+- `onchain_address` *LSPS0.onchain_address* On-chain address the client can pay the order_total_sat to
     - MUST be null IF one of the following is true:
       - `options.min_required_onchain_sat` is greater than order_total_sat.
-      - `options.min_required_onchain_sat` is null and onchain payments are therefore not supported.
+      - `options.min_required_onchain_sat` is null and on-chain payments are therefore not supported.
       - `refund_onchain_address` is null.
-- `required_onchain_block_confirmations` *uint8* Minimum number of block confirmations that are required for the onchain payment to be considered confirmed.
+- `required_onchain_block_confirmations` *uint8* Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.minimum_onchain_payment_confirmations`.
     - MUST be null if `onchain_address` is null.
-- `minimum_fee_for_0conf` *LSPS0.onchain_fee* Fee rate for onchain payment in case the client wants the payment to be confirmed without a confirmation.
+- `minimum_fee_for_0conf` *LSPS0.onchain_fee* Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
     - MUST be null if `onchain_address` is null.
     - MUST be null if `required_onchain_block_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
-- `onchain_payments` *List of objects* Detected onchain payments.
+- `onchain_payments` *List of objects* Detected on-chain payments.
     - MUST contain all incoming/confirmed outpoints to onchain_address. 
     - `outpoint` *string* MUST be an outpoint in the form of [txid:vout](https://btcinformation.org/en/glossary/outpoint).
     - `sat` *LSPS0.sat* MUST contain the received satoshi.
     - `confirmed` *boolean* Indicates if the LSP sees the transaction as confirmed.
 
-> **Rationale required_onchain_block_confirmations** The main risk for an LSP is that the client pays the onchain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the onchain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
+> **Rationale required_onchain_block_confirmations** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
 
-> **Rationale minimum_fee_for_0conf** The client MAY want to have instant confirmation of the onchain payment. The LSP can mitigate the risk of a double spend by requiring a high fee rate. The client can then decide if he wants to pay the high fee rate or wait for the onchain payment to be confirmed once.
+> **Rationale minimum_fee_for_0conf** The client MAY want to have instant confirmation of the on-chain payment. The LSP can mitigate the risk of a double spend by requiring a high fee rate. The client can then decide if he wants to pay the high fee rate or wait for the on-chain payment to be confirmed once.
 
 #### 3.1 Lightning Payment
 
@@ -410,7 +410,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
 
 **0conf risk management**
 
-Every LSP that accepts 0conf transactions is responsible to do their own risk management. `minimum_onchain_payment_confirmations` and `minimum_fee_for_0conf` are the risk management tools the LSP has. The main risk lies in the fact that the client can double spend the onchain payment. Opening a 0conf channel is not risky for the LSP anymore if the LSP is sure of the onchain payment.
+Every LSP that accepts 0conf transactions is responsible to do their own risk management. `minimum_onchain_payment_confirmations` and `minimum_fee_for_0conf` are the risk management tools the LSP has. The main risk lies in the fact that the client can double spend the on-chain payment. Opening a 0conf channel is not risky for the LSP anymore if the LSP is sure of the on-chain payment.
 
 `minimum_onchain_payment_confirmations` and `minimum_fee_for_0conf` are the best estimations the LSP makes at the time of the order creation. These estimations MAY changed over time so the LSP MAY confirm a transaction ealier or later. Therefore, the client MUST NOT rely on the LSP confirming the transaction within the given time frame.
 
@@ -421,7 +421,7 @@ Every LSP that accepts 0conf transactions is responsible to do their own risk ma
 ### 4 Channel Open
 
 The LSP MUST open the channel under the following conditions:
-- The payment arrived and is in state `HOLD` (lightning) or `PAID` (onchain).
+- The payment arrived and is in state `HOLD` (lightning) or `PAID` (on-chain).
 
 **LSP**
 - MUST wait for a peer connection before attempting a channel open.
@@ -431,7 +431,7 @@ The LSP MUST open the channel under the following conditions:
         - MAY overprovision.
     - MUST push `client_balance_sat` to the client.
         - MAY overprovision.
-    - MUST use a high enough onchain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the client paid the order.
+    - MUST use a high enough on-chain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the client paid the order.
         - MAY overprovision.
 - MUST send `channel_ready` after the funding transaction has `minimum_depth_channel` confirmations.
 - MUST allow zero channel reserves if `supports_zero_channel_reserve`.
@@ -476,7 +476,7 @@ In case the channel open failed
   - `opened_at` *LSPS0.datetime* Datetime when the opening transaction has been published.
   - `open_transaction`: *string* TXID of the opening transaction.
   - `scid` *LSPS0.SCID or null* Short channel id. 
-    - MUST be null before the channel is confirmed onchain.
+    - MUST be null before the channel is confirmed on-chain.
   - `expires_at` *LSPS0.datetime* Ealierst datetime when the channel MAY be closed by the LSP. 
     - MUST respect `channel_expiry_blocks`. 
     - MAY overprovision.

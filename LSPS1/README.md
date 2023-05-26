@@ -68,7 +68,7 @@ The client MUST call `lsps1.info` first.
   "supported_versions": [2],
   "website": "http://example.com/contact",
   "options": {
-      "minimum_depth_channel": 0,
+      "minimum_channel_confirmations": 0,
       "minimum_onchain_payment_confirmations": 1,
       "supports_zero_channel_reserve": true,
       "min_onchain_payment_size_sat": null,
@@ -88,7 +88,7 @@ The client MUST call `lsps1.info` first.
 - `website` *string* Website of the LSP.
   - MUST be at most 256 characters long.
 - `options` *dictionary* Dictionary of all options supported by the LSP.
-  - `minimum_depth_channel` *uint8* Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
+  - `minimum_channel_confirmations` *uint8* Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
   - `minimum_onchain_payment_confirmations` *uint8* Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY set `onchain_block_confirmations_required` in the order even higher.
@@ -438,7 +438,7 @@ The LSP MUST open the channel under the following conditions:
         - MAY overprovision.
     - MUST use a high enough on-chain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the client paid the order.
         - MAY overprovision.
-- MUST send `channel_ready` after the funding transaction has `minimum_depth_channel` confirmations.
+- MUST send `channel_ready` after the funding transaction has `minimum_channel_confirmations`.
 - MUST allow zero channel reserves if `supports_zero_channel_reserve`.
 
 In case the channel open succeeds

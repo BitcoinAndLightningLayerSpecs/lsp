@@ -51,7 +51,7 @@ LSP will return errors according to the [JSON-RPC 2.0](https://www.jsonrpc.org/s
 | Idempotent      | Yes        |
 
 
-`lsps1.info` is the entrypoint for each client using the api. It lists the supported versions of the api and all options in a dictionary.
+`lsps1.info` is the entrypoint for each client using the API. It lists the supported versions of the API and all options in a dictionary.
 The client MUST call `lsps1.info` first.
 
 **Request** No parameters needed.
@@ -60,7 +60,7 @@ The client MUST call `lsps1.info` first.
 
 ```JSON
 {
-  "versions": [2],
+  "supported_versions": [2],
   "website": "http://example.com/contact",
   "options": {
       "minimum_depth_channel": 0,
@@ -78,8 +78,8 @@ The client MUST call `lsps1.info` first.
 }
 ```
 
-- `versions` *List of uint16* List of all supported API versions by the LSP.
-  - Client MUST compare the version of the api and therefore ensure compatibility.
+- `supported_versions` *List of uint16* List of all supported API versions by the LSP.
+  - Client MUST compare the version of the API and therefore ensure compatibility.
 - `website` *string* Website of the LSP.
   - MUST be a maximum of 256 characters.
 - `options` *dictionary* Dictionary of all options supported by the LSP.
@@ -144,7 +144,7 @@ The request is constructed depending on the client's needs.
 
 - `api_version` *uint16* API version that the client wants to work with.
   - MUST be `2` for this version of the spec. 
-  - MUST match one of the versions listed in `lsps1.info.versions`.
+  - MUST match one of the versions listed in `lsps1.info.supported_versions`.
 - `order` MUST be provided.
     - `lsp_balance_sat` *LSPS0.sat* How many satoshi the LSP will provide on their side.
       - MUST be 1 or greater. 
@@ -214,7 +214,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - MUST be unique.
   - MUST be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
   - MUST be a maximum of 64 characters.
-- `api_version` *uint16* Version of the api that has been used to create the order.
+- `api_version` *uint16* Version of the API that has been used to create the order.
 - `lsp_balance_sat` *LSPS0.sat* Mirrored from the request.
 - `client_balance_sat` *LSPS0.sat* Mirrored from the request.
 - `confirms_within_blocks` *uint8* Mirrored from the request.

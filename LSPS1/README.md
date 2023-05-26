@@ -85,9 +85,9 @@ The client MUST call `lsps1.info` first.
 
 - `supported_versions` *List of uint16*: List of all supported API versions by the LSP.
   - Client MUST compare the version of the API and therefore ensure compatibility.
-- `website` *string*: Website of the LSP.
+- `website <string>` *string*: Website of the LSP.
   - MUST be at most 256 characters long.
-- `options` *dictionary*: Dictionary of all options supported by the LSP.
+- `options <dictionary>` *dictionary*: Dictionary of all options supported by the LSP.
   - `minimum_channel_confirmations` *uint8*: Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.

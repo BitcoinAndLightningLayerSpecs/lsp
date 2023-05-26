@@ -83,35 +83,35 @@ The client MUST call `lsps1.info` first.
 }
 ```
 
-- `supported_versions` *List of uint16*: List of all supported API versions by the LSP.
+- `supported_versions <Array<uint16>>` List of all supported API versions by the LSP.
   - Client MUST compare the version of the API and therefore ensure compatibility.
-- `website <string>` *string*: Website of the LSP.
+- `website <string>` Website of the LSP.
   - MUST be at most 256 characters long.
-- `options <dictionary>` *dictionary*: Dictionary of all options supported by the LSP.
-  - `minimum_channel_confirmations` *uint8*: Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
+- `options <dictionary>` Dictionary of all options supported by the LSP.
+  - `minimum_channel_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
-  - `minimum_onchain_payment_confirmations` *uint8*: Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.onchain_block_confirmations_required`.
+  - `minimum_onchain_payment_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.onchain_block_confirmations_required`.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
-  - `supports_zero_channel_reserve` *boolean*: Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-  - `min_onchain_payment_size_sat` *LSPS0.sat or null*: Indicates the minimum amount of satoshi (`order_total_sat` see below) that is required for the LSP to accept a payment on-chain.
+  - `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
+  - `min_onchain_payment_size_sat <LSPS0.sat or null>` Indicates the minimum amount of satoshi (`order_total_sat` see below) that is required for the LSP to accept a payment on-chain.
     - The LSP MUST allow on-chain payments equal or above this value. 
     - MUST be 0 or greater.
     - MAY be null if on-chain payments are NOT supported.
-  - `max_channel_expiry_blocks` *uint32*: The maximum number of blocks a channel can be leased for.
+  - `max_channel_expiry_blocks <uint32>` The maximum number of blocks a channel can be leased for.
     - MUST be 1 or greater.
-  - `min_initial_client_balance_sat` *LSPS0.sat*: Minimum number of satoshi that the client MUST request.
+  - `min_initial_client_balance_sat <LSPS0.sat>` Minimum number of satoshi that the client MUST request.
     - MUST be 0 or greater.
-  - `max_initial_client_balance_sat` *LSPS0.sat*: Maximum number of satoshi that the client MUST request.
+  - `max_initial_client_balance_sat <LSPS0.sat>` Maximum number of satoshi that the client MUST request.
     - MUST be 0 or greater.
-  - `min_initial_lsp_balance_sat` *LSPS0.sat*: Minimum number of satoshi that the LSP will provide to the channel.
+  - `min_initial_lsp_balance_sat <LSPS0.sat>` Minimum number of satoshi that the LSP will provide to the channel.
     - MUST be 0 or greater.
-  - `max_initial_lsp_balance_sat` *LSPS0.sat*: Maximum number of satoshi that the LSP will provide to the channel.
+  - `max_initial_lsp_balance_sat <LSPS0.sat>` Maximum number of satoshi that the LSP will provide to the channel.
     - MUST be 0 or greater.
-  - `min_channel_balance_sat` *LSPS0.sat*: Minimal channel size.
+  - `min_channel_balance_sat <LSPS0.sat>` Minimal channel size.
     - MUST be 0 or greater.
-  - `max_channel_balance_sat` *LSPS0.sat*: Maximum channel size.
+  - `max_channel_balance_sat <LSPS0.sat>` Maximum channel size.
     - MUST be 0 or greater.
 
 Every `min/max` options pair MUST ensure that `min <= max`.

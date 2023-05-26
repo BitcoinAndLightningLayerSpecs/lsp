@@ -73,10 +73,10 @@ The client MUST call `lsps1.info` first.
       "supports_zero_channel_reserve": true,
       "min_onchain_payment_size_sat": null,
       "max_channel_expiry_blocks": 20160,
-      "min_client_balance_sat": "20000",
-      "max_client_balance_sat": "100000000",
-      "min_lsp_balance_sat": "0",
-      "max_lsp_balance_sat": "100000000",
+      "min_initial_client_balance_sat": "20000",
+      "max_initial_client_balance_sat": "100000000",
+      "min_initial_lsp_balance_sat": "0",
+      "max_initial_lsp_balance_sat": "100000000",
       "min_channel_balance_sat": "50000",
       "max_channel_balance_sat": "100000000"
   }
@@ -101,13 +101,13 @@ The client MUST call `lsps1.info` first.
     - MAY be null if on-chain payments are NOT supported.
   - `max_channel_expiry_blocks` *uint32* The maximum number of blocks a channel can be leased for.
     - MUST be 1 or greater.
-  - `min_client_balance_sat` *LSPS0.sat* Minimum number of satoshi that the client MUST request.
+  - `min_initial_client_balance_sat` *LSPS0.sat* Minimum number of satoshi that the client MUST request.
     - MUST be 0 or greater.
-  - `max_client_balance_sat` *LSPS0.sat* Maximum number of satoshi that the client MUST request.
+  - `max_initial_client_balance_sat` *LSPS0.sat* Maximum number of satoshi that the client MUST request.
     - MUST be 0 or greater.
-  - `min_lsp_balance_sat` *LSPS0.sat* Minimum number of satoshi that the LSP will provide to the channel.
+  - `min_initial_lsp_balance_sat` *LSPS0.sat* Minimum number of satoshi that the LSP will provide to the channel.
     - MUST be 0 or greater.
-  - `max_lsp_balance_sat` *LSPS0.sat* Maximum number of satoshi that the LSP will provide to the channel.
+  - `max_initial_lsp_balance_sat` *LSPS0.sat* Maximum number of satoshi that the LSP will provide to the channel.
     - MUST be 0 or greater.
   - `min_channel_balance_sat` *LSPS0.sat* Minimal channel size calculated by the sum of the requested `client_balance_sat` and `lsp_balance_sat`.
     - MUST be 0 or greater.
@@ -153,12 +153,12 @@ The request is constructed depending on the client's needs.
 - `order` MUST be provided.
     - `lsp_balance_sat` *LSPS0.sat* How many satoshi the LSP will provide on their side.
       - MUST be 1 or greater. 
-      - MUST be equal or below `base_api.max_lsp_balance_sat`.
-      - MUST be equal or greater `base_api.min_lsp_balance_sat`.
+      - MUST be equal or below `base_api.max_initial_lsp_balance_sat`.
+      - MUST be equal or greater `base_api.min_initial_lsp_balance_sat`.
     - `client_balance_sat` *LSPS0.sat* How many satoshi the client will provide on their side. The client send these funds to the LSP. The LSP will push these funds back to the client.
       - MUST be 0 or greater. 
-      - MUST be below or equal `base_api.max_client_balance_sat`.
-      - MUST be greater or equal `base_api.min_client_balance_sat`.
+      - MUST be below or equal `base_api.max_initial_client_balance_sat`.
+      - MUST be greater or equal `base_api.min_initial_client_balance_sat`.
     - `confirms_within_blocks` *uint8* Number of blocks the client wants to wait maximally for the channel to be confirmed.
       - MUST be 0 or greater.
       - LSP MAY always confirm the channel faster than requested.
@@ -256,7 +256,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 - LSP MUST validate the order against the options defined in `lsps1.info.options`. LSP MUST return an `1000` error in case of a mismatch.
   - `%option_mismatch_property%` MUST be one of the fields in `lsps1.info.options`.
-  - Example: `{ "property": "min_client_balance_sat" }`.
+  - Example: `{ "property": "min_initial_client_balance_sat" }`.
 
 - LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.
   - `%invalid_property%` MUST be one of the fields in the request body. MUST use `.` to separate nested fields.

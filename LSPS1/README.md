@@ -233,8 +233,8 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - `OPENING` LSP is opening the channel.
   - `OPEN` Channel is open.
   - `FAILED` Channel open failed.
-- `payment <object>` Contains everything about payments (see description further down).
-- `channel <object or null>` Contains information about the channel (see description further down).
+- `payment <object>` Contains everything about payments, see [3. Payment](#3-payment).
+- `channel <object or null>` Contains information about the channel, see [5 Channel Object](5-channel-object).
   - MUST be null if the channel is not opened yet.
   
 

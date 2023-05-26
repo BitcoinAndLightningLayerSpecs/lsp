@@ -51,7 +51,12 @@ LSP will return errors according to the [JSON-RPC 2.0](https://www.jsonrpc.org/s
 | Idempotent      | Yes        |
 
 
-`lsps1.info` is the entrypoint for each client using the API. It lists the supported versions of the API and all options in a dictionary.
+`lsps1.info` is the entrypoint for each client using the API. It lists the supported versions of the API and all options in a dictionary. 
+
+- The LSP SHOULD NOT change the values in `lsps1.info` more than once per day.
+
+> **Rationale Change frequency** The LSP should not change values in `lsps1.info` too frequently. Lightning Explorer may scrape these values and provide an overview of all LSPs. If the values change too frequently, the Lightning Explorer may not be able to keep up with the changes. Changing them a maximum of once a day gives explorer enough time to scrape. Once a day has been chosen as it is a similar rate-limit that core-lightning puts on the lightning gossip.
+
 The client MUST call `lsps1.info` first.
 
 **Request** No parameters needed.
@@ -66,7 +71,7 @@ The client MUST call `lsps1.info` first.
       "minimum_depth_channel": 0,
       "minimum_onchain_payment_confirmations": 1,
       "supports_zero_channel_reserve": true,
-      "min_required_onchain_sat": null,
+      "min_onchain_payment_size_sat": null,
       "max_channel_expiry_blocks": 20160,
       "min_client_balance_sat": "20000",
       "max_client_balance_sat": "100000000",
@@ -90,7 +95,7 @@ The client MUST call `lsps1.info` first.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
   - `supports_zero_channel_reserve` *boolean* Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-  - `min_required_onchain_sat` *LSPS0.sat or null* Indicates the minimum amount of satoshi (`order_total_sat` see below) that is required for the LSP to accept a payment on-chain.
+  - `min_onchain_payment_size_sat` *LSPS0.sat or null* Indicates the minimum amount of satoshi (`order_total_sat` see below) that is required for the LSP to accept a payment on-chain.
     - The LSP MUST allow on-chain payments equal or above this value. 
     - MUST be 0 or greater.
     - MAY be null if on-chain payments are NOT supported.
@@ -335,8 +340,8 @@ This section describes the payment object returned by `lsps1.create_order` and `
     - MUST be a maximum of 2048 characters.
 - `onchain_address` *LSPS0.onchain_address* On-chain address the client can pay the order_total_sat to
     - MUST be null IF one of the following is true:
-      - `options.min_required_onchain_sat` is greater than order_total_sat.
-      - `options.min_required_onchain_sat` is null and on-chain payments are therefore not supported.
+      - `options.min_onchain_payment_size_sat` is greater than order_total_sat.
+      - `options.min_onchain_payment_size_sat` is null and on-chain payments are therefore not supported.
       - `refund_onchain_address` is null.
 - `required_onchain_block_confirmations` *uint8* Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.minimum_onchain_payment_confirmations`.

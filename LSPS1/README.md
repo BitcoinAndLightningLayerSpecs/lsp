@@ -86,7 +86,7 @@ The client MUST call `lsps1.info` first.
 - `supported_versions` *List of uint16* List of all supported API versions by the LSP.
   - Client MUST compare the version of the API and therefore ensure compatibility.
 - `website` *string* Website of the LSP.
-  - MUST be a maximum of 256 characters.
+  - MUST be at most 256 characters long.
 - `options` *dictionary* Dictionary of all options supported by the LSP.
   - `minimum_depth_channel` *uint8* Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends `channel_ready` (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
@@ -218,7 +218,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 - `id` *string* Id of this specific order.
   - MUST be unique.
   - MUST be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
-  - MUST be a maximum of 64 characters.
+  - MUST be at most 64 characters long.
 - `api_version` *uint16* Version of the API that has been used to create the order.
 - `lsp_balance_sat` *LSPS0.sat* Mirrored from the request.
 - `client_balance_sat` *LSPS0.sat* Mirrored from the request.
@@ -337,7 +337,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
 - `ln_invoice` *string*
     - MUST be a Lightning BOLT 11 invoice for the number of `order_total_sat`. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
-    - MUST be a maximum of 2048 characters.
+    - MUST be at most 2048 characters long.
 - `onchain_address` *LSPS0.onchain_address* On-chain address the client can pay the order_total_sat to
     - MUST be null IF one of the following is true:
       - `options.min_onchain_payment_size_sat` is greater than order_total_sat.

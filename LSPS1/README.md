@@ -1,5 +1,6 @@
 # LSPS1 Channel Request
 
+
 | Name    	| `channel_request`             |
 |---------- |------------------------------	|
 | Version 	| 2                             |
@@ -28,7 +29,7 @@ This specification uses data types defined in [LSPS0 Common Schemas](LSPS0/commo
 
 The LSP is allowed to overprovision channels/on-chain-payments/on-chain-fees as long as it benefits the client.
 
-> **Rationale** The lsp may need to "bin" UTXOs.
+> **Rationale** The LSP may need to "bin" UTXOs.
 
 ### Errors
 
@@ -41,6 +42,7 @@ LSP will return errors according to the [JSON-RPC 2.0](https://www.jsonrpc.org/s
 * Client pays the order either on-chain or off-chain.
 * LSP opens the channel as soon as they payment is confirmed.
   * Channel open failed: LSP refunds the client.
+
 
 ## API
 

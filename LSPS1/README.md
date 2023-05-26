@@ -55,7 +55,7 @@ LSP will return errors according to the [JSON-RPC 2.0](https://www.jsonrpc.org/s
 
 - The LSP SHOULD NOT change the values in `lsps1.info` more than once per day.
 
-> **Rationale Change frequency** The LSP should not change values in `lsps1.info` too frequently. Lightning Explorer may scrape these values and provide an overview of all LSPs. If the values change too frequently, the Lightning Explorer may not be able to keep up with the changes. Changing them a maximum of once a day gives explorer enough time to scrape. Once a day has been chosen as it is a similar rate-limit that core-lightning puts on the lightning gossip.
+> **Rationale Change frequency** The LSP should not change values in `lsps1.info` too frequently. Lightning Explorers may scrape these values and provide an overview of all LSPs. If the values change too frequently, Lightning Explorers may not be able to keep up with the changes. Changing them a maximum of once a day gives explorer enough time to scrape. Once a day has been chosen as it is a similar rate-limit that core-lightning puts on the lightning gossip.
 
 The client MUST call `lsps1.info` first.
 
@@ -91,11 +91,11 @@ The client MUST call `lsps1.info` first.
   - `minimum_channel_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
-  - `minimum_onchain_payment_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.onchain_block_confirmations_required`.
+  - `minimum_onchain_payment_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.onchain_block_confirmations_required` depending on the size of the channels and risk management.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
   - `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-  - `min_onchain_payment_size_sat <LSPS0.sat or null>` Indicates the minimum amount of satoshi (`order_total_sat` see below) that is required for the LSP to accept a payment on-chain.
+  - `min_onchain_payment_size_sat <LSPS0.sat or null>` Indicates the minimum amount of satoshi (`order_total_sat`) that is required for the LSP to accept a payment on-chain.
     - The LSP MUST allow on-chain payments equal or above this value. 
     - MUST be 0 or greater.
     - MAY be null if on-chain payments are NOT supported.
@@ -133,14 +133,12 @@ The request is constructed depending on the client's needs.
 ```json
 {
   "api_version": 2,
-  "order": {
-    "lsp_balance_sat": "5000000",
-    "client_balance_sat": "2000000",
-    "confirms_within_blocks": 1,
-    "channel_expiry_blocks": 144,
-    "token": "",
-    "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h",
-  },
+  "lsp_balance_sat": "5000000",
+  "client_balance_sat": "2000000",
+  "confirms_within_blocks": 1,
+  "channel_expiry_blocks": 144,
+  "token": "",
+  "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h",
   "announceChannel": true
 }
 ```
@@ -150,28 +148,27 @@ The request is constructed depending on the client's needs.
 - `api_version <uint16>` API version that the client wants to work with.
   - MUST be `2` for this version of the spec. 
   - MUST match one of the versions listed in `lsps1.info.supported_versions`.
-- `order <object>` MUST be provided.
-    - `lsp_balance_sat <LSPS0.sat>` How many satoshi the LSP will provide on their side.
-      - MUST be 1 or greater. 
-      - MUST be equal or below `base_api.max_initial_lsp_balance_sat`.
-      - MUST be equal or greater `base_api.min_initial_lsp_balance_sat`.
-    - `client_balance_sat <LSPS0.sat>` How many satoshi the client will provide on their side. The client send these funds to the LSP. The LSP will push these funds back to the client.
-      - MUST be 0 or greater. 
-      - MUST be below or equal `base_api.max_initial_client_balance_sat`.
-      - MUST be greater or equal `base_api.min_initial_client_balance_sat`.
-    - `confirms_within_blocks <uint8>` Number of blocks the client wants to wait maximally for the channel to be confirmed.
-      - MUST be 0 or greater.
-      - LSP MAY always confirm the channel faster than requested.
-    - `channel_expiry_blocks <uint32>` How long the channel is leased for in block time.
-      - MUST be 1 or greater. 
-      - MUST be below or equal `base_api.max_channel_expiry_blocks`.
-    - `token <string>` Field for arbitrary data like a coupon code or a authentication token.
-      - Client MAY omit this field.
-      - Maximum length is 512 characters.
-    - `refund_onchain_address <LSPS0.onchain_address>` Address where the LSP will send the funds if the order fails.
-      - Client MAY omit this field.
-      - LSP MUST disable on-chain payments if the client omits this field.
-- `announceChannel <boolean>` If the channel should be announced to the network (also known as public).
+- `lsp_balance_sat <LSPS0.sat>` How many satoshi the LSP will provide on their side.
+  - MUST be 1 or greater. 
+  - MUST be equal or below `base_api.max_initial_lsp_balance_sat`.
+  - MUST be equal or greater `base_api.min_initial_lsp_balance_sat`.
+- `client_balance_sat <LSPS0.sat>` How many satoshi the client will provide on their side. The client send these funds to the LSP. The LSP will push these funds back to the client.
+  - MUST be 0 or greater. 
+  - MUST be below or equal `base_api.max_initial_client_balance_sat`.
+  - MUST be greater or equal `base_api.min_initial_client_balance_sat`.
+- `confirms_within_blocks <uint8>` Number of blocks the client wants to wait maximally for the channel to be confirmed.
+  - MUST be 0 or greater.
+  - LSP MAY always confirm the channel faster than requested.
+- `channel_expiry_blocks <uint32>` How long the channel is leased for in block time.
+  - MUST be 1 or greater. 
+  - MUST be below or equal `base_api.max_channel_expiry_blocks`.
+- `token <string>` Field for arbitrary data like a coupon code or a authentication token.
+  - Client MAY omit this field.
+  - Maximum length is 512 characters.
+- `refund_onchain_address <LSPS0.onchain_address>` Address where the LSP will send the funds if the order fails.
+  - Client MAY omit this field.
+  - LSP MUST disable on-chain payments if the client omits this field.
+- `announceChannel <boolean>` If the channel should be announced to the network (also known as public/private channels).
 
 
 > **Rationale `client_balance_sat`** Client MAY want to have initial spending balance on their wallet or start with a balanced channel.
@@ -193,7 +190,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "created_at": "2012-04-23T18:25:43.511Z",
   "expires_at": "2015-01-25T19:29:44.612Z",
   "announceChannel": true,
-  "state": "PENDING",
+  "order_state": "CREATED",
   "payment": {
     "state": "EXPECT_PAYMENT",
     "fee_total_sat": "8888",
@@ -215,8 +212,8 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 - `order_id <string>` Id of this specific order.
   - MUST be unique.
-  - MUST be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
   - MUST be at most 64 characters long.
+  - SHOULD be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
 - `api_version <uint16>` Version of the API that has been used to create the order.
 - `lsp_balance_sat <LSPS0.sat>` Mirrored from the request.
 - `client_balance_sat <LSPS0.sat>` Mirrored from the request.
@@ -225,14 +222,13 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 - `token <string>` Mirrored from the request.
   - MUST be an empty string if the token was not provided.
   - Maximum length is 512 characters.
+- `announceChannel <boolean>` Mirrored from the request.
 - `created_at <LSPS0.datetime>` Datetime when the order was created.
 - `expires_at <LSPS0.datetime>` Datetime when the order expires.
-- `announceChannel <boolean>` Mirrored from the request.
-- `state <string enum>` Current state of the channel open.
-  - `PENDING` LSP is waiting for the client to pay.
-  - `OPENING` LSP is opening the channel.
-  - `OPEN` Channel is open.
-  - `FAILED` Channel open failed.
+- `order_state <string enum>` Current state of the order.
+  - `CREATED` Order has been created. Default value.
+  - `COMPLETED` LSP has published funding transaction.
+  - `FAILED` Order failed.
 - `payment <object>` Contains everything about payments, see [3. Payment](#3-payment).
 - `channel <object or null>` Contains information about the channel, see [5 Channel Object](5-channel-object).
   - MUST be null if the channel funding transaction is not published yet.
@@ -261,11 +257,11 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 - LSP MUST validate the `token` field and return an error if the token is invalid.
 
-> **Rationale `token` validation** The client should be informed if the token code is invalid. Ignoring the invalid token and creating an invoice without the potentially discount or other side effect is not good UX. Ignoring the invalid token will also NOT prevent anybody bruteforcing the token because the client will still detect if the LSP has given a discount.
+> **Rationale `token` validation** The client should be informed if the token is invalid. Ignoring the invalid token and creating an order without the potentially discount or other side effect is not good UX. Ignoring the invalid token will also NOT prevent anybody bruteforcing the token because the client will still detect if the LSP has given a discount.
 
 - LSP MAY reject a client by it's node_id or IP. In this case, the LSP MUST return a `1001` error.
   - %human_message% MAY simply be "Client rejected".
-  - Example: `{ "message": "Node id banned." }`.
+  - Example: `{ "message": "Client rejects" }`.
 
 > **Rationale Client rejected** LSPs can reject a client for example for misbehaviour. LSPs can reject a node on two levels: Prevent a peer connection OR disable order creation. Preventing a peer connection might not work in case you still want to allow other functions to keep working, for example an existing channel.
 
@@ -290,16 +286,16 @@ The client MAY check the current status of the order at any point.
 
 **Errors**
 
-| Code   | Message | Data      | Description |
-| ----   | ------- | ---       | ----------- |
-| 404    | Not found  | {}        | Order with the requested order_id has not been found. |
+| Code   | Message   | Data    | Description                                           |
+| ------ | --------- | ------- | ----------------------------------------------------- |
+| 404    | Not found | {}      | Order with the requested order_id has not been found. |
 
 
 ### 3. Payment
 
-This section describes the payment object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `bolt11_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
+This section describes the `payment` object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `bolt11_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
 
-> **Rationale** On-chain Payments are required for payments with higher amounts, especially to push `client_balance_sat` to the client. On-chain payments are also useful to onboard new users to Lightining. Lightning payments are the preferred way to do payments because they are quick and easily refundable.
+> **Rationale** On-chain payments are required for payments with higher amounts, especially to push `client_balance_sat` to the client. On-chain payments are also useful to onboard new users to Lightining. On the other hand, Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
 
 **Payment object**
@@ -330,14 +326,14 @@ This section describes the payment object returned by `lsps1.create_order` and `
     - `REFUNDED` Lightning payment or on-chain payment has been refunded.
 - `fee_total_sat <LSPS0.sat>` The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat <LSPS0.sat>` What the client needs to pay in total to open the requested channel.
-  - MUST be the fee_total_sat plus the client_balance_sat requested in satoshi.
+  - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
 - `bolt11_invoice <string>`
-    - MUST be a Lightning BOLT 11 invoice for the number of `order_total_sat`. 
+    - MUST be a [Lightning BOLT 11 invoice](https://github.com/lightning/bolts/blob/master/11-payment-encoding.md) for the number of `order_total_sat`. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
     - MUST be at most 2048 characters long.
-- `onchain_address <LSPS0.onchain_address>` On-chain address the client can pay the order_total_sat to
+- `onchain_address <LSPS0.onchain_address>` On-chain address the client can pay the `order_total_sat` to
     - MUST be null IF one of the following is true:
-      - `options.min_onchain_payment_size_sat` is greater than order_total_sat.
+      - `options.min_onchain_payment_size_sat` is greater than `order_total_sat`.
       - `options.min_onchain_payment_size_sat` is null and on-chain payments are therefore not supported.
       - `refund_onchain_address` is null.
 - `required_onchain_block_confirmations <uint8>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
@@ -348,7 +344,7 @@ This section describes the payment object returned by `lsps1.create_order` and `
     - MUST be null if `required_onchain_block_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
 - `onchain_payments <Array<objects>>` Detected on-chain payments.
-    - MUST contain all incoming/confirmed outpoints to onchain_address. 
+    - MUST contain all incoming/confirmed outpoints to `onchain_address`. 
     - `outpoint <string>` MUST be an outpoint in the form of [txid:vout](https://btcinformation.org/en/glossary/outpoint).
     - `sat <LSPS0.sat>` MUST contain the received satoshi.
     - `confirmed <boolean>` Indicates if the LSP sees the transaction as confirmed.
@@ -367,14 +363,13 @@ This section describes the payment object returned by `lsps1.create_order` and `
 
 **LSP**
 
-- MUST change the payment state to `HOLD` when the payment arrived.
-- MUST set state to `PENDING`.
+- MUST change the `payment.state` to `HOLD` when the payment arrived.
 - If the channel has been opened successfully
     - MUST release the preimage and therefore complete the payment.
-    - MUST set the payment state to `PAID`.
+    - MUST set the `payment.state` to `PAID`.
 - If the channel failed to open or the order expired or shortly before the payment times out:
     - MUST reject the payment.
-    - MUST set the payment state to `REFUNDED`.
+    - MUST set the `payment.state` to `REFUNDED`.
 
 
 
@@ -399,15 +394,14 @@ This section describes the payment object returned by `lsps1.create_order` and `
 
 **LSP** State change
 
-- MUST change the payment state to `PAID` when all the payments for the order are confirmed.
-- MUST set state to `PENDING`.
+- MUST change the `payment.state` to `PAID` when all the payments for the order are confirmed.
 - If the order expired and the channel has NOT been opened, OR the channel open failed.
     - MUST refund the client to `refund_onchain_address`.
       - The number of satoshi to refund 
-        - MUST be `order_total_sat` MINUS transaction size * onchain_fee_rate. The LSP MUST choose a reasonable fee rate.
+        - MUST be `order_total_sat` MINUS transaction size * onchain fee rate. The LSP MUST choose a reasonable fee rate.
         - MAY overprovision.
-      - The LSP MUST bump the fees in case the transaction doesn't resolve within 6 hours.
-    - MUST set the payment state to `REFUNDED`.
+      - The LSP MUST bump the fee in case the transaction doesn't resolve within 6 hours.
+    - MUST set the payment `payment.state` to `REFUNDED`.
 
 
 **0conf risk management**
@@ -423,7 +417,7 @@ Every LSP that accepts 0conf transactions is responsible to do their own risk ma
 ### 4 Channel Open
 
 The LSP MUST open the channel under the following conditions:
-- The payment arrived and is in state `HOLD` (lightning) or `PAID` (on-chain).
+- `payment.state` is `HOLD` (lightning) or `PAID` (on-chain).
 
 **LSP**
 - MUST wait for a peer connection before attempting a channel open.
@@ -439,11 +433,12 @@ The LSP MUST open the channel under the following conditions:
 - MUST allow zero channel reserves if `supports_zero_channel_reserve`.
 
 In case the channel open succeeds
-- MUST set state to `SUCCESS`.
+- MUST set `order_state` to `COMPLETED`.
 - MUST update the channel object.
 
 In case the channel open failed
-- MUST set state to `FAILED`.
+- MUST set `order_state` to `FAILED`.
+- MUST issue a refund.
 
 
 ##### Note about Channel Batching
@@ -452,6 +447,8 @@ In case the channel open failed
 
 - MAY open channels in batches, opening multiple channels in one transaction.
   - In this case, the LSP MUST still ensure that the funding transaction gets confirmed after a maximum of `confirms_within_blocks` after the client payment completed.
+
+> **Rationale `confirms_within_blocks`** We use `confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch the channel. For example, if a client orders a channel within 5 blocks, the LSP may wait to publish the funding transaction for 3 blocks to batch channels and add a fee to the funding transaction to ensure it confirms within 2 blocks.
 
 
 ### 5 Channel Object

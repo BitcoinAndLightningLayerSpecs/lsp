@@ -174,7 +174,7 @@ The request is constructed depending on the client's needs.
 - `announceChannel <boolean>` If the channel should be announced to the network (also known as public).
 
 
-> **Rationale client_balance_sat** Client MAY want to have initial spending balance on their wallet or start with a balanced channel.
+> **Rationale `client_balance_sat`** Client MAY want to have initial spending balance on their wallet or start with a balanced channel.
 
 
 The client MUST check if [option_support_large_channel](https://bitcoinops.org/en/topics/large-channels/) is enabled before they order a channel larger than 16,777,216 satoshi.
@@ -261,7 +261,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 - LSP MUST validate the `token` field and return an error if the token is invalid.
 
-> **Rationale token validation** The client should be informed if the token code is invalid. Ignoring the invalid token and creating an invoice without the potentially discount or other side effect is not good UX. Ignoring the invalid token will also NOT prevent anybody bruteforcing the token because the client will still detect if the LSP has given a discount.
+> **Rationale `token` validation** The client should be informed if the token code is invalid. Ignoring the invalid token and creating an invoice without the potentially discount or other side effect is not good UX. Ignoring the invalid token will also NOT prevent anybody bruteforcing the token because the client will still detect if the LSP has given a discount.
 
 - LSP MAY reject a client by it's node_id or IP. In this case, the LSP MUST return a `1001` error.
   - %human_message% MAY simply be "Client rejected".
@@ -353,9 +353,9 @@ This section describes the payment object returned by `lsps1.create_order` and `
     - `sat <LSPS0.sat>` MUST contain the received satoshi.
     - `confirmed <boolean>` Indicates if the LSP sees the transaction as confirmed.
 
-> **Rationale required_onchain_block_confirmations** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
+> **Rationale `required_onchain_block_confirmations`** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
 
-> **Rationale minimum_fee_for_0conf** The client MAY want to have instant confirmation of the on-chain payment. The LSP can mitigate the risk of a double spend by requiring a high fee rate. The client can then decide if he wants to pay the high fee rate or wait for the on-chain payment to be confirmed once.
+> **Rationale `minimum_fee_for_0conf`** The client MAY want to have instant confirmation of the on-chain payment. The LSP can mitigate the risk of a double spend by requiring a high fee rate. The client can then decide if he wants to pay the high fee rate or wait for the on-chain payment to be confirmed once.
 
 #### 3.1 Lightning Payment
 

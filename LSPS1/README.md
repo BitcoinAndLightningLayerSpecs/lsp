@@ -230,7 +230,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - `COMPLETED` LSP has published funding transaction.
   - `FAILED` Order failed.
 - `payment <object>` Contains everything about payments, see [3. Payment](#3-payment).
-- `channel <object or null>` Contains information about the channel, see [5 Channel Object](5-channel-object).
+- `channel <object or null>` Contains information about the channel, see [4 Channel](4-channel).
   - MUST be null if the channel funding transaction is not published yet.
   
 
@@ -408,13 +408,45 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 
 Every LSP that accepts 0conf transactions is responsible to do their own risk management. `minimum_onchain_payment_confirmations` and `minimum_fee_for_0conf` are the risk management tools the LSP has. The main risk lies in the fact that the client can double spend the on-chain payment. Opening a 0conf channel is not risky for the LSP anymore if the LSP is sure of the on-chain payment.
 
-`minimum_onchain_payment_confirmations` and `minimum_fee_for_0conf` are the best estimations the LSP makes at the time of the order creation. These estimations MAY changed over time so the LSP MAY confirm a transaction ealier or later. Therefore, the client MUST NOT rely on the LSP confirming the transaction within the given time frame.
+`minimum_onchain_payment_confirmations` and `minimum_fee_for_0conf` are the best estimates of the LSP makes at the time of the order creation. These estimates MAY change over time so the LSP MAY confirm a transaction earlier or later. Therefore, the client MUST NOT rely on the LSP confirming the transaction within the given time frame.
 
 
+### 4. Channel
+
+**Channel object**
+
+```json
+"channel": {
+  "state": "OPENED",
+  "funded_at": "2012-04-23T18:25:43.511Z",
+  "funding_transaction": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae",
+  "scid": "643904x1419x1",
+  "expires_at": "2012-04-23T18:25:43.511Z",
+  "closing_transaction": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae",
+  "closed_at": "2012-04-23T18:25:43.511Z"
+}
+```
 
 
+- `channel <object>` Contains channel information. 
+  - MUST be null if the channel opening transaction has not been published yet.
+  - `state <string enum>` MUST be one of these values:
+      - `OPENING` Opening transaction published.
+      - `OPENED` Channel is open. LSP must allow payments. May be zero conf and therefore immediate.
+      - `CLOSED` Closing transaction has been published.
+  - `funded_at <LSPS0.datetime>` Datetime when the funding transaction has been published.
+  - `funding_transaction <string>`: TXID of the [funding transaction](https://github.com/lightning/bolts/blob/master/03-transactions.md#funding-transaction-output).
+  - `scid <LSPS0.SCID or null>` Short channel id. 
+    - MUST be null before the channel is confirmed on-chain.
+  - `expires_at <LSPS0.datetime>` Ealierst datetime when the channel MAY be closed by the LSP. 
+    - MUST respect `channel_expiry_blocks`. 
+    - MAY overprovision.
+  - `closing_transaction <string or null>` txId of the [closing transaction](https://github.com/lightning/bolts/blob/master/03-transactions.md#closing-transaction).
+  - `closed_at <LSPS0.datetime or null>` Datetime when the closing transaction has been published.
+    - MUST be null before the channel is closed.
 
-### 4 Channel Open
+
+#### 4.1 Channel Open
 
 The LSP MUST open the channel under the following conditions:
 - `payment.state` is `HOLD` (lightning) or `PAID` (on-chain).
@@ -423,7 +455,7 @@ The LSP MUST open the channel under the following conditions:
 - MUST wait for a peer connection before attempting a channel open.
 - MUST attempt a channel open.
     - MUST respect the `announceChannel` flag.
-    - MUST open the channel with a capacity of `lsp_balance_sat` + `client_balance_sat`.
+    - MUST open the channel with at least a capacity of `lsp_balance_sat` + `client_balance_sat`.
         - MAY overprovision.
     - MUST push `client_balance_sat` to the client.
         - MAY overprovision.
@@ -451,35 +483,4 @@ In case the channel open failed
 > **Rationale `confirms_within_blocks`** We use `confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch the channel. For example, if a client orders a channel within 5 blocks, the LSP may wait to publish the funding transaction for 3 blocks to batch channels and add a fee to the funding transaction to ensure it confirms within 2 blocks.
 
 
-### 5 Channel Object
-
-```json
-"channel": {
-  "state": "OPENED",
-  "opened_at": "2012-04-23T18:25:43.511Z",
-  "open_transaction": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae",
-  "scid": "643904x1419x1",
-  "expires_at": "2012-04-23T18:25:43.511Z",
-  "closing_transaction": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae",
-  "closed_at": "2012-04-23T18:25:43.511Z"
-}
-```
-
-
-- `channel <object>` Contains channel information. 
-  - MUST be null if the channel opening transaction has not been published yet.
-  - `state <string enum>` MUST be one of these values:
-      - `OPENING` Opening transaction published.
-      - `OPENED` Channel is open. LSP must allow payments. May be zero conf and therefore immediate.
-      - `CLOSED` Closing transaction has been published.
-  - `opened_at <LSPS0.datetime>` Datetime when the opening transaction has been published.
-  - `open_transaction <string>`: TXID of the opening transaction.
-  - `scid <LSPS0.SCID or null>` Short channel id. 
-    - MUST be null before the channel is confirmed on-chain.
-  - `expires_at <LSPS0.datetime>` Ealierst datetime when the channel MAY be closed by the LSP. 
-    - MUST respect `channel_expiry_blocks`. 
-    - MAY overprovision.
-  - `closing_transaction <string or null>` Id of the closing transaction.
-  - `closed_at <LSPS0.datetime or null>` Datetime when the closing transaction has been published.
-    - MUST be null before the channel is closed.
 

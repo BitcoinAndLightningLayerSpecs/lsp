@@ -183,7 +183,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 ```json
 {
-  "id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
+  "order_id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
   "api_version": 2,
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
@@ -213,7 +213,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 }
 ```
 
-- `id <string>` Id of this specific order.
+- `order_id <string>` Id of this specific order.
   - MUST be unique.
   - MUST be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
   - MUST be at most 64 characters long.

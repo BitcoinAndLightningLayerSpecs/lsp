@@ -35,6 +35,10 @@ The LSP is allowed to overprovision channels/on-chain-payments/on-chain-fees as 
 
 LSP will return errors according to the [JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification (see [LSPS0 Error Handling](https://github.com/BitcoinAndLightningLayerSpecs/lsp/tree/main/LSPS0#error-handling)).
 
+## Trust model
+
+In general, LSPS1 is developed on the basis that the client trust the LSP to deliver the promised goods. Channel purchases are not atomic and therefore the client risks not getting the promised goods if the LSP is malicious.
+
 ## Order Flow Overview
 
 * Client calls `lsps1.info` to get the LSP's API version and options.

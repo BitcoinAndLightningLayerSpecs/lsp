@@ -170,7 +170,6 @@ The request is constructed depending on the client's needs.
   - MUST be below or equal `base_api.max_channel_expiry_blocks`.
 - `token <string>` Field for arbitrary data like a coupon code or a authentication token.
   - Client MAY omit this field.
-  - Maximum length is 512 characters.
 - `refund_onchain_address <LSPS0.onchain_address>` Address where the LSP will send the funds if the order fails.
   - Client MAY omit this field.
   - LSP MUST disable on-chain payments if the client omits this field.
@@ -227,7 +226,6 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 - `channel_expiry_blocks <uint32>` Mirrored from the request.
 - `token <string>` Mirrored from the request.
   - MUST be an empty string if the token was not provided.
-  - Maximum length is 512 characters.
 - `announceChannel <boolean>` Mirrored from the request.
 - `created_at <LSPS0.datetime>` Datetime when the order was created.
 - `expires_at <LSPS0.datetime>` Datetime when the order expires.

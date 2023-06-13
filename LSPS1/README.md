@@ -3,7 +3,7 @@
 
 | Name    	| `channel_request`             |
 |---------- |------------------------------	|
-| Version 	| 2                             |
+| Version 	| 1                             |
 | Status    | For Implementation            |
 
 
@@ -34,6 +34,10 @@ The LSP is allowed to overprovision channels/on-chain-payments/on-chain-fees as 
 ### Errors
 
 LSP will return errors according to the [JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification (see [LSPS0 Error Handling](https://github.com/BitcoinAndLightningLayerSpecs/lsp/tree/main/LSPS0#error-handling)).
+
+## Trust model
+
+In general, LSPS1 is developed on the basis that the client trust the LSP to deliver the promised goods. Channel purchases are not atomic and therefore the client risks not getting the promised goods if the LSP is malicious.
 
 ## Order Flow Overview
 
@@ -67,7 +71,7 @@ The client MUST call `lsps1.info` first.
 
 ```JSON
 {
-  "supported_versions": [2],
+  "supported_versions": [1],
   "website": "http://example.com/contact",
   "options": {
       "minimum_channel_confirmations": 0,
@@ -100,7 +104,7 @@ The client MUST call `lsps1.info` first.
   - `min_onchain_payment_size_sat <LSPS0.sat or null>` Indicates the minimum amount of satoshi (`order_total_sat`) that is required for the LSP to accept a payment on-chain.
     - The LSP MUST allow on-chain payments equal or above this value. 
     - MUST be 0 or greater.
-    - MAY be null if on-chain payments are NOT supported.
+    - MAY be `null` if on-chain payments are NOT supported.
   - `max_channel_expiry_blocks <uint32>` The maximum number of blocks a channel can be leased for.
     - MUST be 1 or greater.
   - `min_initial_client_balance_sat <LSPS0.sat>` Minimum number of satoshi that the client MUST request.
@@ -134,7 +138,7 @@ The request is constructed depending on the client's needs.
 
 ```json
 {
-  "api_version": 2,
+  "api_version": 1,
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
   "confirms_within_blocks": 1,
@@ -148,7 +152,7 @@ The request is constructed depending on the client's needs.
 
 
 - `api_version <uint16>` API version that the client wants to work with.
-  - MUST be `2` for this version of the spec. 
+  - MUST be `1` for this version of the spec. 
   - MUST match one of the versions listed in `lsps1.info.supported_versions`.
 - `lsp_balance_sat <LSPS0.sat>` How many satoshi the LSP will provide on their side.
   - MUST be 1 or greater. 
@@ -166,7 +170,6 @@ The request is constructed depending on the client's needs.
   - MUST be below or equal `base_api.max_channel_expiry_blocks`.
 - `token <string>` Field for arbitrary data like a coupon code or a authentication token.
   - Client MAY omit this field.
-  - Maximum length is 512 characters.
 - `refund_onchain_address <LSPS0.onchain_address>` Address where the LSP will send the funds if the order fails.
   - Client MAY omit this field.
   - LSP MUST disable on-chain payments if the client omits this field.
@@ -183,7 +186,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 ```json
 {
   "order_id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
-  "api_version": 2,
+  "api_version": 1,
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
   "confirms_within_blocks": 1,
@@ -223,7 +226,6 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 - `channel_expiry_blocks <uint32>` Mirrored from the request.
 - `token <string>` Mirrored from the request.
   - MUST be an empty string if the token was not provided.
-  - Maximum length is 512 characters.
 - `announceChannel <boolean>` Mirrored from the request.
 - `created_at <LSPS0.datetime>` Datetime when the order was created.
 - `expires_at <LSPS0.datetime>` Datetime when the order expires.
@@ -233,7 +235,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - `FAILED` Order failed.
 - `payment <object>` Contains everything about payments, see [3. Payment](#3-payment).
 - `channel <object or null>` Contains information about the channel, see [4 Channel](4-channel).
-  - MUST be null if the channel funding transaction is not published yet.
+  - MUST be `null` if the channel funding transaction is not published yet.
   
 
 **Client**
@@ -334,16 +336,16 @@ This section describes the `payment` object returned by `lsps1.create_order` and
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
     - MUST be at most 2048 characters long.
 - `onchain_address <LSPS0.onchain_address>` On-chain address the client can pay the `order_total_sat` to
-    - MUST be null IF one of the following is true:
+    - MUST be `null` IF one of the following is true:
       - `options.min_onchain_payment_size_sat` is greater than `order_total_sat`.
-      - `options.min_onchain_payment_size_sat` is null and on-chain payments are therefore not supported.
-      - `refund_onchain_address` is null.
+      - `options.min_onchain_payment_size_sat` is `null` and on-chain payments are therefore not supported.
+      - `refund_onchain_address` is `null`.
 - `required_onchain_block_confirmations <uint8>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.minimum_onchain_payment_confirmations`.
-    - MUST be null if `onchain_address` is null.
+    - MUST be `null` if `onchain_address` is `null`.
 - `minimum_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
-    - MUST be null if `onchain_address` is null.
-    - MUST be null if `required_onchain_block_confirmations` is greater than 0.
+    - MUST be `null` if `onchain_address` is `null`.
+    - MUST be `null` if `required_onchain_block_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
 - `onchain_payments <Array<objects>>` Detected on-chain payments.
     - MUST contain all incoming/confirmed outpoints to `onchain_address`. 
@@ -431,7 +433,7 @@ Every LSP that accepts 0conf transactions is responsible to do their own risk ma
 
 
 - `channel <object>` Contains channel information. 
-  - MUST be null if the channel opening transaction has not been published yet.
+  - MUST be `null` if the channel opening transaction has not been published yet.
   - `state <string enum>` MUST be one of these values:
       - `OPENING` Opening transaction published.
       - `OPENED` Channel is open. LSP must allow payments. May be zero conf and therefore immediate.
@@ -439,13 +441,13 @@ Every LSP that accepts 0conf transactions is responsible to do their own risk ma
   - `funded_at <LSPS0.datetime>` Datetime when the funding transaction has been published.
   - `funding_transaction <string>`: TXID of the [funding transaction](https://github.com/lightning/bolts/blob/master/03-transactions.md#funding-transaction-output).
   - `scid <LSPS0.SCID or null>` Short channel id. 
-    - MUST be null before the channel is confirmed on-chain.
+    - MUST be `null` before the channel is confirmed on-chain.
   - `expires_at <LSPS0.datetime>` Ealierst datetime when the channel MAY be closed by the LSP. 
     - MUST respect `channel_expiry_blocks`. 
     - MAY overprovision.
   - `closing_transaction <string or null>` txId of the [closing transaction](https://github.com/lightning/bolts/blob/master/03-transactions.md#closing-transaction).
   - `closed_at <LSPS0.datetime or null>` Datetime when the closing transaction has been published.
-    - MUST be null before the channel is closed.
+    - MUST be `null` before the channel is closed.
 
 
 #### 4.1 Channel Open

@@ -3,7 +3,7 @@
 
 | Name    	| `channel_request`             |
 |---------- |------------------------------	|
-| Version 	| 2                             |
+| Version 	| 1                             |
 | Status    | For Implementation            |
 
 
@@ -71,7 +71,7 @@ The client MUST call `lsps1.info` first.
 
 ```JSON
 {
-  "supported_versions": [2],
+  "supported_versions": [1],
   "website": "http://example.com/contact",
   "options": {
       "minimum_channel_confirmations": 0,
@@ -138,7 +138,7 @@ The request is constructed depending on the client's needs.
 
 ```json
 {
-  "api_version": 2,
+  "api_version": 1,
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
   "confirms_within_blocks": 1,
@@ -152,7 +152,7 @@ The request is constructed depending on the client's needs.
 
 
 - `api_version <uint16>` API version that the client wants to work with.
-  - MUST be `2` for this version of the spec. 
+  - MUST be `1` for this version of the spec. 
   - MUST match one of the versions listed in `lsps1.info.supported_versions`.
 - `lsp_balance_sat <LSPS0.sat>` How many satoshi the LSP will provide on their side.
   - MUST be 1 or greater. 
@@ -187,7 +187,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 ```json
 {
   "order_id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
-  "api_version": 2,
+  "api_version": 1,
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
   "confirms_within_blocks": 1,

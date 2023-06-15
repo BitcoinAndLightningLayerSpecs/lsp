@@ -325,6 +325,55 @@ Padding characters `=` MUST be used.
 > uselessness, as this [tweet](https://twitter.com/fiatjaf/status/1558525040374718465)
 > laments.
 
+### Transaction IDs
+
+###### Link: LSPS0.txid
+
+Transaction ID without witness data as defined in [BIP0141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#transaction-id). 
+
+It MUST be converted to little-endian to enable searching and MUST be encoded as a 64 character HEX string.
+
+> **Rationale** We use the little-endian format to let users easily copy-paste the txid to a block explorer.
+Example:
+
+```json
+{
+  "txid": "F27C97F46ED7281A3EFA7287410082EBA0CD1424D72703A217E435EA840957B0"
+}
+```
+
+
+
+### Output Index
+
+###### Link: LSPS0.output_index
+
+`output_index` is the 0 based index for transaction output UTXOs. It is a maximum of [16 bits (2 bytes)](https://github.com/lightning/bolts/blob/aad959a297ff66946effb165518143be15777dd6/07-routing-gossip.md#definition-of-short_channel_id). It MUST be represented as a JSON integer (number).
+
+Example:
+
+```json
+{
+  "output_index": 0
+}
+```
+
+
+### Outpoints
+
+###### Link: LSPS0.outpoint
+
+An outpoint consist of a `LSPS0.txid` and a `LSPS0.output_index`. It is defined in [BOLT0](https://github.com/lightning/bolts/blob/master/00-introduction.md#outpoint). It MUST be encoded as a JSON string in the `txid:output_index` format.
+
+> **Rationale** The `txid:outpoint` format is conveniently used in block explorers and can just be copy pasted to search for the affected UTXO.
+Example:
+
+```json
+{
+  "funding_outpoint": "F27C97F46ED7281A3EFA7287410082EBA0CD1424D72703A217E435EA840957B0:0"
+}
+```
+
 
 ## References
 

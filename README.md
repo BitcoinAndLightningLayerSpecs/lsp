@@ -1,7 +1,7 @@
 # Lightning Service Provider Spec
 API specifications for Lightning Service Providers (LSP)
 
-The goal of this repository is to provide a unified API specification for Lightning Service Providers (LSP) to create interopability between different Lightning Network wallets/clients and LSPs.
+The goal of this repository is to provide a unified API specification for Lightning Service Providers (LSP) to create interoperability between different Lightning Network wallets/clients and LSPs.
 
 The group meets every second week on Wednesday 11am UTC. The meeting is open to everyone. Please join the [Telegram group][] for more information.
 

@@ -1,10 +1,14 @@
 # Lightning Service Provider Spec
-API specifications for Lightning Service Providers
+API specifications for Lightning Service Providers (LSP)
 
-The current scope is limited to channel sales and services specifically about your channel and the peer that provides it.
+The goal of this repository is to provide a unified API specification for Lightning Service Providers (LSP) to create interopability between different Lightning Network wallets/clients and LSPs.
 
-Once the important aspects are covered, we may work on liquidity marketplace concepts, and other wallet or info services.
+The group meets every second week on Wednesday 11am UTC. The meeting is open to everyone. Please join the [Telegram group][] for more information.
 
+- [Telegram group][]
+- [Meeting transcriptions](https://github.com/BitcoinAndLightningLayerSpecs/meetings)
+
+[Telegram group]: https://t.me/LSPstandards
 
 ## Status Specification
 
@@ -36,13 +40,12 @@ List of Lightning Service Providers in alphabetic order that currently or will s
 
 (If you would like to get added to this list, please open a PR and update the table below)
 
-| Name | Specs | Status |
-| ---- | ----------- | ------ |
-| Blocktank | LSPS1 | Soon |
-| Breez | [Breez](https://github.com/breez/lspd/blob/master/rpc/lspd.md) / LSPS1 | In production / Soon |
-| LNBIG | ? |  ?  |
-| SwissRouting | ? |  ?  |
-| TBD | ? |  ?  |
-| ZeroFeeRouting | ? |  ?  |
+| Name         | Specs       | Status |
+| ------------ | ----------- | ------ |
+| Blocktank    | -           | -      |
+| Breez        | -           | -      |
+| TBD          | -           | -      |
+
+
 
 

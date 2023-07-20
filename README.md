@@ -30,10 +30,6 @@ All LSPS specifications include a "Status" field.
 ### **LSPS0** [Transport Layer](LSPS0/README.md)
 Describes the basics of how clients and LSPs communicate to each other.
 
-### **LSPS.1** [Channel Request](channel-request.md)
-A unified channel request API standard for services to buy channels from LSP. This spec supports both just in time channel openings and pre paid channels
-
-
 
 ## Services
 List of Lightning Service Providers in alphabetic order that currently or will support LSP specs in future.

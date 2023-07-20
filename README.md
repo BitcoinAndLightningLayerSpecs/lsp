@@ -40,7 +40,7 @@ List of Lightning Service Providers in alphabetic order that currently or will s
 | ------------ | ----------- | ------ |
 | Blocktank    | -           | -      |
 | Breez        | -           | -      |
-| TBD          | -           | -      |
+| c=          | -           | -      |
 
 
 

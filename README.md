@@ -15,6 +15,9 @@ The group meets every second week on Wednesday 11am UTC. The meeting is open to 
 All LSPS specifications include a "Status" field.
 "Status" can be one of the following:
 
+* "Draft" - The specification is still under active development and
+  subject to change. Implementation is not recommended at this
+  time.
 * "For Implementation" - The specification has been widely reviewed by
   LSPS participants, is believed to have addressed all raised
   issues, and LSPS participants recommend this specification to be

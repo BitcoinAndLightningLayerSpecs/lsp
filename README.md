@@ -33,6 +33,9 @@ All LSPS specifications include a "Status" field.
 ### **LSPS0** [Transport Layer](LSPS0/README.md)
 Describes the basics of how clients and LSPs communicate to each other.
 
+### **LSPS1** [Channel Request](LSPS1/README.md)
+A channel purchase API to buy channels from an LSP.
+
 
 ## Services
 List of Lightning Service Providers in alphabetic order that currently or will support LSP specs in future.
@@ -43,7 +46,7 @@ List of Lightning Service Providers in alphabetic order that currently or will s
 | ------------ | ----------- | ------ |
 | Blocktank    | -           | -      |
 | Breez        | -           | -      |
-| c=          | -           | -      |
+| c=           | -           | -      |
 
 
 

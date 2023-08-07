@@ -3,27 +3,7 @@
 | Name    | `jit_channels`           |
 |---------|--------------------------|
 | Version | 1                        |
-| Status  | DRAFT                    |
-
-> **Note** Prior to merging this specification, it was pointed out that prepayment
-> probing would potentially conflict with this specification.
->
-> Specifically, prepayment probing is a technique by which a payer would replace
-> the payment hash with a random number, and then attempt payment to the payee
-> (which in the context of this specification would be the client).
-> Once the payer received an error from the payee that this was an unrecognized
-> hash, it knows that there was a viable route to the payee, and the fees
-> involved in the payment, and can ask the human user whether to continue with
-> the real payment or not.
-> The prepayment probe would be through the JIT channel SCID specified in the
-> BOLT11 invoice, which would cause the LSP to open the channel to the client,
-> but as the HTLC hash would be random, the client would be unable to claim
-> the payment and the LSP could not be paid.
-> If the human user of the payer node then decides to not continue with the
-> payment, the LSP would not be able to get compensated for the channel open,
-> but the LSP had already broadcasted the funding transaction.
-> The LSP cannot differentiate between this and the payer and client/payee
-> colluding to cheat it.
+| Status  | For Implementation       |
 
 ## Motivation
 
@@ -136,8 +116,10 @@ Overview:
 * The client hands the invoice to whoever it will receive funds from.
 * The payment is forwarded to the LSP.
 * The LSP recognizes the next hop SCID as being a JIT channel request,
-  and opens a 0-confirmation channel to the client, which must be
-  connected to the LSP at that time.
+  and informs the client of the incoming HTLC.
+  The client must be connected to the LSP at this time.
+* The client informs the LSP to let the HTLC be forwarded, and the LSP
+  opens a 0-confirmation channel to the client.
 * The LSP forwards the payment to the client, deducting the channel
   opening fee.
 * The client claims the payment.
@@ -163,6 +145,15 @@ Overview:
 >     the LSP having to know the exact payment point and the blinding
 >     factor towards the client / payee, it would also learn the sold
 >     private key.
+>
+> We need a separate step for the client to confirm the HTLC details,
+> due to a technique known as *prepayment probing*, where the payer
+> in possession of a BOLT11 invoice will replace the hash with a fresh
+> random unclaimable hash, in order to estimate the forwarding fee
+> to reach the payee.
+> If a payer uses prepayment probing, the LSP cannot differentiate
+> between the probing and the actual payment, and requires the client
+> to determine if the HTLC it receives can be claimed by the client.
 
 ### 0. API Version
 
@@ -785,8 +776,8 @@ where the next hop is `jit_channel_scid`:
   step:
   * The current time is strictly less than
     `opening_fee_params.valid_until`.
-  * All received payment parts sum up to at least `payment_size_msat`
-    plus `opening_fee`.
+  * All received payment parts of a single payment hash sum up to
+    at least `payment_size_msat` plus `opening_fee`.
   * The client is connected.
 
 In "no-MPP+var-invoice" mode, the LSP, if it receives a forward
@@ -799,7 +790,187 @@ where the next hop is `jit_channel_scid`, before
 * MUST check that `opening_fee + htlc_minimum_msat < payment_size_msat`,
   and if that fails, MUST fail with `unknown_next_peer`.
 
-### 5.  Channel Opening And Forwarding
+### 5.  Client-side HTLC Validation
+
+Once the LSP has performed the validations in the previous step, it
+now has to hand over the HTLC details to the client.
+This is done by the `lsps2.you_have_a_jit_htlc` notification, which
+has the `params` below:
+
+```
+{
+  "payment_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "forwarding_onion": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789/+=",
+  "payment_size_msat": "21000"
+}
+```
+
+`payment_hash` is a required field, being the payment hash in the
+hashlock branch of the incoming HTLC, as a JSON string with the
+hexadecimal dump of the hash.
+
+`forwarding_onion` is a required field, being the next onion for
+the forwarding as a binary blob [<LSPS0.binary_blob>][].
+The `forwarding_onion` format is described in [BOLT4][].
+It will be the onion that the LSP will send if a JIT channel is
+successfully opened.
+
+[BOLT4]: https://github.com/lightning/bolts/blob/803a532c49be2f152c7f2dbaa0ec7d4c23a6013d/04-onion-routing.md
+
+In case of a multipart payment, the LSP MUST make only one
+`lsps2.you_have_a_jit_htlc` notification, and MAY select any part
+for the `forwarding_onion` field.
+
+> **Rationale** A "stateless" invoice scheme may encode the invoice
+> details into the `payment_secret` or `metadata` fields of an
+> invoice, so that the payee does not have to remember any invoice
+> details.
+> The `payment_secret` and `metadata` fields are embedded in the
+> onion for the final hop, thus, the payee / client needs access
+> to the onion in order to determine if it can actually claim
+> the HTLC.
+>
+> Alternatively, a `keysend`-like protocol would send the preimage
+> to the payment in the onion for the final hop as well.
+>
+> While the intent of this step is to protect against prepayment
+> probing, and prepayment probing is impossible with multipart
+> payments, we still require this step for multipart payments in
+> order to avoid having branches in the overall flow, which would
+> complicate implementing and testing this flow.
+> This increases latency, but the additional latency is only at
+> the end of the payment route, and a channel open is required
+> anyway which also requires 2 and a half round trips, not
+> including the actual HTLCs being sent and signed, which is
+> another one and a half round trips; the additional 1 and a
+> half round trips here is fairly small compared to that.
+>
+> In particular, even if the client specifies that multipart is
+> allowed (i.e. in "MPP+fixed-invoice" mode), the payer may still
+> use prepayment probing with a single part only.
+> This specification, for maximum compatibility with third-party
+> payers, cannot impose any restrictions on payer behavior.
+
+`payment_size_msat` is the total amount of the multipart payment
+that would go to the client (before deducting `opening_fee`)
+[<LSPS0.msat>][].
+It is the same as the `payment_size_msat` in the previous step.
+
+The `lsps2.buy` interface effectively enables the LSP to send the
+`lsps2.you_have_a_jit_htlc` notification.
+The LPS MUST NOT send this notification unless the client has
+done an `lsps2.buy` call in the past.
+
+In response to the `lsps2.you_have_a_jit_htlc` notification, the
+client MUST:
+
+* Check that it can claim the given `payment_hash`, possibly
+  using details from the decrypted `forwarding_onion`.
+* Call `lsps2.respond_to_jit_htlc`.
+
+The `lsps2.respond_to_jit_htlc` method accepts either of the
+parameters below:
+
+```JSON
+{
+  "payment_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "result": "continue"
+}
+```
+
+OR
+
+```JSON
+{
+  "payment_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "result": "error",
+  "error_onion": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789/+="
+}
+```
+
+`payment_hash` is the payment hash of the hashlock branch of the HTLC
+described in a recent `lsps2.you_have_a_jit_htlc` notification.
+The client MAY change uppercase to lowercase or vice versa; the LSP
+MUST accept either case.
+
+`result` is a JSON string, either `"continue"` or `"error"`.
+
+If `result` is `"continue"` and the `payment_hash` is valid, then the
+LSP responds with an empty success result `{}` and proceeds to the
+next step of this flow, channel opening and forwarding.
+
+If `result` is `"error"`, then the client MAY provide the *optional*
+`error_onion` parameter.
+If the result is `"error"` and `error_onion` is not provided, and the
+`payment_hash` is valid, the LSP MUST error all incoming HTLCs with
+`temporary_channel_failure` with the LSP as the *erring node*, as
+described in [BOLT4 Returning Errors][].
+
+[BOLT4 Returning Errors]: https://github.com/lightning/bolts/blob/803a532c49be2f152c7f2dbaa0ec7d4c23a6013d/04-onion-routing.md#returning-errors
+
+If `result` is `"error"`, the `payment_hash` is valid, and the client
+provides an `error_onion` parameter, it MUST be an error onion with
+the client as the *erring node*, encoded as a binary blob
+[<LSPS0.binary_blob>][].
+The LSP MUST wrap this error onion and propagate the error backward
+to all incoming HTLCs via the BOLT2 `update_fail_htlc` message.
+All these MUST conform to [BOLT4 Returning Errors][].
+
+In particular, if the client would be unable to claim the given
+`payment_hash`, even with information in the `forwarding_onion`
+from the `lsps2.you_have_a_jit_htlc` notification, the client
+MUST call `lsps2.respond_to_jit_htlc` with `"result": "error"` and
+an `error_onion` encoding an `incorrect_or_unknown_payment_details`
+error with the client as the *erring node*.
+
+> **Rationale** If the client receives a `payment_hash` it is unable
+> to claim, the client needs to send an error onion with the client
+> itself as the erring node, to be maximally compatible with various
+> existing implementations of prepayment probing.
+
+If `result` is `"error"` and the `payment_hash` is valid, the
+LSP MUST go back to the previous step and wait for new incoming
+HTLCs.
+
+If the `payment_hash` is valid, then the LSP responds with an
+empty success result `{}`.
+
+If the `payment_hash` is not recognized by the LSP (it never
+existed, or was timed out) then the LSP responds with the
+error below (error `code` in parenthesis):
+
+* `unknown_payment_hash` (1) - The `payment_hash` in the
+  `lsps2.respond_to_jit_htlc` call is invalid.
+
+#### Disconnection And Timeout
+
+If the client disconnects after the LSP sends
+`lsps2.you_have_a_jit_htlc` and before the LSP can receive the
+`lsps2.respond_to_jit_htlc` method request, then the LSP MUST
+fail the incoming HTLCs with `temporary_channel_failure`.
+
+The LSP MUST then go back to the previous step and wait for
+new incoming HTLCs, if `opening_fee_params.valid_until` has not
+been reached yet.
+If the client reconnects afterwards, and the LSP again receives
+HTLCs with the `jit_channel_scid`, then the LSP performs the
+previous step again.
+
+The LSP MUST impose a timoeut between the LSP sending
+`lsps2.you_have_a_jit_htlc` and receiving a
+`lsps2.respond_to_jit_htlc` method request.
+This timeout MUST be 90 to 120 seconds.
+
+If the timeout is reached, the LSP MUST fail all the HTLCs
+with `temporary_channel_failure` with the LSP as the erring
+node, and then go back to the previous step and wait for
+new incoming HTLCs, if `opening_fee_params.valid_until` has
+not been reached yet.
+
+The client MUST remain waiting in this step until the LSP
+requests a channel open and forwards the payment.
+
+### 6.  Channel Opening And Forwarding
 
 The LSP requests a channel open to the client via standard
 [BOLT2 Channel Establishment][] flow.
@@ -852,8 +1023,8 @@ client rejects the channel open via an `error`.
 
 If the client disconnects before the LSP can receive `funding_signed`
 from the client, the LSP MUST fail the incoming payment parts with
-`temporary_channel_failure`, then return to the previous step (waiting
-for payment).
+`temporary_channel_failure`, then return to the previous previous
+step (waiting for payment).
 
 > **Rationale** The client might have crashed at this point, and
 > recovery might take an inordinate amount of time.
@@ -1001,7 +1172,7 @@ the `metadata` or `payment_secret` of the invoice, or by changing how
 `payment_secret` is computed based on whether the invoice is to pay for
 a JIT Channel or not and trying both ways.
 
-### 6.  Post-opening Normal Operation
+### 7.  Post-opening Normal Operation
 
 After the channel has been opened and an `alias` has been specified,
 the client MUST use the `alias` for future invoices on the
@@ -1041,3 +1212,4 @@ also for onion messages.
 [<LSPS0.ppm>]: ../LSPS0/common-schemas.md#link-lsps0ppm
 [<LSPS0.datetime>]: ../LSPS0/common-schemas.md#link-lsps0datetime
 [<LSPS0.scid>]: ../LSPS0/common-schemas.md#link-lsps0scid
+[<LSPS0.binary_blob>]: ../LSPS0/common-schemas.md#link-lsps0binary_blob

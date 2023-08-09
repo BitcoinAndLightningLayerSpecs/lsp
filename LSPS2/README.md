@@ -645,6 +645,36 @@ Example successful `lsps2.buy` result:
 the invoice [<LSPS0.scid>][],
 and `lsp_cltv_expiry_delta` is the CLTV delta for that route hint hop.
 
+When generating `jit_channel_scid`, the LSP SHOULD set the highest bit
+of the block index (the first 24-bit
+number in the `BBBxTTTxOOO` format), and select the rest of the bits
+of the block, transaction, and output indexes by random;
+the LSP MAY use any other method of generating this SCID, and
+MAY use an SCID that could be interpreted as an actual channel, provided
+the LSP can uniquely identify the client.
+The LSP MUST ensure that the SCID is unique at the LSP, that is, no
+other peer (client or non-client) of the LSP has the same SCID allocated
+to it, whether or not the SCID could refer to an actual possible channel
+outpoint.
+
+> **Rationale** Setting the highest bit of the block index, and
+> selecting the rest by random, reduces the probability of the same
+> randomly-selected SCID, giving 63 bits of entropy.
+> The blockheight 8,388,608 is unlikely to be reached for about ~120
+> years from the time of this writing (2023).
+>
+> Regardless, the only true requirement is that the SCID refers to
+> only one possible peer, and the LSP is free to use any policy that
+> fits.
+> The LSP needs some database or lookup table for SCIDs in order to
+> implement LSPS4 anyway, and could use a simple incrementing 64-bit
+> counter that it reinterprets as an SCID with the block index as the
+> highest 24 bits (and checking it against "real" SCIDs it has with
+> peers); every actual block mined would then grant a space of
+> 1,099,511,627,776 (= 2^40) possible SCIDs, with only a tiny few of
+> them likely to become real SCIDs with peers of the LSP node, even
+> if the counter is started from 0.
+
 `client_trusts_lsp` is an *optional* Boolean.
 If not specified, it defaults to `false`.
 If specified and `true`, the client MUST trust the LSP to actually

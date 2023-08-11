@@ -239,9 +239,11 @@ Other LSPS specifications:
   endpoint and each LSP-initiated notification, as well as
   the key names of the `params` for each `method`, and the
   meanings of each parameter.
+  * `method` names MUST be in snake_case, i.e. words are lower
+    case and separated by `_` characters.
   * MUST prefix `method` names with `lsps` followed by the LSPS
-    number followed by `.`, e.g.  `lsps999.dothis` for a client
-    request or `lsps999.thathappened` for an LSP notification.
+    number followed by `.`, e.g.  `lsps999.do_this` for a client
+    request or `lsps999.that_happened` for an LSP notification.
   * MUST also describe the possible error `code`s for each API
     endpoint, together with any `data` (which MUST be an object
     (dictionary)) for that error code, if there should be a
@@ -472,9 +474,9 @@ does not support some of the LSPS specifications.
 
 The client can determine if an LSP supports a particular LSPS
 specification other than LSPS0 via the `method` named
-`lsps0.listprotocols`, which accepts no parameters `{}`.
+`lsps0.list_protocols`, which accepts no parameters `{}`.
 
-`lsps0.listprotocols` has no errors defined.
+`lsps0.list_protocols` has no errors defined.
 
 The response datum is an object like the below:
 
@@ -502,7 +504,7 @@ the LSP supports:
 
 ```JSON
 {
-  "method": "lsps0.listprotocols",
+  "method": "lsps0.list_protocols",
   "jsonrpc": "2.0",
   "id": "example#3cad6a54d302edba4c9ade2f7ffac098",
   "params": {}

@@ -50,6 +50,58 @@ List of Lightning Service Providers in alphabetic order that currently or will s
 | Breez        | -           | -      |
 | c=           | -           | -      |
 
+## Responsible Disclosure
 
+As [CVE-2019-12998][], [CVE-2019-12999][], and [CVE-2019-13000][] show, it
+is possible to have CVE-level bugs in the specification.
 
+[CVE-2019-12998]: https://nvd.nist.gov/vuln/detail/CVE-2019-12998
+[CVE-2019-12999]: https://nvd.nist.gov/vuln/detail/CVE-2019-12999
+[CVE-2019-13000]: https://nvd.nist.gov/vuln/detail/CVE-2019-13000
 
+Please report any security-critical issues regarding LSPS to the contacts
+below.
+When reporting, please encrypt your security-critical bug report via PGP /
+GPG and send to the emails below, with the subject `[LSPS Bug]`.
+
+* ZmnSCPxj jxPCSnmZ <zmnscpxj@cequals.xyz>
+* Yaacov Akiba Slama <yaslama@breez.technology>
+* Reza <reza@synonym.to>
+
+Import the public keys from the [responsible disclosure public
+keys](./responsible-disclosure-public-keys.asc) file.
+
+If necessary, also include your own PGP public key when sending a
+bug report, so that we can reply privately.
+
+For example, you could write your bug report into a text file:
+
+```sh
+cat > lsps999-cve-bug-report.txt <<TEXT
+In LSPS999, section "Some Section Name", the description of some
+process lacks a check of some value.
+If this check is not performed by the client, then a malicious
+LSP can provide an invalid value, which will lead to the client
+expecting some other thing, and then losing all their funds.
+
+I recommend putting a check of this value explicitly in the
+specification, so that clients following the written
+specification are not vulnerable to funds loss.
+TEXT
+```
+
+Then, import the above public keys:
+
+```sh
+gpg --import responsible-disclosure-public-keys.asc
+```
+
+And then encrypt the file so that recipients can read it:
+
+```sh
+gpg --armor --encrypt --recipient zmnscpxj@cequals.xyz --recipient yaslama@breez.technology --recipient reza@synonym.to lsps999-cve-bug-report.txt
+```
+
+This will generate a `lsps999-cve-bug-report.txt.asc` file, which
+you can email to the above recipients, with the subject
+`[LSPS Bug]`.

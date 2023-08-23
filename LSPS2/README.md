@@ -3,7 +3,7 @@
 | Name    | `jit_channels`           |
 |---------|--------------------------|
 | Version | 1                        |
-| Status  | DRAFT                    |
+| Status  | For Implementation       |
 
 > **Note** Prior to merging this specification, it was pointed out that prepayment
 > probing would potentially conflict with this specification.

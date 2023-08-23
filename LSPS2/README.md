@@ -16,6 +16,12 @@
 > involved in the payment, and can ask the human user whether to continue with
 > the real payment or not.
 >
+> Using the "LSP trusts client" model, a naive probe that goes all the way to the payee would cause the
+> LSP to open a channel to the client. If the payee never receives a payment over that channel, the LSP
+> would not receive payment for the channel open. Note that it is possible for this to not be the case
+> in the "Client trusts LSP" model, where the LSP can hold the funding tx until receiving a correct
+> preimage.
+>
 > Payers using prepayment probing do not receive extra benefits to probe private channel
 > route hints. A better way to prepayment probe is to ensure probing only goes to the last
 > public hop on the invoice. This can be accomplished by checking the graph for the destination

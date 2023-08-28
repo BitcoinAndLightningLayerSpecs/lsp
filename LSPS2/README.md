@@ -3,27 +3,7 @@
 | Name    | `jit_channels`           |
 |---------|--------------------------|
 | Version | 1                        |
-| Status  | DRAFT                    |
-
-> **Note** Prior to merging this specification, it was pointed out that prepayment
-> probing would potentially conflict with this specification.
->
-> Specifically, prepayment probing is a technique by which a payer would replace
-> the payment hash with a random number, and then attempt payment to the payee
-> (which in the context of this specification would be the client).
-> Once the payer received an error from the payee that this was an unrecognized
-> hash, it knows that there was a viable route to the payee, and the fees
-> involved in the payment, and can ask the human user whether to continue with
-> the real payment or not.
-> The prepayment probe would be through the JIT channel SCID specified in the
-> BOLT11 invoice, which would cause the LSP to open the channel to the client,
-> but as the HTLC hash would be random, the client would be unable to claim
-> the payment and the LSP could not be paid.
-> If the human user of the payer node then decides to not continue with the
-> payment, the LSP would not be able to get compensated for the channel open,
-> but the LSP had already broadcasted the funding transaction.
-> The LSP cannot differentiate between this and the payer and client/payee
-> colluding to cheat it.
+| Status  | For Implementation       |
 
 ## Motivation
 
@@ -1000,6 +980,87 @@ payments in a separate invoice database, or adding special flags inside
 the `metadata` or `payment_secret` of the invoice, or by changing how
 `payment_secret` is computed based on whether the invoice is to pay for
 a JIT Channel or not and trying both ways.
+
+#### Payment Failure Behavior
+
+If the LSP forwards a single part, the client may not be able to claim
+the payment if the payer implements *prepayment probing*.
+In *prepayment probing*, the payer replaces the payment hash of a
+BOLT11 invoice with a different hash, and determines if it reached the
+payee by checking for an `incorrect_or_unknown_payment_details` error.
+This is used to determine the forwarding fee to reach the payee.
+
+Unfortunately, the LSP is not able to differentiate between prepayment
+probing (which the client has to fail) and the actual payment.
+In addition, even if the client is honest, the client cannot prevent
+the payer from using prepayment probing.
+
+In order to be robust against prepayment probing:
+
+* The LSP, once it has decided to open the channel and forward the
+  payment HTLC(s), MUST set `payment_size_msat` at this point.
+  * In "no-MPP+var-invoice" mode, the first HTLC the LSP receives
+    that indicates `jit_channel_scid` as the next hop, and which
+    causes the LSP to initiate the channel open, sets the
+    `payment_size_msat`.
+  * In "MPP+fixed-invoice" mode the `payment_size_msat` is already
+    specified in the `lsps2.buy` call.
+* Until the first payment HTLC(s) are claimed by the client, the LSP
+  MUST hold future HTLCs without forwarding to the client.
+* If the first payment HTLC(s) are failed by the client, the LSP
+  MUST propagate the failure back as normal, and then the LSP MUST:
+  * Hold any currently-held and future HTLCs until they sum up to
+    at least `payment_size_msat`.
+    * If the sum exceeds `payment_size_msat` then the
+      `payment_size_msat` does not change.
+      This also implies that `opening_fee` does not change.
+  * The LSP forwards the set of HTLCs, with `opening_fee` deducted,
+    as described above, once again holding any other HTLC(s).
+  * If the client fails them again, repeat this loop.
+  * If `opening_fee_params.valid_until` is reached, exit this loop
+    and consider the flow as having failed with a channel opened to
+    the client, and then:
+    * The LSP MAY, at this point, perform mitigations against
+      abuse by clients, according to LSP policies.
+    * In "client trusts LSP" model, the LSP MAY simply not broadcast
+      the funding transaction and can reuse the UTXOs it would have
+      spent there for other purposes.
+    * The LSP MUST fail any held but not forwarded HTLCs with
+      `unknown_next_peer`.
+    * In "LSP trusts client" model, the LSP MUST wait for any
+      forwarded HTLCs to be either fulfilled or failed (including
+      after closure, if a unilateral closure occurred) before
+      propagating the result back.
+    * In "client trusts LSP" model, the LSP MAY fail forwarded
+      HTLCs with `unknown_next_peer`, *if and only if* the LSP did
+      not broadcast the funding transaction.
+
+> **Rationale** While the payee cannot control payer behavior,
+> presumably the payer has some incentive to pay the payee, i.e.
+> the payer values the act of paying the payee more than the
+> amount the payer sends (for example, if paying the invoice
+> would let the payer get a service or product from the payee
+> that the payer finds more valuable than the funds paid).
+> Thus, if the payer has gone through the trouble of locking
+> its funds into a prepayment probe to reach the payee, then
+> with high probability it will make an effort to reach the
+> payee with an actual payment later.
+>
+> Thus, accidents where the payer ultimately fails to make the
+> actual payment even after locking its own funds into a
+> prepayment probe are expected to be rare, and the probability
+> can be considered small enough that an LSP can simply
+> consider this as part of operational costs.
+>
+> Under "client trusts LSP" the LSP can defer broadcast of the
+> funding transaction until after the client has fulfilled the
+> in-Lightning HTLC.
+> If the client instead fails the HTLC, the LSP can simply
+> wait until the client actually fulfills an HTLC where the
+> LSP has deducted its `opening_fee`, and if that does not
+> occur before the `opening_fee_params.valid_until` timeout,
+> the LSP can protect itself by forgetting the funding
+> transaction and freeing the UTXOs for another use.
 
 ### 6.  Post-opening Normal Operation
 

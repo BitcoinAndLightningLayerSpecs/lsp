@@ -3,27 +3,30 @@
 | Name    | `jit_channels`           |
 |---------|--------------------------|
 | Version | 1                        |
-| Status  | DRAFT                    |
+| Status  | For Implementation       |
 
-> **Note** Prior to merging this specification, it was pointed out that prepayment
-> probing would potentially conflict with this specification.
+> **Note** Nodes that naively prepayment probe can cause LSPs using LSPS2 to open channels early.
+> Naive prepayment probing logic is being updated to greatly reduce the possibility of this happening.
 >
-> Specifically, prepayment probing is a technique by which a payer would replace
+> Prepayment probing is a technique by which a payer would replace
 > the payment hash with a random number, and then attempt payment to the payee
 > (which in the context of this specification would be the client).
 > Once the payer received an error from the payee that this was an unrecognized
 > hash, it knows that there was a viable route to the payee, and the fees
 > involved in the payment, and can ask the human user whether to continue with
 > the real payment or not.
-> The prepayment probe would be through the JIT channel SCID specified in the
-> BOLT11 invoice, which would cause the LSP to open the channel to the client,
-> but as the HTLC hash would be random, the client would be unable to claim
-> the payment and the LSP could not be paid.
-> If the human user of the payer node then decides to not continue with the
-> payment, the LSP would not be able to get compensated for the channel open,
-> but the LSP had already broadcasted the funding transaction.
-> The LSP cannot differentiate between this and the payer and client/payee
-> colluding to cheat it.
+>
+> Using the "LSP trusts client" model, a naive probe that goes all the way to the payee would cause the
+> LSP to open a channel to the client. If the payee never receives a payment over that channel, the LSP
+> would not receive payment for the channel open. Note that it is possible for this to not be the case
+> in the "Client trusts LSP" model, where the LSP can hold the funding tx until receiving a correct
+> preimage.
+>
+> Payers using prepayment probing do not receive extra benefits to probe private channel
+> route hints. A better way to prepayment probe is to ensure probing only goes to the last
+> public hop on the invoice. This can be accomplished by checking the graph for the destination
+> pubkey and stopping before private pubkeys. This logic is being implemented in LND as well
+> as other major payer's probing implementations.
 
 ## Motivation
 

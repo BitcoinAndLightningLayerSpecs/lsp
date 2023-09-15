@@ -448,18 +448,18 @@ which also includes a `features` bit field.
 [BOLT7]: https://github.com/lightning/bolts/blob/f7dcc32694b8cd4f3a1768b904f58cb177168f29/07-routing-gossip.md
 [BOLT1]: https://github.com/lightning/bolts/blob/f7dcc32694b8cd4f3a1768b904f58cb177168f29/01-messaging.md
 
-LSPs MUST set the `features` bit numbered 729
+LSPs MAY set the `features` bit numbered 729
 (`option_supports_lsps`) in both the `init` message on connection
 establishment, and in their own advertised `node_announcement`.
 Clients MUST NOT set `features` bit numbered 729 in either
 context.
 
-> **Rationale** As clients are the one who must initiate any
-> BOLT8 message ID 37913 messages before LSPs respond, they need to
-> separately discover whether a peer they connect to is
-> indeed an LSPS LSP that recognizes that message.
-> Broadcasting this as part of gossip allows a client to
-> discover new LSPs by simply downloading gossip.
+> **Rationale** Because all communication is initiated 
+> through clients sending BOLT-8 messages
+> only servers need to advertise themselves.
+> Servers can choose to advertise themselves using feature
+> bit 729. Clients can discover LSP's by downloading
+> gossip and inspecting the channel-graph.
 > The bit 729 was chosen randomly and has no special meaning.
 
 LSPs MUST set the `features` bit 729 `option_supports_lsps` if it

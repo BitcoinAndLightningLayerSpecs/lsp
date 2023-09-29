@@ -472,7 +472,7 @@ does not support some of the LSPS specifications.
 
 ### LSPS Specification Support Query
 
-The client can determine if an LSP supports a particular LSPS
+The client can determine if a LSP supports a particular LSPS
 specification other than LSPS0 via the `method` named
 `lsps0.list_protocols`, which accepts no parameters `{}`.
 
@@ -482,17 +482,19 @@ The response datum is an object like the below:
 
 ```JSON
 {
-  "protocols": [1, 3]
+  "protocols": {
+    "lsps0": [1],
+    "lsps1": [1, 2],
+    "lsps2": [2, 3],
+  }
 }
 ```
 
-`protocols` is an array of numbers, indicating the LSPS specification
-number for the LSPS specification the LSP supports.
-LSPs do not advertise LSPS0 support and 0 MUST NOT appear in the
-`protocols` array.
-
-> **Rationale** LSPS0 support is advertised via `features` bit 729
-> already, so specifying `0` here is redundant.
+`protocols` is a dictionary in the form of `"lsps_name": supported_api_versions`. 
+- `lsps_name` is the name of the specification. It is constructed 
+as `lsps` followed by the LSPS number, e.g. `lsps0`. The LSP lists all supported specs here.
+- `supported_api_versions` is an array of numbers, indicating version numbers the 
+specific LSP specification supports. The version numbers MUST be integral non-zero positive JSON numbers.
 
 > **Non-normative** The example below would not be necessary for other
 > LSPS specifications, but gives an idea of how the JSON-RPC 2.0
@@ -512,18 +514,118 @@ the LSP supports:
 ```
 
 The LSP could then respond with a BOLT8 message ID 37913 with the following
-payload, indicating it supports LSPS1 and LSPS3 (in addition to LSPS0):
+payload, indicating it supports LSPS1 and LSPS2 in addition to LSPS0:
 
 ```JSON
 {
   "jsonrpc": "2.0",
   "id": "example#3cad6a54d302edba4c9ade2f7ffac098",
   "result": {
-    "protocols": [1, 3],
+    "protocols": {
+      "lsps0": [1],
+      "lsps1": [1, 2],
+      "lsps2": [2, 3],
+    },
     "example-undefined-key-that-clients-should-ignore": true
   }
 }
 ```
+
+### Versioning Negotiation
+
+Every specification MUST support versioning so updates can be 
+shipped without breaking earlier version(s).
+LSPS0 defines a common version negotation mechanism that all specifications MUST use.
+
+> **Rationale** Versioning is done in every spec anyway, so we might as well standardize it. 
+> Standardizing on a single mechanism will simplify the implementation
+> and reduce error sources. Additionally, the client will only need to call one method 
+> to negotiate all the LSPS versions, instead of one method per LSPS spec.
+
+
+LSPS0 MUST provide a method called `lsps0.select_versions`.
+This method takes the following parameters:
+
+```JSON
+{
+  "client_versions": {
+    "lsps0": [1],
+    "lsps1": [2, 3],
+    "lsps2": [1, 2, 3],
+    ...
+  }
+}
+```
+
+`client_versions` is a dictionary in the form of `"lsps_name": supported_client_versions` .
+- The client MUST list all `lsps_name` specs it will use for this connection session.
+- `supported_client_versions` is an array of integral non-zero positive JSON numbers, 
+in any order and represents a set of API versions that the client supports.
+
+The LSP MUST select the highest-numbered version in the
+`client_versions` that the LSP also supports.
+
+If the LSP is able to find a version in the `supported_client_versions`
+array that is supported by the LSP, then the LSP selects the
+highest-numbered version it can find as the "current client
+version", which it retains as long as the client is connected or until the client changes the versions.
+If the LSP does not support any of the versions, the LSP MUST return the number `-1`.
+If the client disconnects, the LSP forgets the current client
+version for that client.
+On connection, the LSP sets the current client version to `-1`,
+which is an invalid version, indicating that the
+spec API cannot be accessed.
+
+On success, the result of the `lsps0.select_versions` call
+is in the form of:
+
+```JSON
+{
+  "api_versions": {
+    "lsps0": 1,
+    "lsps1": 3,
+    "lsps2": -1,
+  }
+}
+```
+
+`api_versions` is a dictionary in the form of `"lsps_name": selected_api_version`.
+- It MUST contain all `lsps_name` specs that the client requested.
+- `selected_api_version` is the version the LSP selected among 
+the `supported_client_versions`.
+
+On connection establishment, the client MUST call `lsps0.select_versions`
+to negotiate the API versions with the LSP.
+
+> **Rationale** Some LSPS specifications may send 
+> notifications to the client. It is important that the LSP
+> knows which version of the spec the client is using, so it 
+> can send the correct notifications.
+
+The client MAY call `lsps0.list_protocols` 
+before calling `lsps0.select_versions` to determine which LSPS specs the LSP supports. This is not required though.
+
+Except for `lsps0.select_versions` and `lsps0.list_protocols`, any other LSPS specification method 
+call that does not have a negotiated version number, MUST fail with
+
+* `unsupported_version` (1) - The client and the LSP have not yet
+  negotiated a API version via `lsps0.select_versions`.
+
+`lsps0.select_versions` and `lsps0.list_protocols` are exempt from this error
+as they are needed to negotiate the API versions.
+
+`lsps0.select_versions` MAY be called multiple times during the same connection session.
+This allows the client to renegotiate the API versions. 
+
+Every LSPS SHOULD address version switching/migrations behaviour 
+if a version number is increased or decreased.
+
+> **Rationale** In case the client switches to a different version,
+> existing states might need to be abandoned or migrated.
+> It is important to clearly define these behaviours to avoid
+> confusion.
+
+
 
 ## Common Schemas
 
@@ -531,6 +633,7 @@ As the transport layer uses JSON, we often need to agree upon how particular
 types of data are encoded into JSON.
 This is described in the separate [Common Schemas](common-schemas.md)
 document.
+
 
 ## Notes On Implementation
 

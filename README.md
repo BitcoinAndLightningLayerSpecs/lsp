@@ -30,13 +30,13 @@ All LSPS specifications include a "Status" field.
 
 ## Specs
 
-### **LSPS0** [Transport Layer](LSPS0/README.md)
+### **LSPS0** [Transport Layer](LSPS0/README.md) v1
 Describes the basics of how clients and LSPs communicate to each other.
 
-### **LSPS1** [Channel Request](LSPS1/README.md)
+### **LSPS1** [Channel Request](LSPS1/README.md) v1
 A channel purchase API to buy channels from an LSP.
 
-### **LSPS2** [JIT Channels](LSPS2/README.md)
+### **LSPS2** [JIT Channels](LSPS2/README.md) v1
 Describes how a client can buy channels from an LSP, by paying via a deduction from their incoming payments, creating a channel just-in-time to receive the incoming payment.
 
 ## Services

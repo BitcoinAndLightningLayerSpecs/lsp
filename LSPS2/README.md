@@ -167,32 +167,10 @@ Overview:
 >     factor towards the client / payee, it would also learn the sold
 >     private key.
 
-### 0. API Version
-
-The client can determine the versions supported by the LSP via the
-`lsps2.get_versions` call.
-
-This call takes no parameters `{}` and has no defined errors.
-
-`lsps2.get_versions` has a result like the below:
-
-```JSON
-{
-  "versions": [1]
-}
-```
-
-`versions` is the set of LSPS2 versions the LSP supports.
-When the client later contacts the LSP, it indicates a single specific
-version, which MUST be one of those indicated in this set.
-
-The client MUST determine protocol compatibility (if it supports a
-`version` that the LSP also supports).
-
 ### 1. API Information
 
 `lsps2.get_info` is the entry point for each client using the API.
-It indicates supported versions of this protocol, as well as any limits the
+It indicates any limits the
 LSP imposes, and parameters for payment.
 
 The client MUST request `lsps2.get_info` to read the `opening_fee` of the
@@ -202,13 +180,9 @@ LSP and its related parameters.
 
 ```JSON
 {
-  "version": 1,
   "token": "SECRETDISCOUNTCOUPON100"
 }
 ```
-
-`version` is the version of this spec that will be used for this
-interaction.
 
 `token` is an *optional*, arbitrary JSON string.
 This parameter is intended for use between the client and the LSP; it
@@ -220,8 +194,6 @@ provide any offers, or for any other purpose.
 `lsps2.get_info` has the following errors defined (error code numbers
 in parentheses):
 
-* `unsupported_version` (1) - the LSP does not support the `version`
-  indicated by the client.
 * `unrecognized_or_stale_token` (2) - the client provided the `token`,
   and the LSP does not recognize it, or the token has expired.
 
@@ -560,7 +532,6 @@ Example `lsps2.buy` request parameters:
 
 ```JSON
 {
-    "version": 1,
     "opening_fee_params": {
         "min_fee_msat": "546000",
         "proportional": 1200,
@@ -572,9 +543,6 @@ Example `lsps2.buy` request parameters:
     "payment_size_msat": "42000"
 }
 ```
-
-`version` is the version of this spec that will be used for this
-interaction.
 
 `opening_fee_params` is the object acquired from the previous
 step.
@@ -618,8 +586,6 @@ If the `payment_size_msat` is specified in the request, the LSP:
 
 The following errors are specified for `lsps2.buy`:
 
-* `unsupported_version` (1) - the LSP does not support the
-  specified `version`.
 * `invalid_opening_fee_params` (2) - the `valid_until` field
   of the `opening_fee_params` is already past, **OR** the `promise`
   did not match the parameters.

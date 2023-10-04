@@ -15,7 +15,7 @@ The goal of this specification is to provide a standardized LSP API for wallets 
 
 ### Data types
 
-This specification uses data types defined in [LSPS0 Common Schemas](LSPS0/common-schemas.md).
+This specification uses data types defined in <[LSPS0 Common Schemas][LSPS0.common_schemas]>.
 
 ### Actors
 
@@ -489,7 +489,7 @@ In case the channel open failed
 
 
 
-
+[LSPS0.common_schemas]: ../LSPS0/common-schemas.md
 [LSPS0.sat]: ../LSPS0/common-schemas.md#link-lsps0sat
 [LSPS0.onchain_address]: ../LSPS0/common-schemas.md#link-lsps0onchain_address
 [LSPS0.datetime]: ../LSPS0/common-schemas.md#link-lsps0datetime

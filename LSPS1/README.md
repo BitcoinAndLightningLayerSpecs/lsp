@@ -15,7 +15,7 @@ The goal of this specification is to provide a standardized LSP API for wallets 
 
 ### Data types
 
-This specification uses data types defined in <[LSPS0 Common Schemas][LSPS0.common_schemas]>.
+This specification uses data types defined in [LSPS0 Common Schemas][LSPS0.common_schemas].
 
 ### Actors
 

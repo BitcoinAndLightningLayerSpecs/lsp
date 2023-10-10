@@ -474,25 +474,27 @@ does not support some of the LSPS specifications.
 
 The client can determine if an LSP supports a particular LSPS
 specification other than LSPS0 via the `method` named
-`lsps0.list_protocols`, which accepts no parameters `{}`.
+`lsps0.v1.list_protocols`, which accepts no parameters `{}`.
 
-`lsps0.list_protocols` has no errors defined.
+`lsps0.v1.list_protocols` has no errors defined.
 
 The response datum is an object like the below:
 
 ```JSON
 {
-  "protocols": [1, 3]
+  "protocols": {
+    "lsps0": [1],
+    "lsps1": [1, 2],
+    "lsps2": [2, 3],
+  }
 }
 ```
 
-`protocols` is an array of numbers, indicating the LSPS specification
-number for the LSPS specification the LSP supports.
-LSPs do not advertise LSPS0 support and 0 MUST NOT appear in the
-`protocols` array.
-
-> **Rationale** LSPS0 support is advertised via `features` bit 729
-> already, so specifying `0` here is redundant.
+`protocols` is a dictionary in the form of `"lsps_name": supported_api_versions`. 
+- `lsps_name` is the name of the specification. It is constructed 
+as `lsps` followed by the LSPS number, e.g. `lsps0`. The LSP lists all supported specs here.
+- `supported_api_versions` is an array of numbers, indicating version numbers the 
+specific LSP specification supports. The version numbers MUST be integral non-zero positive JSON numbers.
 
 > **Non-normative** The example below would not be necessary for other
 > LSPS specifications, but gives an idea of how the JSON-RPC 2.0
@@ -504,7 +506,7 @@ the LSP supports:
 
 ```JSON
 {
-  "method": "lsps0.list_protocols",
+  "method": "lsps0.v1.list_protocols",
   "jsonrpc": "2.0",
   "id": "example#3cad6a54d302edba4c9ade2f7ffac098",
   "params": {}
@@ -519,11 +521,23 @@ payload, indicating it supports LSPS1 and LSPS3 (in addition to LSPS0):
   "jsonrpc": "2.0",
   "id": "example#3cad6a54d302edba4c9ade2f7ffac098",
   "result": {
-    "protocols": [1, 3],
+    "protocols": {
+      "lsps0": [1],
+      "lsps1": [1, 2],
+      "lsps2": [2, 3],
+    },
     "example-undefined-key-that-clients-should-ignore": true
   }
 }
 ```
+### Version upgrading, downgrading or negotiation
+
+Each LSPS should define an approriate upgrade mechanism.
+If applicable a downgrade or upgrade mechanism must be specified.
+
+> **Rationale** Each LSPS might have specific requirements and upgrade
+> mechanisms.
+
 
 ## Common Schemas
 

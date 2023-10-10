@@ -374,6 +374,18 @@ Example:
 }
 ```
 
+### Errors
+
+Each LSPS can define error codes that are greater or equal to 1 and smaller or equal to 2,147,483,647.
+
+> **Rationale** : The error-code must fit in a 32-bit signed integer. Negative error-codes
+> are reserved for LSPS0 and JSON-rpc related errors.
+
+The following error-codes are defined:
+
+| **Error code** | **Name**            | **Description**                                                |
+|----------------|---------------------|----------------------------------------------------------------|
+| -1             | unsupported_version | When the LSP doesn't support the version requested by the user |
 
 ## References
 

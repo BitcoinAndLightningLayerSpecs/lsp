@@ -126,13 +126,13 @@ Overview:
   it has no inbound capacity, and the client cannot pre-buy this capacity
   (for instance, it also has no outbound capacity or on-chain funds).
 * The client determines the parameters of a particular LSP via a
-  `lsps2.get_info` request.
+  `lsps2.v1.get_info` request.
   * The LSP indicates how long those parameters are valid for,
     which defines a timeout for the rest of this flow; if the
     flow does not complete in that timeout, the parameters are no
     longer valid and the LSP MAY refuse to open the channel.
 * The client requests for a JIT channel, possibly specifying how much it
-  will receive, via a `lsps2.buy` request.
+  will receive, via a `lsps2.v1.buy` request.
 * The LSP returns an SCID, which identifies this request to the LSP.
 * The client generates an invoice, which includes the above SCID and the
   LSP node ID as a route hint.
@@ -167,48 +167,20 @@ Overview:
 >     factor towards the client / payee, it would also learn the sold
 >     private key.
 
-### 0. API Version
-
-The client can determine the versions supported by the LSP via the
-`lsps2.get_versions` call.
-
-This call takes no parameters `{}` and has no defined errors.
-
-`lsps2.get_versions` has a result like the below:
-
-```JSON
-{
-  "versions": [1]
-}
-```
-
-`versions` is the set of LSPS2 versions the LSP supports.
-When the client later contacts the LSP, it indicates a single specific
-version, which MUST be one of those indicated in this set.
-
-The client MUST determine protocol compatibility (if it supports a
-`version` that the LSP also supports).
-
 ### 1. API Information
 
-`lsps2.get_info` is the entry point for each client using the API.
-It indicates supported versions of this protocol, as well as any limits the
-LSP imposes, and parameters for payment.
+`lsps2.v1.get_info` is the entry point for each client using the API.
 
-The client MUST request `lsps2.get_info` to read the `opening_fee` of the
+The client MUST request `lsps2.v1.get_info` to read the `opening_fee` of the
 LSP and its related parameters.
 
-`lsps2.get_info` takes the parameters:
+`lsps2.v1.get_info` takes the parameters:
 
 ```JSON
 {
-  "version": 1,
   "token": "SECRETDISCOUNTCOUPON100"
 }
 ```
-
-`version` is the version of this spec that will be used for this
-interaction.
 
 `token` is an *optional*, arbitrary JSON string.
 This parameter is intended for use between the client and the LSP; it
@@ -217,15 +189,13 @@ offers (i.e. a "discount coupon"), or for the LSP to actually offer
 this service to the client (i.e. an "API key") instead of failing to
 provide any offers, or for any other purpose.
 
-`lsps2.get_info` has the following errors defined (error code numbers
+`lsps2.v1.get_info` has the following errors defined (error code numbers
 in parentheses):
 
-* `unsupported_version` (1) - the LSP does not support the `version`
-  indicated by the client.
-* `unrecognized_or_stale_token` (2) - the client provided the `token`,
+* `unrecognized_or_stale_token` (1) - the client provided the `token`,
   and the LSP does not recognize it, or the token has expired.
 
-Example `lsps2.get_info` result:
+Example `lsps2.v1.get_info` result:
 
 ```JSON
 {
@@ -367,7 +337,7 @@ The LSP, when generating the `promise` field:
 > key cryptography, with a signature as the `promise`, so that the
 > component that generates `opening_fee_params` objects is the only
 > one with access to a specific private key, while the rest of the LSP,
-> including the `lsps2.buy` component, only knows the public key.
+> including the `lsps2.v1.buy` component, only knows the public key.
 > Another alternative for a componentized LSP would be to have the
 > `opening_fee_params` generator know the public key of the
 > `opening_fee_params` validator; the generator creates an ephemeral
@@ -546,7 +516,7 @@ fn compute_opening_fee(payment_size_msat: u64,
 
 ### 2.  Request JIT Channel
 
-The client constructs a request body for a `lsps2.buy` request,
+The client constructs a request body for a `lsps2.v1.buy` request,
 depending on their need.
 
 The client is identified by the LSP from the BOLT8 connection
@@ -556,11 +526,10 @@ The LSP identifies the client as "connected" if there is a BOLT8
 tunnel that has been identified as having the same peer as the
 client node ID.
 
-Example `lsps2.buy` request parameters:
+Example `lsps2.v1.buy` request parameters:
 
 ```JSON
 {
-    "version": 1,
     "opening_fee_params": {
         "min_fee_msat": "546000",
         "proportional": 1200,
@@ -573,13 +542,10 @@ Example `lsps2.buy` request parameters:
 }
 ```
 
-`version` is the version of this spec that will be used for this
-interaction.
-
 `opening_fee_params` is the object acquired from the previous
 step.
 Clients MUST copy it verbatim from an entry of `opening_fee_params_menu`
-from a result of a `lsps2.get_info` call.
+from a result of a `lsps2.v1.get_info` call.
 LSPs MUST check that the `opening_fee_params.promise` does in fact
 prove that it previously promised the specified `opening_fee_params`.
 LSPs MUST check that the `opening_fee_params.valid_until` is not a
@@ -616,25 +582,23 @@ If the `payment_size_msat` is specified in the request, the LSP:
   public network to be able to receive at least `payment_size_msat`,
   if it was specified.
 
-The following errors are specified for `lsps2.buy`:
+The following errors are specified for `lsps2.v1.buy`:
 
-* `unsupported_version` (1) - the LSP does not support the
-  specified `version`.
-* `invalid_opening_fee_params` (2) - the `valid_until` field
+* `invalid_opening_fee_params` (1) - the `valid_until` field
   of the `opening_fee_params` is already past, **OR** the `promise`
   did not match the parameters.
-* `payment_size_too_small` (3) - the `payment_size_msat` was specified,
+* `payment_size_too_small` (2) - the `payment_size_msat` was specified,
   and the resulting `opening_fee` is equal or greater than the
   `payment_size_msat`.
-* `payment_size_too_large` (4) - the `payment_size_msat` was specified,
+* `payment_size_too_large` (3) - the `payment_size_msat` was specified,
   and the LSP hit an overflow error while calculating the
   `opening_fee`, **OR** the LSP has insufficient incoming liquidity
   from the public network to receive the `payment_size_msat`.
 
 If there were no errors, the LSP then provides a normal
-result to the `lsps2.buy` API.
+result to the `lsps2.v1.buy` API.
 
-Example successful `lsps2.buy` result:
+Example successful `lsps2.v1.buy` result:
 
 ```JSON
 {
@@ -908,7 +872,7 @@ the LSP is able to re-initiate the channel open in a timely manner.
 > spend CPU processing time and network bandwidth on the additional
 > negotiations.
 
-Depending on the `client_trusts_lsp` from the `lsps2.buy` result,
+Depending on the `client_trusts_lsp` from the `lsps2.v1.buy` result,
 after the client has sent `funding_signed` and the LSP is willing
 to broadcast the funding transaction:
 

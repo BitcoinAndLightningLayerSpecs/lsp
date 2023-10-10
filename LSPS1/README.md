@@ -41,8 +41,8 @@ In general, LSPS1 is developed on the basis that the client trust the LSP to del
 
 ## Order Flow Overview
 
-* Client calls `lsps1.info` to get the LSP's API version and options.
-* Client calls `lsps1.create_order` to create an order.
+* Client calls `lsps1.v1.info` to get the LSP's API version and options.
+* Client calls `lsps1.v1.create_order` to create an order.
 * Client pays the order either on-chain or off-chain.
 * LSP opens the channel as soon as they payment is confirmed.
   * Channel open failed: LSP refunds the client.
@@ -50,20 +50,20 @@ In general, LSPS1 is developed on the basis that the client trust the LSP to del
 
 ## API
 
-### 1. lsps1.info
+### 1. lsps1.v1.info
 
-| JSON-RPC Method | lsps1.info |
-|---------------- |----------- |
-| Idempotent      | Yes        |
+| JSON-RPC Method | lsps1.v1.info |
+|---------------- |-------------- |
+| Idempotent      | Yes           |
 
 
-`lsps1.info` is the entrypoint for each client using the API. It lists the supported versions of the API and all options in a dictionary. 
+`lsps1.v1.info` is the entrypoint for each client using the API. It lists the supported versions of the API and all options in a dictionary. 
 
-- The LSP SHOULD NOT change the values in `lsps1.info` more than once per day.
+- The LSP SHOULD NOT change the values in `lsps1.v1.info` more than once per day.
 
-> **Rationale Change frequency** The LSP should not change values in `lsps1.info` too frequently. Lightning Explorers may scrape these values and provide an overview of all LSPs. If the values change too frequently, Lightning Explorers may not be able to keep up with the changes. Changing them a maximum of once a day gives explorer enough time to scrape. Once a day has been chosen as it is a similar rate-limit that core-lightning puts on the lightning gossip.
+> **Rationale Change frequency** The LSP should not change values in `lsps1.v1.info` too frequently. Lightning Explorers may scrape these values and provide an overview of all LSPs. If the values change too frequently, Lightning Explorers may not be able to keep up with the changes. Changing them a maximum of once a day gives explorer enough time to scrape. Once a day has been chosen as it is a similar rate-limit that core-lightning puts on the lightning gossip.
 
-The client MUST call `lsps1.info` first.
+The client MUST call `lsps1.v1.info` first.
 
 **Request** No parameters needed.
 
@@ -71,7 +71,6 @@ The client MUST call `lsps1.info` first.
 
 ```JSON
 {
-  "supported_versions": [1],
   "website": "http://example.com/contact",
   "options": {
       "minimum_channel_confirmations": 0,
@@ -97,7 +96,7 @@ The client MUST call `lsps1.info` first.
   - `minimum_channel_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
-  - `minimum_onchain_payment_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.onchain_block_confirmations_required` depending on the size of the channels and risk management.
+  - `minimum_onchain_payment_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.v1.create_order.onchain_block_confirmations_required` depending on the size of the channels and risk management.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
   - `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
@@ -125,9 +124,9 @@ Every `min/max` options pair MUST ensure that `min <= max`.
 
 **Errors** No additional errors are defined for this method.
 
-### 2. lsps1.create_order 
+### 2. lsps1.v1.create_order 
 
-| JSON-RPC Method     | lsps1.create_order |
+| JSON-RPC Method     | lsps1.v1.create_order |
 |-------------------- |------------------- |
 | Idempotent          | No                 |
 
@@ -138,7 +137,6 @@ The request is constructed depending on the client's needs.
 
 ```json
 {
-  "api_version": 1,
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
   "confirms_within_blocks": 1,
@@ -153,7 +151,7 @@ The request is constructed depending on the client's needs.
 
 - `api_version <uint16>` API version that the client wants to work with.
   - MUST be `1` for this version of the spec. 
-  - MUST match one of the versions listed in `lsps1.info.supported_versions`.
+  - MUST match one of the versions listed in `lsps1.v1.info.supported_versions`.
 - `lsp_balance_sat` <[LSPS0.sat][]> How many satoshi the LSP will provide on their side.
   - MUST be 1 or greater. 
   - MUST be equal or below `base_api.max_initial_lsp_balance_sat`.
@@ -248,11 +246,11 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 | Code   | Message         | Data | Description |
 | ----   | -------         | ----------- | ---- |
 | -32602 | Invalid params  | {"property": %invalid_property%, "message": %human_message% }    | Invalid method parameter(s). |
-| 1000   | Option mismatch |  {"property": %option_mismatch_property%, "message": %human_message% }   | The order doesnt match the options defined in `lsps1.info.options`. |
+| 1000   | Option mismatch |  {"property": %option_mismatch_property%, "message": %human_message% }   | The order doesnt match the options defined in `lsps1.v1.info.options`. |
 | 1001   | Client rejected |  {"message": %human_message% }   | The LSP rejected the client. |
 
-- LSP MUST validate the order against the options defined in `lsps1.info.options`. LSP MUST return an `1000` error in case of a mismatch.
-  - `%option_mismatch_property%` MUST be one of the fields in `lsps1.info.options`.
+- LSP MUST validate the order against the options defined in `lsps1.v1.info.options`. LSP MUST return an `1000` error in case of a mismatch.
+  - `%option_mismatch_property%` MUST be one of the fields in `lsps1.v1.info.options`.
   - Example: `{ "property": "min_initial_client_balance_sat" }`.
 
 - LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.
@@ -270,7 +268,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 > **Rationale Client rejected** LSPs can reject a client for example for misbehaviour. LSPs can reject a node on two levels: Prevent a peer connection OR disable order creation. Preventing a peer connection might not work in case you still want to allow other functions to keep working, for example an existing channel.
 
 
-### 2.1 lsps1.get_order 
+### 2.1 lsps1.v1.get_order 
 
 | JSON-RPC Method | lsps1.get_order |
 |---------------- |---------------- |
@@ -297,7 +295,7 @@ The client MAY check the current status of the order at any point.
 
 ### 3. Payment
 
-This section describes the `payment` object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `bolt11_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
+This section describes the `payment` object returned by `lsps1.v1.create_order` and `lsps1.v1.get_order`. The client MUST pay the `bolt11_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
 
 > **Rationale** On-chain payments are required for payments with higher amounts, especially to push `client_balance_sat` to the client. On-chain payments are also useful to onboard new users to Lightining. On the other hand, Lightning payments are the preferred way to do payments because they are quick and easily refundable.
 
@@ -362,7 +360,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 **Client**
 
 - MUST pay the `bolt11_invoice`.
-- SHOULD pull `lsps1.get_order` to check the success of the payment.
+- SHOULD pull `lsps1.v1.get_order` to check the success of the payment.
 - The client gets refunded automatically in case the channel open failed, the order expires, or just before the payment times out.
 
 **LSP**
@@ -382,7 +380,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 **Client**
 
 - MUST pay `order_total_sat` to `onchain_address`.
-- MAY pull `lsps1.get_order` to check the success of the payment.
+- MAY pull `lsps1.v1.get_order` to check the success of the payment.
 
 **LSP** Payment confirmation
 

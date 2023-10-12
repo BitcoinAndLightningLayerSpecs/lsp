@@ -950,7 +950,7 @@ The LSP MUST ensure that each forwarded part forwards at least
 The LSP MUST ensure that all parts forwarded sum up to at least
 `payment_size_msat - opening_fee`.
 
-The LSP MUST include an `extra_fee` (type 65536) TLV to the
+The LSP MUST include an `extra_fee` (type 65537) TLV to the
 `update_add_htlc` message of forwarded parts that have had
 fees deducted.
 The LSP MUST NOT include this `extra_fee` TLV if the part does

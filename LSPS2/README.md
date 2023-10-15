@@ -167,33 +167,10 @@ Overview:
 >     factor towards the client / payee, it would also learn the sold
 >     private key.
 
-### 0. API Version
-
-The client can determine the versions supported by the LSP via the
-`lsps2.get_versions` call.
-
-This call takes no parameters `{}` and has no defined errors.
-
-`lsps2.get_versions` has a result like the below:
-
-```JSON
-{
-  "versions": [1]
-}
-```
-
-`versions` is the set of LSPS2 versions the LSP supports.
-When the client later contacts the LSP, it indicates a single specific
-version, which MUST be one of those indicated in this set.
-
-The client MUST determine protocol compatibility (if it supports a
-`version` that the LSP also supports).
-
 ### 1. API Information
 
 `lsps2.get_info` is the entry point for each client using the API.
-It indicates supported versions of this protocol, as well as any limits the
-LSP imposes, and parameters for payment.
+It indicates any limits the LSP imposes, and parameters for payment.
 
 The client MUST request `lsps2.get_info` to read the `opening_fee` of the
 LSP and its related parameters.
@@ -202,13 +179,9 @@ LSP and its related parameters.
 
 ```JSON
 {
-  "version": 1,
   "token": "SECRETDISCOUNTCOUPON100"
 }
 ```
-
-`version` is the version of this spec that will be used for this
-interaction.
 
 `token` is an *optional*, arbitrary JSON string.
 This parameter is intended for use between the client and the LSP; it
@@ -220,8 +193,6 @@ provide any offers, or for any other purpose.
 `lsps2.get_info` has the following errors defined (error code numbers
 in parentheses):
 
-* `unsupported_version` (1) - the LSP does not support the `version`
-  indicated by the client.
 * `unrecognized_or_stale_token` (2) - the client provided the `token`,
   and the LSP does not recognize it, or the token has expired.
 
@@ -400,14 +371,11 @@ LSPs MUST NOT add any other fields to an `opening_fee_params` object.
 Clients MUST fail and abort the flow if a `opening_fee_params`
 object has unrecognized fields.
 
-> **Rationale** If additional fields are deemed necessary for a
-> future version of this specification, then the `version` should
-> be increased, and a new schema defined for the later `version`.
->
-> Clients that expect this `version` of LSPS2 will compute the
-> `opening_fee` in the manner indicated in this specification, and
-> any additional fields may imply an extension that may mislead
-> the client into computing the wrong `opening_fee`.
+> **Rationale** Clients that expect this version of LSPS2 will
+> compute the `opening_fee` in the manner indicated in this
+> specification, and any additional fields may imply an extension
+> that may mislead the client into computing the wrong
+> `opening_fee`.
 >
 > If the LSP wants to include other information in the
 > `opening_fee_params`, and that information does not affect how
@@ -560,7 +528,6 @@ Example `lsps2.buy` request parameters:
 
 ```JSON
 {
-    "version": 1,
     "opening_fee_params": {
         "min_fee_msat": "546000",
         "proportional": 1200,
@@ -572,9 +539,6 @@ Example `lsps2.buy` request parameters:
     "payment_size_msat": "42000"
 }
 ```
-
-`version` is the version of this spec that will be used for this
-interaction.
 
 `opening_fee_params` is the object acquired from the previous
 step.
@@ -618,8 +582,6 @@ If the `payment_size_msat` is specified in the request, the LSP:
 
 The following errors are specified for `lsps2.buy`:
 
-* `unsupported_version` (1) - the LSP does not support the
-  specified `version`.
 * `invalid_opening_fee_params` (2) - the `valid_until` field
   of the `opening_fee_params` is already past, **OR** the `promise`
   did not match the parameters.
@@ -834,7 +796,7 @@ their [BOLT2 Channel Establishment][] flow:
 > `option_scid_alias` needs to be set so that the channel can be
 > referred to on future invoices before the channel confirms.
 >
-> Future versions of this API may be able to utilize Asynchronous
+> Future revisions of this API may be able to utilize Asynchronous
 > Receive (currently being developed as of this version) to
 > be able to get around the `option_zeroconf` requirement, by
 > treating the receiver / client as offline until the client is
@@ -1029,7 +991,7 @@ negotiated for the new channel.
 > be paid once via the `jit_channel_scid` before it can be issue
 > further invoices with the `alias`.
 >
-> Future versions of this API may allow for more flexibility on the
+> Future revisions of this API may allow for more flexibility on the
 > client side, including support for variable-amount invoices,
 > multiple incoming payments being stalled until the `opening_fee`
 > is achieved and the channel can be opened, and so on.

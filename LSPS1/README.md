@@ -203,13 +203,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
     "lightning_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05",
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "onchain_block_confirmations_required": 0,
-    "onchain_payments": [
-      {
-        "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
-        "sat": "1200",
-        "confirmed": false
-      }
-    ]
+    "onchain_payment": null
   },
   "channel": null
 }
@@ -313,13 +307,11 @@ This section describes the `payment` object returned by `lsps1.create_order` and
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "onchain_block_confirmations_required": 1,
     "minimum_fee_for_0conf": 253,
-    "onchain_payments": [
-        {
+    "onchain_payment": {
         "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
         "sat": "1200",
         "confirmed": false
-        }
-    ]
+      }
 },
 ```
 
@@ -347,8 +339,9 @@ This section describes the `payment` object returned by `lsps1.create_order` and
     - MUST be `null` if `onchain_address` is `null`.
     - MUST be `null` if `required_onchain_block_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
-- `onchain_payments <Array<objects>>` Detected on-chain payments.
-    - MUST contain all incoming/confirmed outpoints to `onchain_address`. 
+- `onchain_payment <object>` Detected on-chain payment.
+    - MUST contain the incoming/confirmed outpoint to `onchain_address`.
+    - MAY be null if no payment has been detected.
     - `outpoint` <LSPS0.outpoint> MUST be an outpoint in the form of [txid:vout](https://btcinformation.org/en/glossary/outpoint).
     - `sat` <[LSPS0.sat][]> MUST contain the received satoshi.
     - `confirmed <boolean>` Indicates if the LSP sees the transaction as confirmed.
@@ -386,7 +379,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 
 **LSP** Payment confirmation
 
-- MUST monitor the blockchain and update `onchain_payments`.
+- MUST monitor the blockchain and update `onchain_payment`.
 - IF `onchain_block_confirmations_required` is 0 and incoming transaction fee is greater than `minimum_fee_for_0conf`:
   - SHOULD set the transaction as confirmed.
 - IF `onchain_block_confirmations_required` is equal or greater than 1:
@@ -398,7 +391,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 
 **LSP** State change
 
-- MUST change the `payment.state` to `PAID` when all the payments for the order are confirmed.
+- MUST change the `payment.state` to `PAID` when the payment for the order is confirmed.
 - If the order expired and the channel has NOT been opened, OR the channel open failed.
     - MUST refund the client to `refund_onchain_address`.
       - The number of satoshi to refund 

@@ -777,6 +777,27 @@ where the next hop is `jit_channel_scid`:
 
 * SHOULD wait for payment parts of a single payment hash until all
   parts sum up to at least `payment_size_msat`.
+  * SHOULD group together payment parts of a single payment hash.
+  * SHOULD hold all payment parts active for at least 90 seconds,
+    starting from the arrival of the first payment part
+    (**Rationale** [BOLT 4 Basic Multi-Part Payments Requirements][]
+    requires the final hop to wait at least 60 seconds; this
+    replicates that requirement, and adds 30 seconds for
+    additional LSP-client communication overhead).
+  * MAY ignore new blocks being mined.
+    (**Rationale** the requirement to add +2 to the `c` /
+    `min_final_cltv_expiry_delta` gives enough protection for
+    up to two blocks being mined, from the time the payer sent
+    out the payment, to the time the LSP is able to deliver the
+    HTLCs inside a new JIT channel.)
+  * MUST fail with `temporary_channel_failure` if it implements
+    the above timeout, and the timeout is reached.
+  * SHOULD, if it errored `temporary_channel_failure` due to the
+    above timeout, forget about the failed payment parts, and if
+    another payment part arrives after failing, SHOULD consider
+    it as beginning another set of payment parts for a payment.
+  * MUST also have, for all pending payment parts, a separate timeout
+    at `opening_fee_params.valid_until`, described below.
 * MUST NOT fail with `mpp_timeout`, as the final hop is the client
   and that error is only allowed at the final hop.
 * MUST fail with `unknown_next_peer` if all parts have **NOT**
@@ -791,6 +812,8 @@ where the next hop is `jit_channel_scid`:
   * All received payment parts sum up to at least `payment_size_msat`
     plus `opening_fee`.
   * The client is connected.
+
+[BOLT 4 Basic Multi-Part Payment Requirements]: https://github.com/lightning/bolts/blob/803a532c49be2f152c7f2dbaa0ec7d4c23a6013d/04-onion-routing.md#requirements-1
 
 In "no-MPP+var-invoice" mode, the LSP, if it receives a forward
 where the next hop is `jit_channel_scid`, before

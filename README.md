@@ -39,6 +39,9 @@ A channel purchase API to buy channels from an LSP.
 ### **LSPS2** [JIT Channels](LSPS2/README.md)
 Describes how a client can buy channels from an LSP, by paying via a deduction from their incoming payments, creating a channel just-in-time to receive the incoming payment.
 
+### **LSPS6** [Unlinkable Service Tokens](LSPS6/README.md)
+Describes how a client can acquire tokens for other Bitcoin- or Lightning-related services from an LSP, while ensuring that the LSP cannot link the client node ID with usage of the service.
+
 ## Services
 List of Lightning Service Providers in alphabetic order that currently or will support LSP specs in future.
 

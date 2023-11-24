@@ -75,7 +75,7 @@ The client MUST call `lsps1.get_info` first.
   "website": "http://example.com/contact",
   "options": {
       "min_channel_confirmations": 0,
-      "min_onchain_payment_confirmations": 1,
+      "min_onchain_payment_confirmations": null,
       "supports_zero_channel_reserve": true,
       "min_onchain_payment_size_sat": null,
       "max_channel_expiry_blocks": 20160,

@@ -74,7 +74,7 @@ The client MUST call `lsps1.info` first.
   "supported_versions": [1],
   "website": "http://example.com/contact",
   "options": {
-      "minimum_channel_confirmations": 0,
+      "min_channel_confirmations": 0,
       "min_onchain_payment_confirmations": 1,
       "supports_zero_channel_reserve": true,
       "min_onchain_payment_size_sat": null,
@@ -94,7 +94,7 @@ The client MUST call `lsps1.info` first.
 - `website <string>` Website of the LSP.
   - MUST be at most 256 characters long.
 - `options <object>` All options supported by the LSP.
-  - `minimum_channel_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
+  - `min_channel_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
   - `min_onchain_payment_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.min_onchain_payment_confirmations	` depending on the size of the channels and risk management.
@@ -306,7 +306,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
     "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97...",
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations	": 1,
-    "minimum_fee_for_0conf": 253,
+    "min_fee_for_0conf": 253,
     "onchain_payment": {
         "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
         "sat": "1200",
@@ -335,7 +335,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 - `min_onchain_payment_confirmations <uint8>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.min_onchain_payment_confirmations`.
     - MUST be `null` if `onchain_address` is `null`.
-- `minimum_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
+- `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
     - MUST be `null` if `onchain_address` is `null`.
     - MUST be `null` if `min_onchain_payment_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
@@ -348,7 +348,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 
 > **Rationale `min_onchain_payment_confirmations`** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
 
-> **Rationale `minimum_fee_for_0conf`** The client MAY want to have instant confirmation of the on-chain payment. The LSP can mitigate the risk of a double spend by requiring a high fee rate. The client can then decide if he wants to pay the high fee rate or wait for the on-chain payment to be confirmed once.
+> **Rationale `min_fee_for_0conf`** The client MAY want to have instant confirmation of the on-chain payment. The LSP can mitigate the risk of a double spend by requiring a high fee rate. The client can then decide if he wants to pay the high fee rate or wait for the on-chain payment to be confirmed once.
 
 #### 3.1 Lightning Payment
 
@@ -380,7 +380,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 **LSP** Payment confirmation
 
 - MUST monitor the blockchain and update `onchain_payment`.
-- IF `min_onchain_payment_confirmations	` is 0 and incoming transaction fee is greater than `minimum_fee_for_0conf`:
+- IF `min_onchain_payment_confirmations	` is 0 and incoming transaction fee is greater than `min_fee_for_0conf`:
   - SHOULD set the transaction as confirmed.
 - IF `min_onchain_payment_confirmations	` is equal or greater than 1:
   - SHOULD set the transaction as confirmed after `min_onchain_payment_confirmations	` confirmations.
@@ -403,9 +403,9 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 
 **0conf risk management**
 
-Every LSP that accepts 0conf transactions is responsible to do their own risk management. `min_onchain_payment_confirmations` and `minimum_fee_for_0conf` are the risk management tools the LSP has. The main risk lies in the fact that the client can double spend the on-chain payment. Opening a 0conf channel is not risky for the LSP anymore if the LSP is sure of the on-chain payment.
+Every LSP that accepts 0conf transactions is responsible to do their own risk management. `min_onchain_payment_confirmations` and `min_fee_for_0conf` are the risk management tools the LSP has. The main risk lies in the fact that the client can double spend the on-chain payment. Opening a 0conf channel is not risky for the LSP anymore if the LSP is sure of the on-chain payment.
 
-`min_onchain_payment_confirmations` and `minimum_fee_for_0conf` are the best estimates of the LSP makes at the time of the order creation. These estimates MAY change over time so the LSP MAY confirm a transaction earlier or later. Therefore, the client MUST NOT rely on the LSP confirming the transaction within the given time frame.
+`min_onchain_payment_confirmations` and `min_fee_for_0conf` are the best estimates of the LSP makes at the time of the order creation. These estimates MAY change over time so the LSP MAY confirm a transaction earlier or later. Therefore, the client MUST NOT rely on the LSP confirming the transaction within the given time frame.
 
 
 ### 4. Channel
@@ -458,7 +458,7 @@ The LSP MUST open the channel under the following conditions:
         - MAY overprovision.
     - MUST use a high enough on-chain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the client paid the order.
         - MAY overprovision.
-- MUST send `channel_ready` after the funding transaction has `minimum_channel_confirmations`.
+- MUST send `channel_ready` after the funding transaction has `min_channel_confirmations`.
 - MUST allow zero channel reserves if `supports_zero_channel_reserve`.
 
 In case the channel open succeeds

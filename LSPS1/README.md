@@ -41,7 +41,7 @@ In general, LSPS1 is developed on the basis that the client trust the LSP to del
 
 ## Order Flow Overview
 
-* Client calls `lsps1.info` to get the LSP's API version and options.
+* Client calls `lsps1.get_info` to get the LSP's API version and options.
 * Client calls `lsps1.create_order` to create an order.
 * Client pays the order either on-chain or off-chain.
 * LSP opens the channel as soon as they payment is confirmed.
@@ -50,20 +50,20 @@ In general, LSPS1 is developed on the basis that the client trust the LSP to del
 
 ## API
 
-### 1. lsps1.info
+### 1. lsps1.get_info
 
-| JSON-RPC Method | lsps1.info |
+| JSON-RPC Method | lsps1.get_info |
 |---------------- |----------- |
 | Idempotent      | Yes        |
 
 
-`lsps1.info` is the entrypoint for each client using the API. It lists the supported versions of the API and all options in a dictionary. 
+`lsps1.get_info` is the entrypoint for each client using the API. It lists the supported versions of the API and all options in a dictionary. 
 
-- The LSP SHOULD NOT change the values in `lsps1.info` more than once per day.
+- The LSP SHOULD NOT change the values in `lsps1.get_info` more than once per day.
 
-> **Rationale Change frequency** The LSP should not change values in `lsps1.info` too frequently. Lightning Explorers may scrape these values and provide an overview of all LSPs. If the values change too frequently, Lightning Explorers may not be able to keep up with the changes. Changing them a maximum of once a day gives explorer enough time to scrape. Once a day has been chosen as it is a similar rate-limit that core-lightning puts on the lightning gossip.
+> **Rationale Change frequency** The LSP should not change values in `lsps1.get_info` too frequently. Lightning Explorers may scrape these values and provide an overview of all LSPs. If the values change too frequently, Lightning Explorers may not be able to keep up with the changes. Changing them a maximum of once a day gives explorer enough time to scrape. Once a day has been chosen as it is a similar rate-limit that core-lightning puts on the lightning gossip.
 
-The client MUST call `lsps1.info` first.
+The client MUST call `lsps1.get_info` first.
 
 **Request** No parameters needed.
 
@@ -153,7 +153,7 @@ The request is constructed depending on the client's needs.
 
 - `api_version <uint16>` API version that the client wants to work with.
   - MUST be `1` for this version of the spec. 
-  - MUST match one of the versions listed in `lsps1.info.supported_versions`.
+  - MUST match one of the versions listed in `lsps1.get_info.supported_versions`.
 - `lsp_balance_sat` <[LSPS0.sat][]> How many satoshi the LSP will provide on their side.
   - MUST be 1 or greater. 
   - MUST be equal or below `base_api.max_initial_lsp_balance_sat`.
@@ -242,11 +242,11 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 | Code   | Message         | Data | Description |
 | ----   | -------         | ----------- | ---- |
 | -32602 | Invalid params  | {"property": %invalid_property%, "message": %human_message% }    | Invalid method parameter(s). |
-| 1000   | Option mismatch |  {"property": %option_mismatch_property%, "message": %human_message% }   | The order doesnt match the options defined in `lsps1.info.options`. |
+| 1000   | Option mismatch |  {"property": %option_mismatch_property%, "message": %human_message% }   | The order doesnt match the options defined in `lsps1.get_info.options`. |
 | 1001   | Client rejected |  {"message": %human_message% }   | The LSP rejected the client. |
 
-- LSP MUST validate the order against the options defined in `lsps1.info.options`. LSP MUST return an `1000` error in case of a mismatch.
-  - `%option_mismatch_property%` MUST be one of the fields in `lsps1.info.options`.
+- LSP MUST validate the order against the options defined in `lsps1.get_info.options`. LSP MUST return an `1000` error in case of a mismatch.
+  - `%option_mismatch_property%` MUST be one of the fields in `lsps1.get_info.options`.
   - Example: `{ "property": "min_initial_client_balance_sat" }`.
 
 - LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.

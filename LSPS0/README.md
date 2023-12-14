@@ -258,32 +258,20 @@ Other LSPS specifications:
 > **Rationale** A prefix ensures that method names do not
 > conflict across LSPS specifications, and creates a convention
 > that allows non-standard extensions to define their own prefix.
-> A `result` dictionary allows for newer versions of an
+> A `result` dictionary allows for later revisions of an
 > LSPS specification to seamlessly add new keys in the response.
 
-LSPs MAY return additional keys in the `response` values
+An LSP MAY return additional keys in the `response` values
 that are not defined in the relevant LSPS specification.
 Clients conversely MUST ignore unrecognized keys.
 
-> **Rationale** This allows newer version of an LSPS specification
+> **Rationale** This allows later revisions of an LSPS specification
 > to seamlessly add new keys to the response while maintaining
 > backwards compatibility with older clients that do not know the
-> newer version with additional keys.
-> Newer versions can make parameters backwards compatible by only
+> later revision with additional keys.
+> Later revisions can make parameters backwards compatible by only
 > adding optional new parameters, which when absent causes the
-> API endpoint to behave identically to older versions.
-
-Other LSPS specifications SHOULD specify some API call where LSPs
-can indicate which version(s) of that LSPS specification it
-supports, and SHOULD specify how clients can indicate which
-version it wants to use.
-For example, an LSPS specification might indicate a "get
-information" API call that is stable across versions, which
-returns a `versions` array that indicates which versions of that
-LSPS specification the LSP supports.
-Other API calls then might include a `version` parameter
-that lets the client select which version of the LSPS
-specification it wants.
+> API endpoint to behave identically to older revisions.
 
 Other LSPS specifications MUST be designed to be resilient
 against responses and notifications being lost on the way
@@ -383,13 +371,71 @@ SHOULD indicate this as an "unrecognized" error to the user.
 > user-visible source of the error message would be the client;
 > it is thus better if the client writes its own error
 > messages that it can change based on user feedback.
-> Newer versions of some LSPS spec may introduce new error codes,
+> Later revisions of some LSPS spec may introduce new error codes,
 > or the specification may be incomplete and actual development
 > shows that some unspecified error could possibly occur, in
 > which case the human-readable `error` field could contain a
 > description of this error, which developers of clients can
 > then use to help guide the evolution of the specification, or
-> to comply with later versions of the LSPS spec.
+> to comply with later revisions of the LSPS spec.
+
+##### `-32602` Invalid Parameters Error
+
+An LSP that sends back an invalid parameter error with
+`code = -32602` MUST include a `data` object in the `error`
+response.
+
+This `data` object MUST contain at least the field `unrecognized`,
+a JSON array of strings, representing an unordered set of
+parameter names.
+These are the parameter names that are not recognized by the LSP as
+valid for the RPC method.
+
+For example, suppose the client sent this request:
+
+```JSON
+{
+  "jsonrpc": "2.0",
+  "method": "example.method_name",
+  "params": {
+    "future_feature1_param": "value1",
+    "future_feature2_param": "value2"
+  },
+  "id": "42"
+}
+```
+
+Suppose the LSP recognizes `example.method_name` as a valid
+method, and recognizes `future_feature2_param` as a valid
+parameter of that method, but does not recognize
+`future_feature1_param`.
+In that case, the LSP would respond with:
+
+```JSON
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32602,
+    "message": "Invalid params",
+    "data": {
+      "unrecognized": ["future_feature1_param"]
+    }
+  },
+  "id": "42"
+}
+```
+
+> **Rationale** Suppose there exists some other LSPS.
+> Suppose some future revision(s) of this LSPS includes (in
+> whatever order) two additional parameters,
+> `future_feature1_param` and `future_feature2_param`.
+> If a client sends a request that includes
+> `future_feature1_param` *and* `future_feature2_param`, and the
+> LSP does not support one or both of them, the LSP would return
+> an "Invalid params" -32602 error.
+> However, without the `unrecognized` field in the `data` object,
+> the client cannot know if the LSP does not support
+> `future_feature1_param`, `future_feature2_param`, or both.
 
 #### Disconnection Handling
 
@@ -524,6 +570,91 @@ payload, indicating it supports LSPS1 and LSPS3 (in addition to LSPS0):
   }
 }
 ```
+
+### LSPS Extension And Versioning
+
+Individual LSPS SHOULD NOT include their own explicit versioning
+scheme.
+
+An individual LSPS MAY be revised to a later revision.
+Later revisions of an individual LSPS MUST NOT break compatibility with
+earlier revisions.
+
+If there is a need for a change that breaks compatibility with an
+existing revision of an LSPS, then a new LSPS with a different
+ LSPS number MUST be used.
+
+Later revisions of an LSPS MAY, if a new need arises:
+
+* Add new optional `params` fields for a client-callable API `method`.
+  * If the optional parameter is not specified, the `method` MUST
+    act the same as in previous revision of the LSPS, before the
+    parameter existed.
+* Add new required or optional `result` fields for a client-callable
+  API `method`.
+  * Provided that the client is free to ignore the added fields and
+    that acceptance of a new `result` field is signalled by using a
+    new optional `params` field of some client-callable API `method`,
+    or by calling a new client-callable API `method`, or by some other
+    method, and that a lack of signal of acceptance of the new field
+    results in behaving the same as in older revisions.
+    (**Rationale** Older clients WILL ignore unknown fields and thus
+    would not be aware of them)
+  * Allowed recursively for any field that itself contains a
+    dictionary (i.e. a `result` field may contain a dictionary, and a
+    new revision of an LSPS may define a new field for that dictionary)
+    to any depth of dictionary fields, provided the previous provision
+    is followed.
+* Add new error `code`s for a client-callable API `method`.
+* Add completely new client-callable API `method`s.
+* Add completely new LSP-initiated notification `method`s, provided
+  they are enabled only by a new optional field in some
+  client-callable API `method` or by a completely new client-callable
+  API `method`.
+
+Later revisions of an LSPS MUST NOT make changes beyond the above.
+
+A client:
+
+* MUST ignore unrecognized `result` fields from the result of a
+  client-callable API `method`.
+  * MUST recursively ignore unrecognized fields from any
+    dictionaries in a recognized `result` field, to any depth.
+* MUST treat as a generic error any unrecognized error `code` from
+  an `error` result for a client-callable API `method`.
+  * SHOULD log this as unusual.
+* MUST ignore unrecognized LSP-initiated notification `method`s.
+  * SHOULD log this as unusual.
+
+An LSP MUST:
+
+* Respond with a -32602 "Invalid params" error, described in a
+  previous section with `unrecognized` field in the `data`
+  dictionary, if it receives a client-callable API `method` it
+  recognized, but with an unrecognized parameter.
+* Respond with a -32601 "Method not found" error, if it receives a
+  request to call a client-callable API `method` that it does not
+  recognize.
+
+If the client supports an older revision of an LSPS, it simply does
+not provide any new optional parameters to existing client-callable
+API `method`s, or any new client-callable API `method`s.
+Then the interface would act the same as in the older revision.
+
+If a client wants to use a newer revision of an LSPS, it can look
+for some new `result` field, and if that does not exist, it knows
+the LSP supports an older revision of the LSPS.
+The client can provide any new optional parameters it wants to
+use, and if the LSP responds with a -32602 "Invalid params" error,
+that error includes an `unrecognized` field, described above, that
+contains the parameters that the LSP does not supoort.
+The client can use a new client-callable API `method`, and if the
+LSP responds with a -32601 "Method not found" error, knows that the
+LSP does not support that `method`.
+
+Vendor-specific extensions to an LSPS can also obey the above
+rules, and would remain compatible with a non-vendor LSP and a
+non-vendor client.
 
 ## Common Schemas
 

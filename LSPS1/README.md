@@ -41,7 +41,8 @@ In general, LSPS1 is developed on the basis that the client trust the LSP to del
 
 ## Order Flow Overview
 
-* Client calls `lsps1.get_info` to get the LSP's API version and options.
+
+* Client calls `lsps1.get_info` to get the LSP's options.
 * Client calls `lsps1.create_order` to create an order.
 * Client pays the order either on-chain or off-chain.
 * LSP opens the channel as soon as they payment is confirmed.
@@ -57,7 +58,7 @@ In general, LSPS1 is developed on the basis that the client trust the LSP to del
 | Idempotent      | Yes        |
 
 
-`lsps1.get_info` is the entrypoint for each client using the API. It lists the supported versions of the API and all options in a dictionary. 
+`lsps1.get_info` is the entrypoint for each client using the API. It lists all options in a dictionary. 
 
 - The LSP SHOULD NOT change the values in `lsps1.get_info` more than once per day.
 
@@ -71,7 +72,6 @@ The client MUST call `lsps1.get_info` first.
 
 ```JSON
 {
-  "supported_versions": [1],
   "website": "http://example.com/contact",
   "options": {
       "minimum_channel_confirmations": 0,
@@ -89,8 +89,6 @@ The client MUST call `lsps1.get_info` first.
 }
 ```
 
-- `supported_versions <Array<uint16>>` List of all supported API versions by the LSP.
-  - Client MUST compare the version of the API and therefore ensure compatibility.
 - `website <string>` Website of the LSP.
   - MUST be at most 256 characters long.
 - `options <object>` All options supported by the LSP.
@@ -122,7 +120,6 @@ The client MUST call `lsps1.get_info` first.
 
 Every `min/max` options pair MUST ensure that `min <= max`.
 
-
 **Errors** No additional errors are defined for this method.
 
 ### 2. lsps1.create_order 
@@ -138,7 +135,6 @@ The request is constructed depending on the client's needs.
 
 ```json
 {
-  "api_version": 1,
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
   "confirms_within_blocks": 1,
@@ -150,10 +146,6 @@ The request is constructed depending on the client's needs.
 ```
 
 
-
-- `api_version <uint16>` API version that the client wants to work with.
-  - MUST be `1` for this version of the spec. 
-  - MUST match one of the versions listed in `lsps1.get_info.supported_versions`.
 - `lsp_balance_sat` <[LSPS0.sat][]> How many satoshi the LSP will provide on their side.
   - MUST be 1 or greater. 
   - MUST be equal or below `base_api.max_initial_lsp_balance_sat`.
@@ -186,7 +178,6 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 ```json
 {
   "order_id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
-  "api_version": 1,
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
   "confirms_within_blocks": 1,
@@ -213,7 +204,6 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - MUST be unique.
   - MUST be at most 64 characters long.
   - SHOULD be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
-- `api_version <uint16>` Version of the API that has been used to create the order.
 - `lsp_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
 - `client_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
 - `confirms_within_blocks <uint8>` Mirrored from the request.

@@ -601,6 +601,7 @@ Example successful `lsps2.buy` result:
 ```JSON
 {
     "jit_channel_scid": "1x4815x29451",
+    "temporary_channel_id": "82581bfe75e8808b66f92974725276efe245e3fc72c821fcaa77d893de4cdc6b"
     "lsp_cltv_expiry_delta" : 144,
     "client_trusts_lsp": false
 }
@@ -610,13 +611,21 @@ Example successful `lsps2.buy` result:
 the invoice [<LSPS0.scid>][],
 and `lsp_cltv_expiry_delta` is the CLTV delta for that route hint hop.
 
+`temporary_channel_id` is the random 32-byte `temporary_channel_id` in that the
+LSP is going to use when sending the [`open_channel` message], in big-endian
+hex string encoding [<LSPS0.channel_id>][]. It allows the client to link the
+channel opening request with its previously made LSPS2 buy request.
+
 `client_trusts_lsp` is an *optional* Boolean.
 If not specified, it defaults to `false`.
 If specified and `true`, the client MUST trust the LSP to actually
 create and confirm a valid channel funding transaction.
 
+
 The client MAY abort the flow if the LSP specified `client_trusts_lsp`
 as `true` in the result.
+
+[`open_channel` message]: https://github.com/lightning/bolts/blob/f7dcc32694b8cd4f3a1768b904f58cb177168f29/02-peer-protocol.md#the-open_channel-message
 
 ### 3.  Invoice Generation
 

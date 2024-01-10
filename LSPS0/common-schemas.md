@@ -146,6 +146,22 @@ encoding, would be written as the JSON string `"539268x845x1"`.
 > format for SCIDs, and helps separate the SCID type from other
 > types.
 
+### Channel Identifiers (Channel IDs)
+
+###### Link: LSPS0.channel_id
+
+Channel identifiers are the 32-byte `channel_id`s as defined in the [BOLT2
+Definition of `channel_id`], i.e., the big-endian XOR of funding transaction's
+`txid` and `output_index`, encoded encoded as a hex string.
+
+In contexts where the case is significant (for example, if it
+will be committed to by some hash or signature) then the
+representation MUST be in lowercase.
+Otherwise, readers MUST allow both lowercase and uppercase
+hexadecimal digits.
+
+[BOLT2 Definition of `channel_id`]: https://github.com/lightning/bolts/blob/29c14c6e12cbdf33f6b724094c81658a614d2e02/02-peer-protocol.md#definition-of-channel_id
+
 ### SECP256K1 Points / Public Keys / Lightning Network Node IDs
 
 ###### Link: LSPS0.pubkey

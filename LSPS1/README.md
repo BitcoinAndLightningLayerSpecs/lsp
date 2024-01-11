@@ -404,34 +404,19 @@ Every LSP that accepts 0conf transactions is responsible to do their own risk ma
 
 ```json
 "channel": {
-  "state": "OPENED",
   "funded_at": "2012-04-23T18:25:43.511Z",
   "funding_outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:0",
-  "scid": "643904x1419x1",
   "expires_at": "2012-04-23T18:25:43.511Z",
-  "closing_transaction": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae",
-  "closed_at": "2012-04-23T18:25:43.511Z"
 }
 ```
 
-
 - `channel <object>` Contains channel information. 
   - MUST be `null` if the channel opening transaction has not been published yet.
-  - `state <string enum>` MUST be one of these values:
-      - `OPENING` Opening transaction published.
-      - `OPENED` Channel is open. LSP must allow payments. May be zero conf and therefore immediate.
-      - `CLOSED` Closing transaction has been published.
   - `funded_at` <[LSPS0.datetime][]> Datetime when the funding transaction has been published.
   - `funding_outpoint` <[LSPS0.outpoint][]> Outpoint of the [funding transaction](https://github.com/lightning/bolts/blob/master/03-transactions.md#funding-transaction-output).
-  - `scid` <[LSPS0.scid][] or null> Short channel id. 
-    - MUST be `null` before the channel is confirmed on-chain.
-  - `expires_at` <[LSPS0.datetime][]> Ealierst datetime when the channel MAY be closed by the LSP. 
+  - `expires_at` <[LSPS0.datetime][]> Earliest datetime when the channel MAY be closed by the LSP.
     - MUST respect `channel_expiry_blocks`. 
     - MAY overprovision.
-  - `closing_transaction` <[LSPS0.txid][] or null> txId of the [closing transaction](https://github.com/lightning/bolts/blob/master/03-transactions.md#closing-transaction).
-  - `closed_at` <[LSPS0.datetime][] or null> Datetime when the closing transaction has been published.
-    - MUST be `null` before the channel is closed.
-
 
 #### 4.1 Channel Open
 

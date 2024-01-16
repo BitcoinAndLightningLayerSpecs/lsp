@@ -74,7 +74,8 @@ The client MUST call `lsps1.get_info` first.
 {
   "website": "http://example.com/contact",
   "options": {
-      "min_channel_confirmations": 0,
+      "min_required_channel_confirmations": 6,
+      "min_funding_confirms_within_blocks" : 0,
       "min_onchain_payment_confirmations": null,
       "supports_zero_channel_reserve": true,
       "min_onchain_payment_size_sat": null,
@@ -92,9 +93,11 @@ The client MUST call `lsps1.get_info` first.
 - `website <string>` Website of the LSP.
   - MUST be at most 256 characters long.
 - `options <object>` All options supported by the LSP.
-  - `min_channel_confirmations <uint8>` Minimum number of block confirmations before the LSP accepts a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
+  - `min_required_channel_confirmations <uint8>` Smallest number of confirmations needed for the LSP to accept a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
+  - `min_funding_confirms_within_blocks <uint8>` Smallest number of blocks in which the LSP can confirm the funding transaction.
+    - MUST be 1 or greater
   - `min_onchain_payment_confirmations <uint8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.min_onchain_payment_confirmations	` depending on the size of the channels and risk management.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
@@ -138,7 +141,8 @@ The request is constructed depending on the client's needs.
 {
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
-  "confirms_within_blocks": 1,
+  "required_channel_confirmations" : 0,
+  "funding_confirms_within_blocks": 6,
   "channel_expiry_blocks": 144,
   "token": "",
   "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h",
@@ -155,9 +159,12 @@ The request is constructed depending on the client's needs.
   - MUST be 0 or greater. 
   - MUST be below or equal `base_api.max_initial_client_balance_sat`.
   - MUST be greater or equal `base_api.min_initial_client_balance_sat`.
-- `confirms_within_blocks <uint8>` Number of blocks the client wants to wait maximally for the channel to be confirmed.
-  - MUST be 0 or greater.
-  - LSP MAY always confirm the channel faster than requested.
+- `required_channel_confirmations <uint8>` Number of confirmations the funding tx must have before the LSP sends `channel_ready`
+  - MUST be greater or equal to `base_api.min_required_channel_confirmations`
+  - LSP MAY always confirm the channel faster then requested
+- `funding_confirms_within_blocks <uint8>` Number of blocks the client wants to wait maximally until the funding transaction is confirmed.
+  - MUST be greater or equal to `base_api.min_funding_confirms_within_blocks`
+  - LSP MAY always confirm the funding transaction faster than requested.
 - `channel_expiry_blocks <uint32>` How long the channel is leased for in block time.
   - MUST be 1 or greater. 
   - MUST be below or equal `base_api.max_channel_expiry_blocks`.
@@ -208,7 +215,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - SHOULD be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
 - `lsp_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
 - `client_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
-- `confirms_within_blocks <uint8>` Mirrored from the request.
+- `funding_confirms_within_blocks <uint8>` Mirrored from the request.
 - `channel_expiry_blocks <uint32>` Mirrored from the request.
 - `token <string>` Mirrored from the request.
   - MUST be an empty string if the token was not provided.
@@ -433,9 +440,9 @@ The LSP MUST open the channel under the following conditions:
         - MAY overprovision.
     - MUST push `client_balance_sat` to the client.
         - MAY overprovision.
-    - MUST use a high enough on-chain fee rate to ensure the funding transaction confirms within `confirms_within_blocks` after the client paid the order.
+    - MUST use a high enough on-chain fee rate to ensure the funding transaction confirms within `funding_confirms_within_blocks after the client paid the order.
         - MAY overprovision.
-- MUST send `channel_ready` after the funding transaction has `min_channel_confirmations`.
+- MUST send `channel_ready` after the funding transaction has `required_channel_confirmations`.
 - MUST allow zero channel reserves if `supports_zero_channel_reserve`.
 
 In case the channel open succeeds
@@ -452,9 +459,11 @@ In case the channel open failed
 **LSP**
 
 - MAY open channels in batches, opening multiple channels in one transaction.
-  - In this case, the LSP MUST still ensure that the funding transaction gets confirmed after a maximum of `confirms_within_blocks` after the client payment completed.
+  - the LSP MUST still ensure that the funding transaction gets confirmed after a maximum of `funding_confirms_within_blocks after the client payment completed.
 
-> **Rationale `confirms_within_blocks`** We use `confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch the channel. For example, if a client orders a channel within 5 blocks, the LSP may wait to publish the funding transaction for 3 blocks to batch channels and add a fee to the funding transaction to ensure it confirms within 2 blocks.
+For orders where `required_channel_confirmations=0` the LSP MUST attempt to open the channel immediately after receiving the payments.
+
+> **Rationale `funding_confirms_within_blocks** We use `funding_confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch the channel. For example, if a client orders a channel within 5 blocks, the LSP may wait to publish the funding transaction for 3 blocks to batch channels and add a fee to the funding transaction to ensure it confirms within 2 blocks.
 
 
 

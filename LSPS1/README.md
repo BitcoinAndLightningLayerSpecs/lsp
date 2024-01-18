@@ -75,7 +75,7 @@ The client MUST call `lsps1.get_info` first.
   "website": "http://example.com/contact",
   "options": {
       "min_channel_confirmations": 0,
-      "min_onchain_payment_confirmations": 1,
+      "min_onchain_payment_confirmations": null,
       "supports_zero_channel_reserve": true,
       "min_onchain_payment_size_sat": null,
       "max_channel_expiry_blocks": 20160,
@@ -98,6 +98,7 @@ The client MUST call `lsps1.get_info` first.
   - `min_onchain_payment_confirmations <unit8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.min_onchain_payment_confirmations	` depending on the size of the channels and risk management.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
+    - MAY be `null` if on-chain payments are NOT supported.
   - `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
   - `min_onchain_payment_size_sat` <[LSPS0.sat][] or `null`> Indicates the minimum amount of satoshi (`order_total_sat`) that is required for the LSP to accept a payment on-chain.
     - The LSP MUST allow on-chain payments equal or above this value. 

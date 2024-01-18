@@ -220,7 +220,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - `COMPLETED` LSP has published funding transaction.
   - `FAILED` Order failed.
 - `payment <object>` Contains everything about payments, see [3. Payment](#3-payment).
-- `channel <object or null>` Contains information about the channel, see [4 Channel](4-channel).
+- `channel <object or null>` Contains information about the channel, see [4 Channel](#4-channel).
   - MUST be `null` if the channel funding transaction is not published yet.
   
 

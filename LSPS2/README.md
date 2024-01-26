@@ -569,15 +569,17 @@ The client MUST ensure that `payment_size_msat` is within the previous
 The LSP MUST validate that the `payment_size_msat` is within the previous
 `min_payment_size_msat` and `max_payment_size_msat` parameters from the LSP.
 
-If the `payment_size_msat` is specified in the request, the LSP:
-
-* MUST compute the `opening_fee` and check that the computation
-  did not hit an overflow failure.
-  * MUST check that the resulting `opening_fee` is strictly less
-    than the `payment_size_msat`.
-* SHOULD check that it has sufficient incoming liquidity from the
-  public network to be able to receive at least `payment_size_msat`,
-  if it was specified.
+* If the `payment_size_msat` is specified in the request, the LSP:
+    * MUST compute the `opening_fee` and check that the computation
+      did not hit an overflow failure.
+      * MUST check that the resulting `opening_fee` is strictly less
+        than the `payment_size_msat`.
+    * SHOULD check that it has sufficient incoming liquidity from the
+      public network to be able to receive at least `payment_size_msat`.
+* otherwise:
+    * SHOULD validate that the size of a received variable-amount payment is
+      within the previous `min_payment_size_msat` and `max_payment_size_msat`
+      parameters before forwarding the payment.
 
 The following errors are specified for `lsps2.buy`:
 

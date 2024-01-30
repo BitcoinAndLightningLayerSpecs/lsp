@@ -270,7 +270,7 @@ and MUST NOT have any additional fields:
   payment size, inclusive.
   These are strings containing decimal numbers, in millisatoshis
   [<LSPS0.msat>][].
-  The payment size is the amount that the payer is guarateed to be able to send
+  The payment size is the amount that the payer is guaranteed to be able to send
   to the client, not including the forwarding fees of nodes along the way.
 * `promise` is an arbitrary LSP-generated string that proves to the LSP that
   it has promised a specific `opening_fee_params` with the specific
@@ -410,8 +410,8 @@ For a given `payment_size_msat` (in millisatoshis) and a selected
         opening_fee = min_fee_msat
 
 * All numbers MUST be computed in unsigned 64-bit integers.
-  * Clients and LSPs MAY use arbitarry-precision integers, such as
-    Haskell `Integer` type or bignums in Lisplike languages, IF AND
+  * Clients and LSPs MAY use arbitrary-precision integers, such as
+    Haskell `Integer` type or bignums in Lisp-like languages, IF AND
     ONLY IF they check for overflow of unsigned 64-bit at each basic
     arithmetic operation.
 * Integer division MUST round down; the `+ 9999999` causes this to

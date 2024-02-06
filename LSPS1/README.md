@@ -142,7 +142,7 @@ The request is constructed depending on the client's needs.
   "channel_expiry_blocks": 144,
   "token": "",
   "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h",
-  "announceChannel": true
+  "announce_channel": true
 }
 ```
 
@@ -166,7 +166,7 @@ The request is constructed depending on the client's needs.
 - `refund_onchain_address` <[LSPS0.onchain_address][]> Address where the LSP will send the funds if the order fails.
   - Client MAY omit this field.
   - LSP MUST disable on-chain payments if the client omits this field.
-- `announceChannel <boolean>` If the channel should be announced to the network (also known as public/private channels).
+- `announce_channel <boolean>` If the channel should be announced to the network (also known as public/private channels).
 
 
 > **Rationale `client_balance_sat`** Client MAY want to have initial spending balance on their wallet or start with a balanced channel.
@@ -186,7 +186,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "token": "",
   "created_at": "2012-04-23T18:25:43.511Z",
   "expires_at": "2015-01-25T19:29:44.612Z",
-  "announceChannel": true,
+  "announce_channel": true,
   "order_state": "CREATED",
   "payment": {
     "state": "EXPECT_PAYMENT",
@@ -212,7 +212,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 - `channel_expiry_blocks <uint32>` Mirrored from the request.
 - `token <string>` Mirrored from the request.
   - MUST be an empty string if the token was not provided.
-- `announceChannel <boolean>` Mirrored from the request.
+- `announce_channel <boolean>` Mirrored from the request.
 - `created_at` <[LSPS0.datetime][]> Datetime when the order was created.
 - `expires_at` <[LSPS0.datetime][]> Datetime when the order expires.
 - `order_state <string enum>` Current state of the order.
@@ -243,7 +243,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 - LSP MUST validate the request fields. LSP MUST return a `-32602` error in case of an invalid request field.
   - `%invalid_property%` MUST be one of the fields in the request body. MUST use `.` to separate nested fields.
-  - Example: `{ "property": "announceChannel", "message": "Not a boolean" }`.
+  - Example: `{ "property": "announce_channel", "message": "Not a boolean" }`.
 
 - LSP MUST validate the `token` field and return an error if the token is invalid.
 
@@ -428,7 +428,7 @@ The LSP MUST open the channel under the following conditions:
 **LSP**
 - MUST wait for a peer connection before attempting a channel open.
 - MUST attempt a channel open.
-    - MUST respect the `announceChannel` flag.
+    - MUST respect the `announce_channel` flag.
     - MUST open the channel with at least a capacity of `lsp_balance_sat` + `client_balance_sat`.
         - MAY overprovision.
     - MUST push `client_balance_sat` to the client.

@@ -77,19 +77,6 @@ by the [JSON-RPC 2.0][] protocol.
 
 [JSON-RPC 2.0]: https://www.jsonrpc.org/specification
 
----
-
-**Error codes** In general, the client, the LSP, and any LSPS building on top of LSPS0 MUST respect
-[JSON-RPC error codes][]. 
-This document extends the error codes by describing edge cases
-combining [JSON-RPC 2.0][] with [BOLT8][]. Any error code like `-32603 Internal error` is still valid
-even though not mentioned here.
-
-[JSON-RPC error codes]: https://www.jsonrpc.org/specification#error_object
-
-Any LSPS building on top of LSPS0 that defines custom errors MUST still use the `-32000 to -32099 Server error` range as described in the [JSON-RPC error codes][].
-
----
 
 If a client or LSP receives a BOLT8 message with message ID
 37913, it MUST perform the checks below.
@@ -356,6 +343,16 @@ Other LSPS specifications MUST:
 
 #### Error Handling
 
+In general, the client, the LSP, and any LSPS building on top of LSPS0 MUST respect
+[JSON-RPC error codes][]. 
+This document extends the error codes by describing edge cases
+combining [JSON-RPC 2.0][] with [BOLT8][]. Any error code like `-32603 Internal error` is still valid
+even though not mentioned here explicitly.
+
+[JSON-RPC error codes]: https://www.jsonrpc.org/specification#error_object
+
+---
+
 JSON-RPC 2.0 `error`s include a `message` field which is a
 human-readable error message.
 
@@ -450,6 +447,10 @@ In that case, the LSP would respond with:
 > However, without the `unrecognized` field in the `data` object,
 > the client cannot know if the LSP does not support
 > `future_feature1_param`, `future_feature2_param`, or both.
+
+##### Custom Errors
+
+Any LSPS building on top of LSPS0 that defines custom errors MUST use the `-32000 to -32099 Server error` range described in the [JSON-RPC error codes][].
 
 #### Disconnection Handling
 

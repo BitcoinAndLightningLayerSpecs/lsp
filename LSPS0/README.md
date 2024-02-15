@@ -347,7 +347,7 @@ In general, the client, the LSP, and any LSPS building on top of LSPS0 MUST resp
 [JSON-RPC error codes][]. 
 This document extends the error codes by describing edge cases
 combining [JSON-RPC 2.0][] with [BOLT8][]. Any error code like `-32603 Internal error` is still valid
-even though not mentioned here explicitly.
+even though not mentioned explicitly.
 
 [JSON-RPC error codes]: https://www.jsonrpc.org/specification#error_object
 

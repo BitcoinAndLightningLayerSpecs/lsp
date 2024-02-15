@@ -87,7 +87,7 @@ even though not mentioned here.
 
 [JSON-RPC error codes]: https://www.jsonrpc.org/specification#error_object
 
-Any LSPS building on top of LSPS0 that defines custom errors MUST use the `-32000 to -32099 Server error` range as described in the [JSON-RPC error codes][].
+Any LSPS building on top of LSPS0 that defines custom errors MUST still use the `-32000 to -32099 Server error` range as described in the [JSON-RPC error codes][].
 
 ---
 

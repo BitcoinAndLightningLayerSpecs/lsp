@@ -207,6 +207,8 @@ Example `lsps2.get_info` result:
             "valid_until": "2023-02-23T08:47:30.511Z",
             "min_lifetime": 1008,
             "max_client_to_self_delay": 2016,
+            "min_payment_size_msat": "1000",
+            "max_payment_size_msat": "1000000",
             "promise": "abcdefghijklmnopqrstuvwxyz"
         },
         {
@@ -215,11 +217,11 @@ Example `lsps2.get_info` result:
             "valid_until": "2023-02-27T21:23:57.984Z",
             "min_lifetime": 1008,
             "max_client_to_self_delay": 2016,
+            "min_payment_size_msat": "1000",
+            "max_payment_size_msat": "1000000",
             "promise": "abcdefghijklmnopqrstuvwxyz"
         }
-    ],
-    "min_payment_size_msat": "1000",
-    "max_payment_size_msat": "1000000",
+    ]
 }
 ```
 The `opening_fee_params_menu` is an array of `opening_fee_params`
@@ -227,9 +229,9 @@ objects.
 The LSP MAY return an empty array; in which case, the client currently
 cannot use JIT Channels with this LSP.
 
-An `opening_fee_params` object describes how much the LSP will charge
-for a channel open, and until when the described fee rates will be
-considered valid.
+An `opening_fee_params` object describes how much the LSP will charge for a
+channel open, what payment sizes it will accept, and until when the described
+parameters will be considered valid.
 An `opening_fee_params` object MUST have all of the following fields,
 and MUST NOT have any additional fields:
 
@@ -264,6 +266,12 @@ and MUST NOT have any additional fields:
   The client-side `to_self_delay` is the delay imposed on the LSP to recover
   the funds in case the LSP has to perform a unilateral close on the channel
   and defines the security of the client against malign or hacked LSPs.
+* `min_payment_size_msat` and `max_payment_size_msat` are the limits of the
+  payment size, inclusive.
+  These are strings containing decimal numbers, in millisatoshis
+  [<LSPS0.msat>][].
+  The payment size is the amount that the payer is guaranteed to be able to send
+  to the client, not including the forwarding fees of nodes along the way.
 * `promise` is an arbitrary LSP-generated string that proves to the LSP that
   it has promised a specific `opening_fee_params` with the specific
   `min_fee_msat`, `proportional`, `valid_until`, `min_lifetime`, and
@@ -387,13 +395,6 @@ object has unrecognized fields.
 > exists or not, and the LSP can cut the added information in this
 > `promise` from the cryptographic commitment.
 
-`min_payment_size_msat` and `max_payment_size_msat` are the limits of the
-payment size, inclusive.
-These are strings containing decimal numbers, in millisatoshis
-[<LSPS0.msat>][].
-The payment size is the amount that the payer will send to the
-client, not including the forwarding fees of nodes along the way.
-
 The client now takes the `opening_fee_params` and the expected
 `payment_size_msat`, to compute the `opening_fee`, and determine if the
 resulting `opening_fee` is reasonable.
@@ -409,8 +410,8 @@ For a given `payment_size_msat` (in millisatoshis) and a selected
         opening_fee = min_fee_msat
 
 * All numbers MUST be computed in unsigned 64-bit integers.
-  * Clients and LSPs MAY use arbitarry-precision integers, such as
-    Haskell `Integer` type or bignums in Lisplike languages, IF AND
+  * Clients and LSPs MAY use arbitrary-precision integers, such as
+    Haskell `Integer` type or bignums in Lisp-like languages, IF AND
     ONLY IF they check for overflow of unsigned 64-bit at each basic
     arithmetic operation.
 * Integer division MUST round down; the `+ 9999999` causes this to
@@ -534,6 +535,8 @@ Example `lsps2.buy` request parameters:
         "valid_until": "2023-02-23T08:47:30.511Z",
         "min_lifetime": 1008,
         "max_client_to_self_delay": 2016,
+        "min_payment_size_msat": "1000",
+        "max_payment_size_msat": "1000000",
         "promise": "abcdefghijklmnopqrstuvwxyz"
     },
     "payment_size_msat": "42000"
@@ -566,19 +569,17 @@ The client MUST ensure that `payment_size_msat` is within the previous
 The LSP MUST validate that the `payment_size_msat` is within the previous
 `min_payment_size_msat` and `max_payment_size_msat` parameters from the LSP.
 
-> **Non-normative** The LSP may have the `min_payment_size_msat` and
-> `max_payment_size_msat` parameters as configuration-time constants,
-> or may embed them in the `promise` field of the `opening_fee_params`.
-
-If the `payment_size_msat` is specified in the request, the LSP:
-
-* MUST compute the `opening_fee` and check that the computation
-  did not hit an overflow failure.
-  * MUST check that the resulting `opening_fee` is strictly less
-    than the `payment_size_msat`.
-* SHOULD check that it has sufficient incoming liquidity from the
-  public network to be able to receive at least `payment_size_msat`,
-  if it was specified.
+* If the `payment_size_msat` is specified in the request, the LSP:
+    * MUST compute the `opening_fee` and check that the computation
+      did not hit an overflow failure.
+      * MUST check that the resulting `opening_fee` is strictly less
+        than the `payment_size_msat`.
+    * SHOULD check that it has sufficient incoming liquidity from the
+      public network to be able to receive at least `payment_size_msat`.
+* otherwise:
+    * SHOULD validate that the size of a received variable-amount payment is
+      within the previous `min_payment_size_msat` and `max_payment_size_msat`
+      parameters before forwarding the payment.
 
 The following errors are specified for `lsps2.buy`:
 

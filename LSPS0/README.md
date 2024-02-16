@@ -449,8 +449,8 @@ In that case, the LSP would respond with:
 
 ##### Custom Errors
 
-[JSON-RPC](https://www.jsonrpc.org/specification#error_object) protocol defines the range of `-31999 to +32767` (inclusive) to be application defined errors.
-Each LSPS MUST use an error range of 100 error codes. The error range for each LSPS can be calculated as follow: `LSPS-number * 100 to LSPS-number * 100 + 99` (inclusive).
+[JSON-RPC 2.0][] protocol defines the range of `-31999 to +32767` (inclusive) to be application defined errors.
+Each LSPS is provided and MUST use an error range of 100 error codes. The range for each LSPS can be calculated as follow: `LSPS-number * 100 to LSPS-number * 100 + 99` (inclusive).
 
 For example:
 - LSPS0: `00000 to 00099`
@@ -458,7 +458,7 @@ For example:
 - LSPS2: `00200 to 00299`
 
 And so on until `+32699`. The range of `-31999 to -1` (inclusive) is undefined and MAY be used by applications outside of the LSPSpec. 
-Such applications MAY request the spec group to register an error code range to avoid colitions.
+Such applications MAY request the spec group to register an error code range to avoid collision.
 
 
 #### Disconnection Handling

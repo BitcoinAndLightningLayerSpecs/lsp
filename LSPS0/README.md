@@ -77,7 +77,6 @@ by the [JSON-RPC 2.0][] protocol.
 
 [JSON-RPC 2.0]: https://www.jsonrpc.org/specification
 
-
 If a client or LSP receives a BOLT8 message with message ID
 37913, it MUST perform the checks below.
 If any of these checks fail, then the incoming message has
@@ -450,7 +449,17 @@ In that case, the LSP would respond with:
 
 ##### Custom Errors
 
-Any LSPS building on top of LSPS0 that defines custom errors MUST use the `-32000 to -32099 Server error` range described in the [JSON-RPC error codes][].
+[JSON-RPC](https://www.jsonrpc.org/specification#error_object) protocol defines the range of `-31999 to +32767` (inclusive) to be application defined errors.
+Each LSPS MUST use an error range of 100 error codes. The error range for each LSPS can be calculated as follow: `LSPS-number * 100 to LSPS-number * 100 + 99` (inclusive).
+
+For example:
+- LSPS0: `00000 to 00099`
+- LSPS1: `00100 to 00199`
+- LSPS2: `00200 to 00299`
+
+And so on until `+32699`. The range of `-31999 to -1` (inclusive) is undefined and MAY be used by applications outside of the LSPSpec. 
+Such applications MAY request the spec group to register an error code range to avoid colitions.
+
 
 #### Disconnection Handling
 

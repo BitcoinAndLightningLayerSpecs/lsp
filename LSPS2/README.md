@@ -772,8 +772,7 @@ where the next hop is `jit_channel_scid`:
   step:
   * The current time is strictly less than
     `opening_fee_params.valid_until`.
-  * All received payment parts sum up to at least `payment_size_msat`
-    plus `opening_fee`.
+  * All received payment parts sum up to at least `payment_size_msat`.
   * The client is connected.
 
 [BOLT 4 Basic Multi-Part Payment Requirements]: https://github.com/lightning/bolts/blob/803a532c49be2f152c7f2dbaa0ec7d4c23a6013d/04-onion-routing.md#requirements-1

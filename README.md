@@ -43,7 +43,7 @@ Describes how a client can buy channels from an LSP, by paying via a deduction f
 
 LSPSpec implementations in no specific order:
 
-- [LDK - lightning liquidity](https://crates.io/crates/lightning-liquidity) LSPS0, LSPS1, LSPS2
+- [LDK - lightning liquidity](https://github.com/lightningdevkit/lightning-liquidity) LSPS0, LSPS1, LSPS2
 - [LND - balanceofsatoshi](https://github.com/alexbosworth/balanceofsatoshis/tree/master/lsp) LSPS0, LSPS1
 - [CLN - cln-lightning-liquidity](https://github.com/niteshbalusu11/cln-lightning-liquidity) LSPS0, LSPS1
 

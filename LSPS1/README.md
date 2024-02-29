@@ -234,10 +234,10 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 | Code   | Message         | Data | Description |
 | ----   | -------         | ----------- | ---- |
 | -32602 | Invalid params  | {"property": %invalid_property%, "message": %human_message% }    | Invalid method parameter(s). |
-| 1000   | Option mismatch |  {"property": %option_mismatch_property%, "message": %human_message% }   | The order doesnt match the options defined in `lsps1.get_info.options`. |
-| 1001   | Client rejected |  {"message": %human_message% }   | The LSP rejected the client. |
+| 101    | Option mismatch |  {"property": %option_mismatch_property%, "message": %human_message% }   | The order doesnt match the options defined in `lsps1.get_info.options`. |
+| 102    | Client rejected |  {"message": %human_message% }   | The LSP rejected the client. |
 
-- LSP MUST validate the order against the options defined in `lsps1.get_info.options`. LSP MUST return an `1000` error in case of a mismatch.
+- LSP MUST validate the order against the options defined in `lsps1.get_info.options`. LSP MUST return an `101` error in case of a mismatch.
   - `%option_mismatch_property%` MUST be one of the fields in `lsps1.get_info.options`.
   - Example: `{ "property": "min_initial_client_balance_sat" }`.
 
@@ -249,7 +249,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 > **Rationale `token` validation** The client should be informed if the token is invalid. Ignoring the invalid token and creating an order without the potentially discount or other side effect is not good UX. Ignoring the invalid token will also NOT prevent anybody bruteforcing the token because the client will still detect if the LSP has given a discount.
 
-- LSP MAY reject a client by it's node_id or IP. In this case, the LSP MUST return a `1001` error.
+- LSP MAY reject a client by it's node_id or IP. In this case, the LSP MUST return a `102` error.
   - %human_message% MAY simply be "Client rejected".
   - Example: `{ "message": "Client rejected" }`.
 
@@ -278,7 +278,7 @@ The client MAY check the current status of the order at any point.
 
 | Code   | Message   | Data    | Description                                           |
 | ------ | --------- | ------- | ----------------------------------------------------- |
-| 404    | Not found | {}      | Order with the requested order_id has not been found. |
+| 100    | Not found | {}      | Order with the requested order_id has not been found. |
 
 
 ### 3. Payment

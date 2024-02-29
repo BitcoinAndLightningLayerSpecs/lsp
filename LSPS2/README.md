@@ -772,8 +772,7 @@ where the next hop is `jit_channel_scid`:
   step:
   * The current time is strictly less than
     `opening_fee_params.valid_until`.
-  * All received payment parts sum up to at least `payment_size_msat`
-    plus `opening_fee`.
+  * All received payment parts sum up to at least `payment_size_msat`.
   * The client is connected.
 
 [BOLT 4 Basic Multi-Part Payment Requirements]: https://github.com/lightning/bolts/blob/803a532c49be2f152c7f2dbaa0ec7d4c23a6013d/04-onion-routing.md#requirements-1
@@ -782,10 +781,10 @@ In "no-MPP+var-invoice" mode, the LSP, if it receives a forward
 where the next hop is `jit_channel_scid`, before
 `opening_fee_params.valid_until`:
 
-* MUST set `payment_size_msat` as the forwarded value of the HTLC.
-* MUST compute the `opening_fee` based on the `payment_size_msat`, and
-  if the computation overflows, MUST fail with `unknown_next_peer`.
-* MUST check that `opening_fee + htlc_minimum_msat <= payment_size_msat`,
+* MUST compute the `opening_fee` based on the value of the first incoming HTLC
+  (`htlc_value_msat`), and if the computation overflows, MUST fail with
+  `unknown_next_peer`.
+* MUST check that `opening_fee + htlc_minimum_msat <= htlc_value_msat`,
   and if that fails, MUST fail with `unknown_next_peer`.
 
 ### 5.  Channel Opening And Forwarding

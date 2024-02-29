@@ -803,32 +803,16 @@ side.
 The LSP and client MUST negotiate these options and parameters in
 their [BOLT2 Channel Establishment][] flow:
 
-* `option_zeroconf` is set.
 * `option_scid_alias` is set.
 * `announce_channel` is `false`.
 * The client-provided `to_self_delay` is less than or equal to
   the agreed-upon `max_client_to_self_delay`.
 
-> **Rationale** `option_zeroconf` is set so that the payment can
-> be immediately forwarded to the client and resolved as soon as
-> the opening negotiation completes; if the client and LSP had to
-> wait for confirmation, the incoming payment would have to be
-> locked for an extended period, which is indistinguishable from
-> a channel jamming attack.
-> `option_zeroconf` cannot be set unless `announce_channel` is
-> `false`.
-> `option_scid_alias` needs to be set so that the channel can be
-> referred to on future invoices before the channel confirms.
+> **Rationale** `option_scid_alias` needs to be set so that the
+> channel can be referred to on future invoices before the channel
+> confirms.
 >
-> Future revisions of this API may be able to utilize Asynchronous
-> Receive (currently being developed as of this version) to
-> be able to get around the `option_zeroconf` requirement, by
-> treating the receiver / client as offline until the client is
-> online *and* the JIT channel to it is deeply confirmed, if the
-> LSP and client negotiate a non-`option_zeroconf` channel for
-> the JIT channel.
-> A non-`option_zeroconf` JIT channel could also be later
-> published with `announce_channel = true`.
+> `option_scid_alias` requires that `announce_channel` be `false`.
 
 Clients MAY reject the channel open attempt if any other
 parameters or options are not desired by the client (for example,

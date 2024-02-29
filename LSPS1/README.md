@@ -74,8 +74,8 @@ The client MUST call `lsps1.get_info` first.
 {
   "website": "http://example.com/contact",
   "options": {
-      "min_required_channel_confirmations": 6,
-      "min_funding_confirms_within_blocks" : 0,
+      "min_required_channel_confirmations": 0,
+      "min_funding_confirms_within_blocks" : 6,
       "min_onchain_payment_confirmations": null,
       "supports_zero_channel_reserve": true,
       "min_onchain_payment_size_sat": null,
@@ -161,8 +161,8 @@ The request is constructed depending on the client's needs.
   - MUST be greater or equal `base_api.min_initial_client_balance_sat`.
 - `required_channel_confirmations <uint8>` Number of confirmations the funding tx must have before the LSP sends `channel_ready`
   - MUST be greater or equal to `base_api.min_required_channel_confirmations`
-  - LSP MAY always confirm the channel faster then requested
-- `funding_confirms_within_blocks <uint8>` Number of blocks the client wants to wait maximally until the funding transaction is confirmed.
+  - LSP MAY always confirm the channel faster than requested
+- `funding_confirms_within_blocks <uint8>` The maximum number of blocks the client wants to wait until the funding transaction is confirmed.
   - MUST be greater or equal to `base_api.min_funding_confirms_within_blocks`
   - LSP MAY always confirm the funding transaction faster than requested.
 - `channel_expiry_blocks <uint32>` How long the channel is leased for in block time.
@@ -459,11 +459,11 @@ In case the channel open failed
 **LSP**
 
 - MAY open channels in batches, opening multiple channels in one transaction.
-  - the LSP MUST still ensure that the funding transaction gets confirmed after a maximum of `funding_confirms_within_blocks after the client payment completed.
+  - The LSP MUST still ensure that the funding transaction gets confirmed within `funding_confirms_within_blocks` blocks after the client payment completed.
 
-For orders where `required_channel_confirmations=0` the LSP MUST attempt to open the channel immediately after receiving the payments.
+For orders where `required_channel_confirmations = 0` the LSP MUST attempt to open the channel immediately after receiving the payment.
 
-> **Rationale `funding_confirms_within_blocks** We use `funding_confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch the channel. For example, if a client orders a channel within 5 blocks, the LSP may wait to publish the funding transaction for 3 blocks to batch channels and add a fee to the funding transaction to ensure it confirms within 2 blocks.
+> **Rationale `funding_confirms_within_blocks** We use `funding_confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch channel funding transactions. For example, if a client orders a channel within five blocks, the LSP may wait to publish the funding transaction for three blocks to batch channel openings and add a fee to the funding transaction to ensure it confirms within two blocks.
 
 
 

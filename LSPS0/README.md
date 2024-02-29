@@ -462,9 +462,9 @@ And so on until `+32699`. The range of `-31999 to -1` (inclusive) is undefined
 and MAY be used by applications outside of the LSPSpec. Such applications MAY request 
 the spec group to register an error code range to avoid collision.
 
-As per the [JSON-RPC 2.0][] protocol, the range between `-32000 to -32099` are 
+As per [JSON-RPC 2.0][], the range between `-32000 to -32099` are 
 "reserved for implementation-defined server-errors". These error codes MAY be used by LSPs 
-too. Clients MUST treat an error in this range similar to a `-32603	Internal error` if not know otherwise.
+too. Clients MUST treat an error in this range similar to a `-32603 Internal error` if it does not know otherwise.
 
 
 #### Disconnection Handling

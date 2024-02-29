@@ -274,8 +274,9 @@ and MUST NOT have any additional fields:
   to the client, not including the forwarding fees of nodes along the way.
 * `promise` is an arbitrary LSP-generated string that proves to the LSP that
   it has promised a specific `opening_fee_params` with the specific
-  `min_fee_msat`, `proportional`, `valid_until`, `min_lifetime`, and
-  `max_client_to_self_delay`.
+  `min_fee_msat`, `proportional`, `valid_until`, `min_lifetime`,
+  `max_client_to_self_delay`, `min_payment_size_msat`, and
+  `max_payment_size_msat`.
 
 > **Rationale** A "minimum" fee is used instead of an additive base fee as
 > this mimics similar financial services.

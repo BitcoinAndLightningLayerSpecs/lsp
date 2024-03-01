@@ -15,6 +15,12 @@ services from the LSP.
 The 'LSP' is the API provider, and acts as the server.
 The 'client' is the API consumer.
 
+## Common Schemas
+
+As the transport layer protocol described in the following uses JSON, we often
+need to agree upon how particular types of data are encoded into JSON. This is
+described in the separate [Common Schemas](common-schemas.md) document.
+
 ## Protocol
 
 ### Lightning Peer-To-Peer Transport
@@ -655,10 +661,3 @@ LSP does not support that `method`.
 Vendor-specific extensions to an LSPS can also obey the above
 rules, and would remain compatible with a non-vendor LSP and a
 non-vendor client.
-
-## Common Schemas
-
-As the transport layer uses JSON, we often need to agree upon how particular
-types of data are encoded into JSON.
-This is described in the separate [Common Schemas](common-schemas.md)
-document.

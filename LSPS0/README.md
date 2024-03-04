@@ -500,21 +500,13 @@ establishment, and in their own advertised `node_announcement`.
 Clients MUST NOT set `features` bit numbered 729 in either
 context.
 
-> **Rationale** Because all communication is initiated 
-> through clients sending BOLT-8 messages
-> only servers need to advertise themselves.
-> Servers can choose to advertise themselves using feature
-> bit 729. Clients can discover LSP's by downloading
-> gossip and inspecting the channel-graph.
+> **Rationale** Only servers MAY advertise themselves which is optional.
+>
 > The bit 729 was chosen randomly and has no special meaning.
-
-LSPs MUST set the `features` bit 729 `option_supports_lsps` if it
-supports at least LSPS0, and MUST set the `features` bit even if it
-does not support some of the LSPS specifications.
-
-> **Rationale** This specification also describes a `listprotocols`
-> API which the LSP uses to report exactly which LSPS specifications
-> it supports.
+>
+> Even if the LSP-server only implements a part of the spec they
+> MAY set the feature-flag. Clients SHOULD user `lsps0.list_protocols`
+> to inspect which part of the spec a server supports.
 
 ### LSPS Specification Support Query
 

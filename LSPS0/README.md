@@ -505,7 +505,7 @@ context.
 > The bit 729 was chosen randomly and has no special meaning.
 >
 > Even if the LSP-server only implements a part of the spec they
-> MAY set the feature-flag. Clients SHOULD user `lsps0.list_protocols`
+> MAY set the feature-flag. Clients SHOULD use `lsps0.list_protocols`
 > to inspect which part of the spec a server supports.
 
 ### LSPS Specification Support Query

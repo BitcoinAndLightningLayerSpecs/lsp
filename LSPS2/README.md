@@ -593,6 +593,7 @@ The following errors are specified for `lsps2.buy`:
   and the LSP hit an overflow error while calculating the
   `opening_fee`, **OR** the LSP has insufficient incoming liquidity
   from the public network to receive the `payment_size_msat`.
+* [LSPS0.client_rejected_error][] (1) - The LSP rejected the client.
 
 If there were no errors, the LSP then provides a normal
 result to the `lsps2.buy` API.
@@ -1030,3 +1031,4 @@ also for onion messages.
 [<LSPS0.ppm>]: ../LSPS0/common-schemas.md#link-lsps0ppm
 [<LSPS0.datetime>]: ../LSPS0/common-schemas.md#link-lsps0datetime
 [<LSPS0.scid>]: ../LSPS0/common-schemas.md#link-lsps0scid
+[LSPS0.client_rejected_error]: ../LSPS0/common-schemas.md#link-lsps0client_rejected_error

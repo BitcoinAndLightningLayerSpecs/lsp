@@ -374,6 +374,23 @@ Example:
 }
 ```
 
+### Error Codes
+
+Commonly shared error codes that are used in multiple LSPS.
+
+#### 001 Client rejected
+
+###### Link: LSPS0.client_rejected_error
+
+A LSP MAY return a `LSPS0.client_rejected_error` error in case it does not want to offer a service to the client.
+Mostly used in case the client misbehaves.
+
+| Code | Message         | Data                             | Description                  |
+| ---- | --------------- | -------------------------------- | ---------------------------- |
+| 1    | Client rejected | {"message": %human_message% }    | The LSP rejected the client. |
+
+- `%human_message% <string>` A human readable message that indicates why the lsp rejected the client.
+
 
 ## References
 

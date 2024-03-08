@@ -582,13 +582,13 @@ If the `payment_size_msat` is specified in the request, the LSP:
 
 The following errors are specified for `lsps2.buy`:
 
-* `invalid_opening_fee_params` (200) - the `valid_until` field
+* `invalid_opening_fee_params` (201) - the `valid_until` field
   of the `opening_fee_params` is already past, **OR** the `promise`
   did not match the parameters.
-* `payment_size_too_small` (201) - the `payment_size_msat` was specified,
+* `payment_size_too_small` (202) - the `payment_size_msat` was specified,
   and the resulting `opening_fee` is equal or greater than the
   `payment_size_msat`.
-* `payment_size_too_large` (202) - the `payment_size_msat` was specified,
+* `payment_size_too_large` (203) - the `payment_size_msat` was specified,
   and the LSP hit an overflow error while calculating the
   `opening_fee`, **OR** the LSP has insufficient incoming liquidity
   from the public network to receive the `payment_size_msat`.

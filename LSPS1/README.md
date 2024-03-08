@@ -462,4 +462,4 @@ In case the channel open failed
 [LSPS0.outpoint]: ../LSPS0/common-schemas.md#link-lsps0outpoint
 [LSPS0.scid]: ../LSPS0/common-schemas.md#link-lsps0scid
 [LSPS0.txid]: ../LSPS0/common-schemas.md#link-lsps0txid
-[LSPS0.client_rejected_error]: ../LSPS0/common-schemas.md#link-lsps0.client_rejected_error
+[LSPS0.client_rejected_error]: ../LSPS0/common-schemas.md#link-lsps0client_rejected_error

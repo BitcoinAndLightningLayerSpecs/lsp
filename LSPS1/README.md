@@ -288,7 +288,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 
 ```json
 "payment": {
-    "onchain": {...}.
+    "onchain": {...},
     "bolt11": {...}
 }
 ```

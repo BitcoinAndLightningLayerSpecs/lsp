@@ -235,7 +235,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 | ----   | -------         | ----------- | ---- |
 | -32602 | Invalid params  | {"property": %invalid_property%, "message": %human_message% }            | Invalid method parameter(s). |
 | 100    | Option mismatch | {"property": %option_mismatch_property%, "message": %human_message% }    | The order doesnt match the options defined in `lsps1.get_info.options`. |
-| 1    | Client rejected | {"message": %human_message% }                                            | [LSPS0.client_rejected_error][] |
+| 001    | Client rejected | {"message": %human_message% }                                            | [LSPS0.client_rejected_error][] |
 
 - LSP MUST validate the order against the options defined in `lsps1.get_info.options`. LSP MUST return an `100` error in case of a mismatch.
   - `%option_mismatch_property%` MUST be one of the fields in `lsps1.get_info.options`.

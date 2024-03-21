@@ -72,7 +72,6 @@ The client MUST call `lsps1.get_info` first.
 
 ```JSON
 {
-  "website": "http://example.com/contact",
   "options": {
       "min_required_channel_confirmations": 0,
       "min_funding_confirms_within_blocks" : 6,
@@ -90,8 +89,6 @@ The client MUST call `lsps1.get_info` first.
 }
 ```
 
-- `website <string>` Website of the LSP.
-  - MUST be at most 256 characters long.
 - `options <object>` All options supported by the LSP.
   - `min_required_channel_confirmations <uint8>` Smallest number of confirmations needed for the LSP to accept a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.

@@ -39,6 +39,9 @@ A channel purchase API to buy channels from an LSP.
 ### **LSPS2** [JIT Channels](LSPS2/README.md)
 Describes how a client can buy channels from an LSP, by paying via a deduction from their incoming payments, creating a channel just-in-time to receive the incoming payment.
 
+### **LSPS4** [Continuous JIT Channels](LSPS4/README.md)
+Describes how a client can buy channels from an LSP, by paying via a deduction from their incoming payments, creating a channel just-in-time to receive the incoming payment, but more awesome because it lets you buy using multiple separate tiny payments and with better privacy in BOLT11 invoices.
+
 ## Services
 List of Lightning Service Providers in alphabetic order that currently or will support LSP specs in future.
 

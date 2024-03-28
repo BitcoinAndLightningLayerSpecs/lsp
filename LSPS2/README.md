@@ -602,7 +602,7 @@ Example successful `lsps2.buy` result:
 
 ```JSON
 {
-    "jit_channel_scid": "1x4815x29451",
+    "jit_channel_scid": "29451x4815x1",
     "lsp_cltv_expiry_delta" : 144,
     "client_trusts_lsp": false
 }

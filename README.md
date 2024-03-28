@@ -48,7 +48,7 @@ List of Lightning Service Providers in alphabetic order that currently or will s
 | ------------ | ----------- | ------ |
 | Blocktank    | -           | -      |
 | Breez        | -           | -      |
-| c=           | -           | -      |
+| c=           | LSPS2       | Testing / Signet |
 
 ## Responsible Disclosure
 

@@ -342,6 +342,16 @@ Other LSPS specifications MUST:
 
 #### Error Handling
 
+In general, the client, the LSP, and any LSPS building on top of LSPS0 MUST respect
+[JSON-RPC error codes][]. 
+This document extends the error codes by describing edge cases
+combining [JSON-RPC 2.0][] with [BOLT8][]. Any error code like `-32603 Internal error` is still valid
+even though not mentioned explicitly.
+
+[JSON-RPC error codes]: https://www.jsonrpc.org/specification#error_object
+
+---
+
 JSON-RPC 2.0 `error`s include a `message` field which is a
 human-readable error message.
 
@@ -436,6 +446,26 @@ In that case, the LSP would respond with:
 > However, without the `unrecognized` field in the `data` object,
 > the client cannot know if the LSP does not support
 > `future_feature1_param`, `future_feature2_param`, or both.
+
+##### Custom Errors
+
+[JSON-RPC 2.0][] protocol defines the range of `-31999 to +32767` (inclusive) to be application defined errors.
+Each LSPS is provided and MUST use an error range of max 100 error codes. 
+The range for each LSPS is calculated as follow: `LSPS-number * 100 to LSPS-number * 100 + 99` (inclusive).
+
+For example:
+- LSPS0: `00000 to 00099`
+- LSPS1: `00100 to 00199`
+- LSPS2: `00200 to 00299`
+
+And so on until `+32699`. The range of `-31999 to -1` (inclusive) is undefined 
+and MAY be used by applications outside of the LSPSpec. Such applications MAY request 
+the spec group to register an error code range to avoid collision.
+
+As per [JSON-RPC 2.0][], the range between `-32000 to -32099` is 
+"reserved for implementation-defined server-errors". These error codes MAY be used by LSPs 
+too. Clients MUST treat an error in this range similar to a `-32603 Internal error` if it does not know otherwise.
+
 
 #### Disconnection Handling
 

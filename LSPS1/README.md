@@ -237,11 +237,12 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 
 | Code   | Message         | Data | Description |
 | ----   | -------         | ----------- | ---- |
-| -32602 | Invalid params  | {"property": %invalid_property%, "message": %human_message% }    | Invalid method parameter(s). |
-| 1000   | Option mismatch |  {"property": %option_mismatch_property%, "message": %human_message% }   | The order doesnt match the options defined in `lsps1.get_info.options`. |
-| 1001   | Client rejected |  {"message": %human_message% }   | The LSP rejected the client. |
+| -32602 | Invalid params  | {"property": %invalid_property%, "message": %human_message% }            | Invalid method parameter(s). |
+| 001    | Client rejected | {"message": %human_message% }                                            | [LSPS0.client_rejected_error][] |
+| 100    | Option mismatch | {"property": %option_mismatch_property%, "message": %human_message% }    | The order doesnt match the options defined in `lsps1.get_info.options`. |
 
-- LSP MUST validate the order against the options defined in `lsps1.get_info.options`. LSP MUST return an `1000` error in case of a mismatch.
+
+- LSP MUST validate the order against the options defined in `lsps1.get_info.options`. LSP MUST return an `100` error in case of a mismatch.
   - `%option_mismatch_property%` MUST be one of the fields in `lsps1.get_info.options`.
   - Example: `{ "property": "min_initial_client_balance_sat" }`.
 
@@ -252,10 +253,6 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 - LSP MUST validate the `token` field and return an error if the token is invalid.
 
 > **Rationale `token` validation** The client should be informed if the token is invalid. Ignoring the invalid token and creating an order without the potentially discount or other side effect is not good UX. Ignoring the invalid token will also NOT prevent anybody bruteforcing the token because the client will still detect if the LSP has given a discount.
-
-- LSP MAY reject a client by it's node_id or IP. In this case, the LSP MUST return a `1001` error.
-  - %human_message% MAY simply be "Client rejected".
-  - Example: `{ "message": "Client rejected" }`.
 
 > **Rationale Client rejected** LSPs can reject a client for example for misbehaviour. LSPs can reject a node on two levels: Prevent a peer connection OR disable order creation. Preventing a peer connection might not work in case you still want to allow other functions to keep working, for example an existing channel.
 
@@ -282,7 +279,7 @@ The client MAY check the current status of the order at any point.
 
 | Code   | Message   | Data    | Description                                           |
 | ------ | --------- | ------- | ----------------------------------------------------- |
-| 404    | Not found | {}      | Order with the requested order_id has not been found. |
+| 101    | Not found | {}      | Order with the requested order_id has not been found. |
 
 
 ### 3. Payment
@@ -472,3 +469,4 @@ For orders where `required_channel_confirmations = 0` the LSP MUST attempt to op
 [LSPS0.outpoint]: ../LSPS0/common-schemas.md#link-lsps0outpoint
 [LSPS0.scid]: ../LSPS0/common-schemas.md#link-lsps0scid
 [LSPS0.txid]: ../LSPS0/common-schemas.md#link-lsps0txid
+[LSPS0.client_rejected_error]: ../LSPS0/common-schemas.md#link-lsps0client_rejected_error

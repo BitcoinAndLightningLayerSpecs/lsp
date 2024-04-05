@@ -185,7 +185,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "order_id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
-  "confirms_within_blocks": 1,
+  "funding_confirms_within_blocks": 1,
   "channel_expiry_blocks": 12,
   "token": "",
   "created_at": "2012-04-23T18:25:43.511Z",

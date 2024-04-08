@@ -3,7 +3,7 @@
 | Name    | `transport`        |
 | ------- | ------------------ |
 | Version | 1                  |
-| Status  | For Implementation |
+| Status  | Stable             |
 
 ## Motivation
 

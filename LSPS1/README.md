@@ -185,6 +185,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "order_id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
+  "required_channel_confirmations" : 0,
   "confirms_within_blocks": 1,
   "channel_expiry_blocks": 12,
   "token": "",
@@ -212,6 +213,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - SHOULD be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
 - `lsp_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
 - `client_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
+- `required_channel_confirmations <uint8>` Mirrored from the request.
 - `funding_confirms_within_blocks <uint8>` Mirrored from the request.
 - `channel_expiry_blocks <uint32>` Mirrored from the request.
 - `token <string>` Mirrored from the request.

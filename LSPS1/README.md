@@ -294,7 +294,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 **Payment object**
 
 ```json
-"payment": {
+{
     "state": "EXPECT_PAYMENT",
     "fee_total_sat": "8888",
     "order_total_sat": "2008888",
@@ -408,7 +408,7 @@ Every LSP that accepts 0conf transactions is responsible to do their own risk ma
 **Channel object**
 
 ```json
-"channel": {
+{
   "funded_at": "2012-04-23T18:25:43.511Z",
   "funding_outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:0",
   "expires_at": "2012-04-23T18:25:43.511Z"

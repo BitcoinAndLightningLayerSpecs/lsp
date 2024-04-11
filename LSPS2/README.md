@@ -390,9 +390,7 @@ Clients, when reading the `promise` field:
 > A size limit is imposed so that LSPs cannot burden clients with
 > unreasonable storage requirements.
 
-LSPs MUST NOT add any other fields to an `opening_fee_params` object.
-
-Clients MUST fail and abort the flow if a `opening_fee_params`
+Clients MAY fail and abort the flow if a `opening_fee_params`
 object has unrecognized fields.
 
 > **Rationale** Clients that expect this version of LSPS2 will
@@ -410,6 +408,14 @@ object has unrecognized fields.
 > the `promise` can be used to determine whether this information
 > exists or not, and the LSP can cut the added information in this
 > `promise` from the cryptographic commitment.
+>
+> It is possible that in the future this spec adds additional backward
+> compatible fields to the `opening_fee_params` object. Clients may therefore
+> also choose to ignore unrecognized fields in order to allow for backward
+> compatible upgrade paths. Since the LSP can commit to any random data in the
+> promise that the client may not be able to read, there is no real harm in
+> ignoring additional fields. The client has an incentive to understand the
+> newly added fields, because they might give a discount.
 
 The client now takes the `opening_fee_params` and the expected
 `payment_size_msat`, to compute the `opening_fee`, and determine if the

@@ -545,28 +545,19 @@ Example `lsps2.buy` request parameters:
 
 ```JSON
 {
-    "opening_fee_params": {
-        "min_fee_msat": "546000",
-        "proportional": 1200,
-        "valid_until": "2023-02-23T08:47:30.511Z",
-        "min_lifetime": 1008,
-        "max_client_to_self_delay": 2016,
-        "min_payment_size_msat": "1000",
-        "max_payment_size_msat": "1000000",
-        "promise": "abcdefghijklmnopqrstuvwxyz"
-    },
+    "promise": "abcdefghijklmnopqrstuvwxyz",
     "payment_size_msat": "42000"
 }
 ```
 
-`opening_fee_params` is the object acquired from the previous
-step.
+`promise` is taken from an `opening_fee_params` object acquired from the
+previous step.
 Clients MUST copy it verbatim from an entry of `opening_fee_params_menu`
 from a result of a `lsps2.get_info` call.
-LSPs MUST check that the `opening_fee_params.promise` does in fact
-prove that it previously promised the specified `opening_fee_params`.
-LSPs MUST check that the `opening_fee_params.valid_until` is not a
-past datetime.
+LSPs MUST check that the `promise` does in fact prove that it previously
+committed to a specific `opening_fee_params` object.
+LSPs MUST check that the `opening_fee_params.valid_until` encoded in the
+`promise` is not a past datetime.
 
 `payment_size_msat` is an *optional* amount denominated in millisatoshis
 that the client wants to receive [<LSPS0.msat>][]:
@@ -599,9 +590,9 @@ The LSP MUST validate that the `payment_size_msat` is within the previous
 
 The following errors are specified for `lsps2.buy`:
 
-* `invalid_opening_fee_params` (201) - the `valid_until` field
-  of the `opening_fee_params` is already past, **OR** the `promise`
-  did not match the parameters.
+* `invalid_promise` (201) - the `promise` could not be decoded, **OR** the
+  `promise` could not be verified with the LSP's rules, **OR** the `valid_until`
+  field of the associated `opening_fee_params` has already past.
 * `payment_size_too_small` (202) - the `payment_size_msat` was specified,
   and the resulting `opening_fee` is equal or greater than the
   `payment_size_msat`.

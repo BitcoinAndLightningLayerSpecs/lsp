@@ -312,6 +312,12 @@ the following rules:
 
 The LSP, when generating the `promise` field:
 
+* MUST encode all fields of the `opening_fee_params` into the `promise` in such
+  a way that the `opening_fee_params` object can be reconstructed from the
+  `promise`. This spec does not describe _how_ the fields must be encoded. This
+  could be through an identifier that allows the LSP to lookup the values
+  associated to the `promise`. It is recommended to encode the raw values of the
+  fields inside the `promise` string, so the LSP can be stateless.
 * SHOULD use a cryptographically-verifiable method of generating
   `promise`, such as a MAC of some deterministic serialization of the
   other `opening_fee_params` keys, then encoded in hexadecimal, base64,
@@ -340,6 +346,15 @@ The LSP, when generating the `promise` field:
 > **Rationale** The method to generate `promise` is left vague in order
 > to allow LSP implementors the flexibility to structure their code
 > as necessary.
+>
+> The LSP should be able to extract all the information in the
+> `opening_fee_params` object from the `promise` to allow a clear upgrade path.
+> If this would not be the case, if ever a field is added to the
+> `opening_fee_params` object, clients may not know about the new field and they
+> may send back an `opening_fee_params` object without the newly added field in
+> the `lsps2.buy` call. The LSP would only be able to verify the `promise` if
+> the field was encoded in the `promise` itself.
+>
 > The above specification suggests the use of any MAC, which would cover
 > the above requirements, and requires a symmetric key known only by
 > the LSP.

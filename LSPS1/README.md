@@ -185,7 +185,8 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "order_id": "bb4b5d0a-8334-49d8-9463-90a6d413af7c",
   "lsp_balance_sat": "5000000",
   "client_balance_sat": "2000000",
-  "confirms_within_blocks": 1,
+  "required_channel_confirmations" : 0,
+  "funding_confirms_within_blocks": 1,
   "channel_expiry_blocks": 12,
   "token": "",
   "created_at": "2012-04-23T18:25:43.511Z",
@@ -196,7 +197,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
     "state": "EXPECT_PAYMENT",
     "fee_total_sat": "8888",
     "order_total_sat": "2008888",
-    "lightning_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05",
+    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05",
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations": 0,
     "min_fee_for_0conf": 253,
@@ -212,6 +213,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - SHOULD be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
 - `lsp_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
 - `client_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
+- `required_channel_confirmations <uint8>` Mirrored from the request.
 - `funding_confirms_within_blocks <uint8>` Mirrored from the request.
 - `channel_expiry_blocks <uint32>` Mirrored from the request.
 - `token <string>` Mirrored from the request.
@@ -292,7 +294,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 **Payment object**
 
 ```json
-"payment": {
+{
     "state": "EXPECT_PAYMENT",
     "fee_total_sat": "8888",
     "order_total_sat": "2008888",
@@ -406,10 +408,10 @@ Every LSP that accepts 0conf transactions is responsible to do their own risk ma
 **Channel object**
 
 ```json
-"channel": {
+{
   "funded_at": "2012-04-23T18:25:43.511Z",
   "funding_outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:0",
-  "expires_at": "2012-04-23T18:25:43.511Z",
+  "expires_at": "2012-04-23T18:25:43.511Z"
 }
 ```
 

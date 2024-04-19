@@ -90,12 +90,12 @@ The client MUST call `lsps1.get_info` first.
 ```
 
 - `options <object>` All options supported by the LSP.
-  - `min_required_channel_confirmations <uint8>` Smallest number of confirmations needed for the LSP to accept a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
+  - `min_required_channel_confirmations <uint16>` Smallest number of confirmations needed for the LSP to accept a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
     - MAY be 0 to allow 0conf channels.
     - MUST be 0 or greater.
-  - `min_funding_confirms_within_blocks <uint8>` Smallest number of blocks in which the LSP can confirm the funding transaction.
+  - `min_funding_confirms_within_blocks <uint16>` Smallest number of blocks in which the LSP can confirm the funding transaction.
     - MUST be 1 or greater
-  - `min_onchain_payment_confirmations <uint8>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.min_onchain_payment_confirmations	` depending on the size of the channels and risk management.
+  - `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.min_onchain_payment_confirmations	` depending on the size of the channels and risk management.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
     - MAY be `null` if on-chain payments are NOT supported.
@@ -156,10 +156,10 @@ The request is constructed depending on the client's needs.
   - MUST be 0 or greater. 
   - MUST be below or equal `base_api.max_initial_client_balance_sat`.
   - MUST be greater or equal `base_api.min_initial_client_balance_sat`.
-- `required_channel_confirmations <uint8>` Number of confirmations the funding tx must have before the LSP sends `channel_ready`
+- `required_channel_confirmations <uint16>` Number of confirmations the funding tx must have before the LSP sends `channel_ready`
   - MUST be greater or equal to `base_api.min_required_channel_confirmations`
   - LSP MAY always confirm the channel faster than requested
-- `funding_confirms_within_blocks <uint8>` The maximum number of blocks the client wants to wait until the funding transaction is confirmed.
+- `funding_confirms_within_blocks <uint16>` The maximum number of blocks the client wants to wait until the funding transaction is confirmed.
   - MUST be greater or equal to `base_api.min_funding_confirms_within_blocks`
   - LSP MAY always confirm the funding transaction faster than requested.
 - `channel_expiry_blocks <uint32>` How long the channel is leased for in block time.
@@ -213,8 +213,8 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - SHOULD be a valid [UUID version 4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) (aka random UUID).
 - `lsp_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
 - `client_balance_sat` <[LSPS0.sat][]> Mirrored from the request.
-- `required_channel_confirmations <uint8>` Mirrored from the request.
-- `funding_confirms_within_blocks <uint8>` Mirrored from the request.
+- `required_channel_confirmations <uint16>` Mirrored from the request.
+- `funding_confirms_within_blocks <uint16>` Mirrored from the request.
 - `channel_expiry_blocks <uint32>` Mirrored from the request.
 - `token <string>` Mirrored from the request.
   - MUST be an empty string if the token was not provided.
@@ -327,7 +327,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
       - `options.min_onchain_payment_size_sat` is greater than `order_total_sat`.
       - `options.min_onchain_payment_size_sat` is `null` and on-chain payments are therefore not supported.
       - `refund_onchain_address` is `null`.
-- `min_onchain_payment_confirmations <uint8>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
+- `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.min_onchain_payment_confirmations`.
     - MUST be `null` if `onchain_address` is `null`.
 - `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.

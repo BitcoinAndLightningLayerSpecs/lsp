@@ -44,8 +44,7 @@ The LSP SHOULD serve a well-known URI `/.well-known/bitcoin` to allow for public
       ]
     },
     ...
-  },
-
+  }
 }
 ```
 

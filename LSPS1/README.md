@@ -294,7 +294,6 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 
 ```json
 {
-"payment": {
   "bolt11": {
     "state" : "EXPECT_PAYMENT",
     "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
@@ -338,7 +337,7 @@ The LSP MAY omit payment options.
 #### 3.1 Lightning Payments using BOLT-11
 
 ```json
-"bolt11": {
+{
     "state" : "EXPECT_PAYMENT",
     "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
     "fee_total_sat": 8888,
@@ -350,9 +349,9 @@ The LSP MAY omit payment options.
 - `state`
     - `EXPECT_PAYMENT` Payment expected.
     - `HOLD` Lighting payment arrived, preimage NOT released.
-    - `PAID`  When the has been reimage released
+    - `PAID`  When the has been preimage released
     - `REFUNDED` Lightning payment has been refunded.
-- `expires_at` <[LSPS0.datetime][]> The timestamp at which the
+- `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
     - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
@@ -380,7 +379,7 @@ The LSP MAY omit payment options.
 #### 3.2 Onchain payments
 
 ```json
-"onchain": {
+{
     "state": "EXPECT_PAYMENT",
     "fee_total_sat": 9999,
     "order_total_sat": 200999,
@@ -407,6 +406,7 @@ The LSP MAY omit payment options.
       - `options.min_onchain_payment_size_sat` is greater than `order_total_sat`.
       - `options.min_onchain_payment_size_sat` is `null` and on-chain payments are therefore not supported.
       - `refund_onchain_address` is `null`.
+- `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
 - `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.min_onchain_payment_confirmations`.
     - MUST be `null` if `onchain_address` is `null`.

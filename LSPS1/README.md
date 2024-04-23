@@ -100,7 +100,7 @@ The client MUST call `lsps1.get_info` first.
     - MAY be 0 to allow 0conf payments.
     - MUST be 0 or greater.
     - MAY be `null` or omitted if on-chain payments are NOT supported.
-  - `supports_onchain_payments` <boolean> True if the LSP supports [onchain payments](#### 3.2 Onchain payments).
+  - `supports_onchain_payments` <boolean> `true` if the LSP supports [onchain payments](#### 3.2 Onchain payments).
     - May be omitted if the LSP does not support onchain payments.
   - `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
   - `max_channel_expiry_blocks <uint32>` The maximum number of blocks a channel can be leased for.

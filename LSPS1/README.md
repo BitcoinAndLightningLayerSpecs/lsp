@@ -296,13 +296,14 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 {
   "bolt11": {
     "state" : "EXPECT_PAYMENT",
-    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
+    "expires_at": "2025-01-01T00:00:00Z",
     "fee_total_sat": 8888,
     "order_total_sat": "200888",
-    "state": "EXPECT_PAYMENT"
+    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
   },
   "onchain": {
     "state": "EXPECT_PAYMENT",
+    "expires_at": "2025-01-01T00:00:00Z",
     "fee_total_sat": 9999,
     "order_total_sat": 200999,
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
@@ -339,10 +340,10 @@ The LSP MAY omit payment options.
 ```json
 {
     "state" : "EXPECT_PAYMENT",
-    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
+    "expires_at": "2025-01-01T00:00:00Z",
     "fee_total_sat": 8888,
     "order_total_sat": "200888",
-    "state": "EXPECT_PAYMENT"
+    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
 }
 ```
 
@@ -381,6 +382,7 @@ The LSP MAY omit payment options.
 ```json
 {
     "state": "EXPECT_PAYMENT",
+    "expires_at": "2025-01-01T00:00:00Z",
     "fee_total_sat": 9999,
     "order_total_sat": 200999,
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
@@ -398,6 +400,7 @@ The LSP MAY omit payment options.
   - `EXPECT_PAYMENT`: Payment expected
   - `PAID`: Onchain payment is confirmed
   - `REFUNDED`: Onchain payment has been refunded
+- `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
     - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
@@ -406,7 +409,6 @@ The LSP MAY omit payment options.
       - `options.min_onchain_payment_size_sat` is greater than `order_total_sat`.
       - `options.min_onchain_payment_size_sat` is `null` and on-chain payments are therefore not supported.
       - `refund_onchain_address` is `null`.
-- `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
 - `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.min_onchain_payment_confirmations`.
     - MUST be `null` if `onchain_address` is `null`.

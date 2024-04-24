@@ -509,7 +509,7 @@ In case the channel open failed
 
 For orders where `required_channel_confirmations = 0` the LSP MUST attempt to open the channel immediately after receiving the payment.
 
-> **Rationale `funding_confirms_within_blocks** We use `funding_confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch channel funding transactions. For example, if a client orders a channel within five blocks, the LSP may wait to publish the funding transaction for three blocks to batch channel openings and add a fee to the funding transaction to ensure it confirms within two blocks.
+> **Rationale `funding_confirms_within_blocks`** We use `funding_confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch channel funding transactions. For example, if a client orders a channel within five blocks, the LSP may wait to publish the funding transaction for three blocks to batch channel openings and add a fee to the funding transaction to ensure it confirms within two blocks.
 
 
 

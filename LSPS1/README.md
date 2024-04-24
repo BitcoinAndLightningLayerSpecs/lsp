@@ -322,7 +322,7 @@ The Client MUST ignore unkown payment options.
 
 The LSP MAY omit payment options.
 
-> **Rationale**: E.g: The LSP might not support onchain payments.
+> **Rationale**: E.g.: The LSP might not support onchain payments.
 
 > **Rationale**:
 > Fees and expiry dates are defined on the level of the payment-option.

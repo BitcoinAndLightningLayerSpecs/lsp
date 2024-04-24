@@ -1,9 +1,9 @@
 # LSPS6
 
-| Name    | `.well-known`      |
-| ------- |--------------------|
-| Version | 1                  |
-| Status  | For Implementation |
+| Name    | `.well-known` |
+| ------- |---------------|
+| Version | 1             |
+| Status  | Draft         |
 
 ## Motivation
 
@@ -87,6 +87,7 @@ the client SHOULD use the information from the well-known URI as a fallback.
 ```JSON
 {
   "url": "https://acme.com/lsp",
+  "well_known": true,
   "icon": "https://acme.com/lsp-icon.png",
   "logo": "https://acme.com/lsp-logo.png",
   "email": "lsp-support@acme.com",
@@ -97,12 +98,18 @@ the client SHOULD use the information from the well-known URI as a fallback.
 ```
 
 - `url` LSP SHOULD include the URL of its website.
+- `well_known` LSP MAY include a boolean to indicate if the LSP has a well-known URI.
+The default is that it does not support it.
 - `icon` LSP MAY include the URL of its icon.
+Icon is a squarely shaped smaller representation of the logo.
+Often the icon is the logo without the text to fit in a square shape.
 - `logo` LSP MAY include the URL of its logo.
 - `email` LSP MAY include its support email.
-- `nostr` LSP MAY include its nost public key.
-- `twitter` LSP MAY include its Twitter handle.
-- `telegram` LSP MAY include its Telegram handle.
+- `nostr` LSP MAY include its npub according to [NIP-19][].
+- `twitter` LSP MAY include its Twitter handle starting with an `@` sign.
+- `telegram` LSP MAY include its Telegram handle starting with an `@` sign.
+
+[NIP-19]: https://github.com/nostr-protocol/nips/blob/master/19.md
 
 ### lsps6.get_lsp_info
 

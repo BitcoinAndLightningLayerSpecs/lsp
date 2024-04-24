@@ -49,17 +49,20 @@ The LSP SHOULD serve a well-known URI `/.well-known/bitcoin` to allow for public
 ```
 
 - `icon` LSP MAY include the URL of its icon.
+  Icon is a squarely shaped smaller representation of the logo.
+  Often the icon is the logo without the text to fit in a square shape.
 - `logo` LSP MAY include the URL of its logo.
 - `email` LSP MAY include its support email.
-- `nostr` LSP MAY include its nost public key.
-- `twitter` LSP MAY include its Twitter handle.
-- `telegram` LSP MAY include its Telegram handle.
+- `nostr` LSP MAY include its  npub according to [NIP-19][].
+- `twitter` LSP MAY include its Twitter handle starting with an `@` sign.
+- `telegram` LSP MAY include its Telegram handle starting with an `@` sign.
 - `lightning`
   - `mainnet` LSP SHOULD include its mainnet lightning node public keys.
   - `testnet` LSP MAY include its testnet lightning node public keys.
   - `...` LSP MAY include its public keys for other network types.
 
 [Well-known URIs]: https://datatracker.ietf.org/doc/html/rfc8615
+[NIP-19]: https://github.com/nostr-protocol/nips/blob/master/19.md
 
 ## API
 
@@ -108,8 +111,6 @@ Often the icon is the logo without the text to fit in a square shape.
 - `nostr` LSP MAY include its npub according to [NIP-19][].
 - `twitter` LSP MAY include its Twitter handle starting with an `@` sign.
 - `telegram` LSP MAY include its Telegram handle starting with an `@` sign.
-
-[NIP-19]: https://github.com/nostr-protocol/nips/blob/master/19.md
 
 ### lsps6.get_lsp_info
 

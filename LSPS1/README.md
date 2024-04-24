@@ -74,49 +74,39 @@ The client MUST call `lsps1.get_info` first.
 
 ```JSON
 {
-  "options": {
-      "min_required_channel_confirmations": 0,
-      "min_funding_confirms_within_blocks" : 6,
-      "min_onchain_payment_confirmations": null,
-      "supports_zero_channel_reserve": true,
-      "max_channel_expiry_blocks": 20160,
-      "min_initial_client_balance_sat": "20000",
-      "max_initial_client_balance_sat": "100000000",
-      "min_initial_lsp_balance_sat": "0",
-      "max_initial_lsp_balance_sat": "100000000",
-      "min_channel_balance_sat": "50000",
-      "max_channel_balance_sat": "100000000"
-  }
+  "min_required_channel_confirmations": 0,
+  "min_funding_confirms_within_blocks" : 6,
+  "supports_zero_channel_reserve": true,
+  "max_channel_expiry_blocks": 20160,
+  "min_initial_client_balance_sat": "20000",
+  "max_initial_client_balance_sat": "100000000",
+  "min_initial_lsp_balance_sat": "0",
+  "max_initial_lsp_balance_sat": "100000000",
+  "min_channel_balance_sat": "50000",
+  "max_channel_balance_sat": "100000000"
 }
 ```
 
-- `options <object>` All options supported by the LSP.
-  - `min_required_channel_confirmations <uint16>` Smallest number of confirmations needed for the LSP to accept a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
-    - MAY be 0 to allow 0conf channels.
-    - MUST be 0 or greater.
-  - `min_funding_confirms_within_blocks <uint16>` Smallest number of blocks in which the LSP can confirm the funding transaction.
-    - MUST be 1 or greater
-  - `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.min_onchain_payment_confirmations	` depending on the size of the channels and risk management.
-    - MAY be 0 to allow 0conf payments.
-    - MUST be 0 or greater.
-    - MAY be `null` or omitted if on-chain payments are NOT supported.
-  - `supports_onchain_payments` <boolean> `true` if the LSP supports [onchain payments](#### 3.2 Onchain payments).
-    - May be omitted if the LSP does not support onchain payments.
-  - `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-  - `max_channel_expiry_blocks <uint32>` The maximum number of blocks a channel can be leased for.
-    - MUST be 1 or greater.
-  - `min_initial_client_balance_sat` <[LSPS0.sat][]> Minimum number of satoshi that the client MUST request.
-    - MUST be 0 or greater.
-  - `max_initial_client_balance_sat` <[LSPS0.sat][]> Maximum number of satoshi that the client MUST request.
-    - MUST be 0 or greater.
-  - `min_initial_lsp_balance_sat` <[LSPS0.sat][]> Minimum number of satoshi that the LSP will provide to the channel.
-    - MUST be 0 or greater.
-  - `max_initial_lsp_balance_sat` <[LSPS0.sat][]> Maximum number of satoshi that the LSP will provide to the channel.
-    - MUST be 0 or greater.
-  - `min_channel_balance_sat` <[LSPS0.sat][]> Minimal channel size.
-    - MUST be 0 or greater.
-  - `max_channel_balance_sat` <[LSPS0.sat][]> Maximum channel size.
-    - MUST be 0 or greater.
+- `min_required_channel_confirmations <uint16>` Smallest number of confirmations needed for the LSP to accept a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
+  - MAY be 0 to allow 0conf channels.
+  - MUST be 0 or greater.
+- `min_funding_confirms_within_blocks <uint16>` Smallest number of blocks in which the LSP can confirm the funding transaction.
+  - MUST be 1 or greater
+- `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
+- `max_channel_expiry_blocks <uint32>` The maximum number of blocks a channel can be leased for.
+  - MUST be 1 or greater.
+- `min_initial_client_balance_sat` <[LSPS0.sat][]> Minimum number of satoshi that the client MUST request.
+  - MUST be 0 or greater.
+- `max_initial_client_balance_sat` <[LSPS0.sat][]> Maximum number of satoshi that the client MUST request.
+  - MUST be 0 or greater.
+- `min_initial_lsp_balance_sat` <[LSPS0.sat][]> Minimum number of satoshi that the LSP will provide to the channel.
+  - MUST be 0 or greater.
+- `max_initial_lsp_balance_sat` <[LSPS0.sat][]> Maximum number of satoshi that the LSP will provide to the channel.
+  - MUST be 0 or greater.
+- `min_channel_balance_sat` <[LSPS0.sat][]> Minimal channel size.
+  - MUST be 0 or greater.
+- `max_channel_balance_sat` <[LSPS0.sat][]> Maximum channel size.
+  - MUST be 0 or greater.
 
 
 Every `min/max` options pair MUST ensure that `min <= max`.

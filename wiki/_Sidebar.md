@@ -1,4 +1,4 @@
 - [Home](Home)
-- [Libraries & Services](Libraries-Services.md)
+- [Libraries & Services](Libraries-Services)
 - [Implementation Notes](Implementation-Notes)
 - [Wiki Contributions](Wiki-Contributions)

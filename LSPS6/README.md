@@ -25,12 +25,6 @@ The LSP SHOULD serve a well-known URI `/.well-known/bitcoin` to allow for public
 
 ```json
 {
-  "icon": "https://acme.com/icon.png",
-  "logo": "https://acme.com/logo.png",
-  "email": "support@acme.com",
-  "nostr": "npub1w...s2mfp9",
-  "twitter": "@acme",
-  "telegram": "@acme",
   "lightning": {
     "mainnet": {
       "public_keys": [
@@ -48,14 +42,6 @@ The LSP SHOULD serve a well-known URI `/.well-known/bitcoin` to allow for public
 }
 ```
 
-- `icon` LSP MAY include the URL of its icon.
-  Icon is a squarely shaped smaller representation of the logo.
-  Often the icon is the logo without the text to fit in a square shape.
-- `logo` LSP MAY include the URL of its logo.
-- `email` LSP MAY include its support email.
-- `nostr` LSP MAY include its  npub according to [NIP-19][].
-- `twitter` LSP MAY include its Twitter handle starting with an `@` sign.
-- `telegram` LSP MAY include its Telegram handle starting with an `@` sign.
 - `lightning`
   - `mainnet` LSP SHOULD include its mainnet lightning node public keys.
   - `testnet` LSP MAY include its testnet lightning node public keys.
@@ -77,12 +63,6 @@ match the public key from the LSP with the public key from the well-known URI.
 
 [TLD]: https://en.wikipedia.org/wiki/Top-level_domain
 
-Any information that is available in the response of `lsps6.get_info`
-should override the information in the well-known URI as it's more authoritative.
-
-If there is a piece of information unavailable,
-the client SHOULD use the information from the well-known URI as a fallback.
-
 **Request** No parameters needed.
 
 **Response**
@@ -93,10 +73,7 @@ the client SHOULD use the information from the well-known URI as a fallback.
   "well_known": true,
   "icon": "https://acme.com/lsp-icon.png",
   "logo": "https://acme.com/lsp-logo.png",
-  "email": "lsp-support@acme.com",
-  "nostr": "npub1w...s2mfp9",
-  "twitter": "@acme-lsp",
-  "telegram": "@acme-lsp"
+  "email": "lsp-support@acme.com"
 }
 ```
 
@@ -108,9 +85,6 @@ Icon is a squarely shaped smaller representation of the logo.
 Often the icon is the logo without the text to fit in a square shape.
 - `logo` LSP MAY include the URL of its logo.
 - `email` LSP MAY include its support email.
-- `nostr` LSP MAY include its npub according to [NIP-19][].
-- `twitter` LSP MAY include its Twitter handle starting with an `@` sign.
-- `telegram` LSP MAY include its Telegram handle starting with an `@` sign.
 
 ### lsps6.get_lsp_info
 

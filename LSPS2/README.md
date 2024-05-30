@@ -5,6 +5,10 @@
 | Version | 1                        |
 | Status  | For Implementation       |
 
+
+LSPS2 requires [LSPS0](../LSPS0/) and therefore [BOLT8](https://github.com/lightning/bolts/blob/master/08-transport.md) as a transport layer.
+
+
 > **Note** Nodes that naively prepayment probe can cause LSPs using LSPS2 to open channels early.
 > Naive prepayment probing logic is being updated to greatly reduce the possibility of this happening.
 >

@@ -6,7 +6,7 @@
 | Version 	| 1                             |
 | Status    | For Implementation            |
 
-LSPS1 requires [LSPS0](../LSPS0/) and therefore [BOLT8](https://github.com/lightning/bolts/blob/f7dcc32694b8cd4f3a1768b904f58cb177168f29/08-transport.md) as a transport layer.
+LSPS1 requires [LSPS0](../LSPS0/) and therefore [BOLT8](https://github.com/lightning/bolts/blob/master/08-transport.md) as a transport layer.
 
 
 ## Motivation

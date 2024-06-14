@@ -395,16 +395,10 @@ The LSP MAY omit payment options.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
     - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
 - `onchain_address` <[LSPS0.onchain_address][]> On-chain address the client can pay the `order_total_sat` to
-    - MUST be `null` IF one of the following is true:
-      - `options.min_onchain_payment_size_sat` is greater than `order_total_sat`.
-      - `options.min_onchain_payment_size_sat` is `null` and on-chain payments are therefore not supported.
-      - `refund_onchain_address` is `null`.
 - `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.min_onchain_payment_confirmations`.
-    - MUST be `null` if `onchain_address` is `null`.
 - `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
-    - MUST be `null` if `onchain_address` is `null`.
-    - MUST be `null` if `min_onchain_payment_confirmations` is greater than 0.
+    - MUST be `null` or absent if `min_onchain_payment_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
 - `onchain_payment <object>` Detected on-chain payment.
     - MUST contain the incoming/confirmed outpoint to `onchain_address`.

@@ -298,11 +298,7 @@ This section describes the `payment` object returned by `lsps1.create_order` and
     "order_total_sat": 200999,
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations": 1,
-    "min_fee_for_0conf": 253,
-    "onchain_payment": {
-      "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
-      "sat": "1200",
-      "confirmed": false
+    "min_fee_for_0conf": 253
     }
   }
 }
@@ -377,12 +373,7 @@ The LSP MAY omit payment options.
     "order_total_sat": 200999,
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations": 1,
-    "min_fee_for_0conf": 253,
-    "onchain_payment": {
-        "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
-        "sat": "1200",
-        "confirmed": false
-    }
+    "min_fee_for_0conf": 253
 }
 ```
 
@@ -400,12 +391,6 @@ The LSP MAY omit payment options.
 - `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
     - MUST be `null` or absent if `min_onchain_payment_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
-- `onchain_payment <object>` Detected on-chain payment.
-    - MUST contain the incoming/confirmed outpoint to `onchain_address`.
-    - MAY be null if no payment has been detected.
-    - `outpoint` <LSPS0.outpoint> MUST be an outpoint in the form of [txid:vout](https://btcinformation.org/en/glossary/outpoint).
-    - `sat` <[LSPS0.sat][]> MUST contain the received satoshi.
-    - `confirmed <boolean>` Indicates if the LSP sees the transaction as confirmed.
 
 > **Rationale `min_onchain_payment_confirmations`** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
 

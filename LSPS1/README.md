@@ -339,6 +339,7 @@ The LSP MAY omit payment options.
     - `PAID`  When the has been preimage released
     - `REFUNDED` Lightning payment has been refunded.
 - `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
+    - `CANCELLED` Lightning payment has been cancelled
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
     - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
@@ -361,7 +362,7 @@ The LSP MAY omit payment options.
     - MUST set the `payment.state` to `PAID`.
 - If the channel failed to open or the order expired or shortly before the payment times out:
     - MUST reject the payment.
-    - MUST set the `payment.state` to `REFUNDED`.
+    - MUST set the `payment.state` to `CANCELLED`.
 
 #### 3.2 Onchain payments
 

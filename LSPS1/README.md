@@ -182,17 +182,16 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "created_at": "2012-04-23T18:25:43.511Z",
   "announce_channel": true,
   "order_state": "CREATED",
+  "expires_at": "2015-01-25T19:29:44.612Z",
   "payment": {
     "bolt11": {
       "state": "EXPECT_PAYMENT",
       "fee_total_sat": 8888,
       "order_total_sat": 2008888,
-      "expires_at": "2015-01-25T19:29:44.612Z",
       "invoice" : "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"},
     "onchain": {
       "fee_total_sat": 9999,
       "order_total_sat": 2009999,
-      "expires_at": "2015-01-25T19:29:44.612Z",
       "address" : "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4y",
       "min_fee_for_0conf": 253,
       "min_onchain_payment_confirmations": 0
@@ -215,6 +214,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - MUST be an empty string if the token was not provided.
 - `announce_channel <boolean>` Mirrored from the request.
 - `created_at` <[LSPS0.datetime][]> Datetime when the order was created.
+- `expires_at` <[LSPS0.datetime][]> Datetime at which the order expires
 - `order_state <string enum>` Current state of the order.
   - `CREATED` Order has been created. Default value.
   - `COMPLETED` LSP has published funding transaction.
@@ -286,14 +286,12 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 {
   "bolt11": {
     "state" : "EXPECT_PAYMENT",
-    "expires_at": "2025-01-01T00:00:00Z",
     "fee_total_sat": 8888,
     "order_total_sat": "200888",
     "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
   },
   "onchain": {
     "state": "EXPECT_PAYMENT",
-    "expires_at": "2025-01-01T00:00:00Z",
     "fee_total_sat": 9999,
     "order_total_sat": 200999,
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
@@ -311,22 +309,19 @@ The LSP MAY omit payment options.
 > **Rationale**: E.g.: The LSP might not support onchain payments.
 
 > **Rationale**:
-> Fees and expiry dates are defined on the level of the payment-option.
+> Fees are defined on the level of the payment-option.
 > This allows an LSP to provide the cheapest service for each payment option.
 >
 > An LSP might choose to have a lower fee for lightning than for onchain payments.
 > Onchain payments might
 > - be more costly for the LSP as they might have to spend a small UTXO in the future
 > - be more risky for the LSP in case of 0-conf channels
-> - require longer confirmation times than a lightning payment. (Risk of changing on-chain fees)
-
 
 #### 3.1 Lightning Payments using BOLT-11
 
 ```json
 {
     "state" : "EXPECT_PAYMENT",
-    "expires_at": "2025-01-01T00:00:00Z",
     "fee_total_sat": 8888,
     "order_total_sat": "200888",
     "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97..."
@@ -337,9 +332,7 @@ The LSP MAY omit payment options.
     - `EXPECT_PAYMENT` Payment expected.
     - `HOLD` Lighting payment arrived, preimage NOT released.
     - `PAID`  When the has been preimage released
-    - `REFUNDED` Lightning payment has been refunded.
-- `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
-    - `CANCELLED` Lightning payment has been cancelled
+    - `CANCELLED` Lightning payment has been cancelled.
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
     - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
@@ -369,7 +362,6 @@ The LSP MAY omit payment options.
 ```json
 {
     "state": "EXPECT_PAYMENT",
-    "expires_at": "2025-01-01T00:00:00Z",
     "fee_total_sat": 9999,
     "order_total_sat": 200999,
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
@@ -382,7 +374,6 @@ The LSP MAY omit payment options.
   - `EXPECT_PAYMENT`: Payment expected
   - `PAID`: Onchain payment is confirmed
   - `REFUNDED`: Onchain payment has been refunded
-- `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
     - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.

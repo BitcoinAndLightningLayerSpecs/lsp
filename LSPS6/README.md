@@ -1,67 +1,44 @@
-# LSPS6
+# LSPS6 LSP meta-data
 
-| Name    | `.well-known` |
+| Name    | `meta-data` |
 | ------- |---------------|
 | Version | 1             |
 | Status  | Draft         |
 
+LSPS6 requires [BOLT8][] as a transport layer.
+
+[BOLT8]: https://github.com/lightning/bolts/blob/master/08-transport.md
+
 ## Motivation
 
-The purpose is to provide a standard way for clients to obtain extra information from the LSP.
+Sometimes the client wants to obtain extra information from the LSP.
 There might be information that is not available through regular LSPS messages.
 An example for such information could be the pricing strategy for LSPS1.
-Optionally there is also a mechanism to show authoritatively that the information
-is coming from the LSP in order to prevent spoofing.
+This extra information can be in the form of a URL or an email address.
+We need a way to prevent spoofing.
 
 ### Actors
 
 The 'LSP' is the API provider, and acts as the server.
 The 'client' is the API consumer.
 
-## Well-Known URI
+## DNS Public Key Verification
 
-[Well-known URIs][] are a way to discover information about a service.
-The LSP SHOULD serve a well-known URI `/.well-known/bitcoin` to allow for public key discovery.
+[BIP353][] provides a way to discover payment instructions over DNS.
+Analogous to this the LSP SHOULD create a DNS TXT record in the form of
+`lsps.acme.com. 3600 IN TXT "public_key:0326e6...2833a3"` for public key verification.
 
-```json
-{
-  "lightning": {
-    "mainnet": {
-      "public_keys": [
-        "0326e6...2833a3",
-        "0305f5...2e4e45"
-      ]
-    },
-    "testnet": {
-      "public_keys": [
-        "03f060...869c00"
-      ]
-    },
-    ...
-  }
-}
-```
-
-- `lightning`
-  - `mainnet` LSP SHOULD include its mainnet lightning node public keys.
-  - `testnet` LSP MAY include its testnet lightning node public keys.
-  - `...` LSP MAY include its public keys for other network types.
-
-[Well-known URIs]: https://datatracker.ietf.org/doc/html/rfc8615
-[NIP-19]: https://github.com/nostr-protocol/nips/blob/master/19.md
+[BIP353]: https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki
 
 ## API
 
 ### lsps6.get_info
 
-`lsps6.get_info` provides generic information about the LSP.
+`lsps6.get_info` provides generic information about the LSP like icon, logo, etc.
 
-The client SHOULD use the data in `url` up until the [TLD][] and append `/.well-known/bitcoin`.
-So assuming the URL is `https://acme.com/lsp`, the client MUST use `https://acme.com/.well-known/bitcoin`.
-To confirm authority the client MUST crawl this URL and
-match the public key from the LSP with the public key from the well-known URI.
-
-[TLD]: https://en.wikipedia.org/wiki/Top-level_domain
+It is possible to confirm authority over DNS when there are URLs (or an email address) in the response.
+To confirm authority the client MUST verify the public key(s) from the domain's DNS record(s)
+with the public key that sends the [Bolt8][] messages.
 
 **Request** No parameters needed.
 
@@ -70,7 +47,7 @@ match the public key from the LSP with the public key from the well-known URI.
 ```JSON
 {
   "url": "https://acme.com/lsp",
-  "well_known": true,
+  "dns": true,
   "icon": "https://acme.com/lsp-icon.png",
   "logo": "https://acme.com/lsp-logo.png",
   "email": "lsp-support@acme.com"
@@ -78,7 +55,7 @@ match the public key from the LSP with the public key from the well-known URI.
 ```
 
 - `url` LSP SHOULD include the URL of its website.
-- `well_known` LSP MAY include a boolean to indicate if the LSP has a well-known URI.
+- `dns` LSP MAY include a boolean to indicate if the LSP has DNS Public Key Verification.
 The default is that it does not support it.
 - `icon` LSP MAY include the URL of its icon.
 Icon is a squarely shaped smaller representation of the logo.
@@ -88,7 +65,7 @@ Often the icon is the logo without the text to fit in a square shape.
 
 ### lsps6.get_lsp_info
 
-`lsps6.get_lsp_info` provides generic information about an LSPS spec.
+`lsps6.get_lsp_info` provides generic additional information about an LSPS spec.
 
 **Request**
 ```JSON
@@ -108,5 +85,5 @@ Often the icon is the logo without the text to fit in a square shape.
 
 LSP MUST always respond even when there is no support for a spec. LSP MUST include the following fields
 (field values can be empty):
-- `short` is a short description of the details with no formatting. With a maximum of 64 characters.
-- `long` is a long description of the details with md formatting. With a maximum of 1024 characters.
+- `short` is a short description of the additional details with no formatting. With a maximum of 64 characters.
+- `long` is a long description of the additional details with md formatting. With a maximum of 1024 characters.

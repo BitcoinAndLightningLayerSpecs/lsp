@@ -70,56 +70,44 @@ The client MUST call `lsps1.get_info` first.
 
 **Request** No parameters needed.
 
-**Response** 
+**Response**
 
 ```JSON
 {
-  "options": {
-      "min_required_channel_confirmations": 0,
-      "min_funding_confirms_within_blocks" : 6,
-      "min_onchain_payment_confirmations": null,
-      "supports_zero_channel_reserve": true,
-      "min_onchain_payment_size_sat": null,
-      "max_channel_expiry_blocks": 20160,
-      "min_initial_client_balance_sat": "20000",
-      "max_initial_client_balance_sat": "100000000",
-      "min_initial_lsp_balance_sat": "0",
-      "max_initial_lsp_balance_sat": "100000000",
-      "min_channel_balance_sat": "50000",
-      "max_channel_balance_sat": "100000000"
-  }
+  "min_required_channel_confirmations": 0,
+  "min_funding_confirms_within_blocks" : 6,
+  "supports_zero_channel_reserve": true,
+  "max_channel_expiry_blocks": 20160,
+  "min_initial_client_balance_sat": "20000",
+  "max_initial_client_balance_sat": "100000000",
+  "min_initial_lsp_balance_sat": "0",
+  "max_initial_lsp_balance_sat": "100000000",
+  "min_channel_balance_sat": "50000",
+  "max_channel_balance_sat": "100000000"
 }
 ```
 
-- `options <object>` All options supported by the LSP.
-  - `min_required_channel_confirmations <uint16>` Smallest number of confirmations needed for the LSP to accept a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
-    - MAY be 0 to allow 0conf channels.
-    - MUST be 0 or greater.
-  - `min_funding_confirms_within_blocks <uint16>` Smallest number of blocks in which the LSP can confirm the funding transaction.
-    - MUST be 1 or greater
-  - `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations before the LSP accepts an on-chain payment as confirmed. This is a lower bound. The LSP MAY increase this value by responding with a different value in `lsps1.create_order.min_onchain_payment_confirmations	` depending on the size of the channels and risk management.
-    - MAY be 0 to allow 0conf payments.
-    - MUST be 0 or greater.
-    - MAY be `null` if on-chain payments are NOT supported.
-  - `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
-  - `min_onchain_payment_size_sat` <[LSPS0.sat][] or `null`> Indicates the minimum amount of satoshi (`order_total_sat`) that is required for the LSP to accept a payment on-chain.
-    - The LSP MUST allow on-chain payments equal or above this value. 
-    - MUST be 0 or greater.
-    - MAY be `null` if on-chain payments are NOT supported.
-  - `max_channel_expiry_blocks <uint32>` The maximum number of blocks a channel can be leased for.
-    - MUST be 1 or greater.
-  - `min_initial_client_balance_sat` <[LSPS0.sat][]> Minimum number of satoshi that the client MUST request.
-    - MUST be 0 or greater.
-  - `max_initial_client_balance_sat` <[LSPS0.sat][]> Maximum number of satoshi that the client MUST request.
-    - MUST be 0 or greater.
-  - `min_initial_lsp_balance_sat` <[LSPS0.sat][]> Minimum number of satoshi that the LSP will provide to the channel.
-    - MUST be 0 or greater.
-  - `max_initial_lsp_balance_sat` <[LSPS0.sat][]> Maximum number of satoshi that the LSP will provide to the channel.
-    - MUST be 0 or greater.
-  - `min_channel_balance_sat` <[LSPS0.sat][]> Minimal channel size.
-    - MUST be 0 or greater.
-  - `max_channel_balance_sat` <[LSPS0.sat][]> Maximum channel size.
-    - MUST be 0 or greater.
+- `min_required_channel_confirmations <uint16>` Smallest number of confirmations needed for the LSP to accept a channel as confirmed and sends [channel_ready](https://github.com/lightning/bolts/blob/master/02-peer-protocol.md#the-channel_ready-message) (previously `funding_locked`).
+  - MAY be 0 to allow 0conf channels.
+  - MUST be 0 or greater.
+- `min_funding_confirms_within_blocks <uint16>` Smallest number of blocks in which the LSP can confirm the funding transaction.
+  - MUST be 1 or greater
+- `supports_zero_channel_reserve <boolean>` Indicates if the LSP supports [zeroreserve](https://github.com/ElementsProject/lightning/pull/5315).
+- `max_channel_expiry_blocks <uint32>` The maximum number of blocks a channel can be leased for.
+  - MUST be 1 or greater.
+- `min_initial_client_balance_sat` <[LSPS0.sat][]> Minimum number of satoshi that the client MUST request.
+  - MUST be 0 or greater.
+- `max_initial_client_balance_sat` <[LSPS0.sat][]> Maximum number of satoshi that the client MUST request.
+  - MUST be 0 or greater.
+- `min_initial_lsp_balance_sat` <[LSPS0.sat][]> Minimum number of satoshi that the LSP will provide to the channel.
+  - MUST be 0 or greater.
+- `max_initial_lsp_balance_sat` <[LSPS0.sat][]> Maximum number of satoshi that the LSP will provide to the channel.
+  - MUST be 0 or greater.
+- `min_channel_balance_sat` <[LSPS0.sat][]> Minimal channel size.
+  - MUST be 0 or greater.
+- `max_channel_balance_sat` <[LSPS0.sat][]> Maximum channel size.
+  - MUST be 0 or greater.
+
 
 Every `min/max` options pair MUST ensure that `min <= max`.
 
@@ -192,18 +180,23 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "channel_expiry_blocks": 12,
   "token": "",
   "created_at": "2012-04-23T18:25:43.511Z",
-  "expires_at": "2015-01-25T19:29:44.612Z",
   "announce_channel": true,
   "order_state": "CREATED",
   "payment": {
-    "state": "EXPECT_PAYMENT",
-    "fee_total_sat": "8888",
-    "order_total_sat": "2008888",
-    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05",
-    "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
-    "min_onchain_payment_confirmations": 0,
-    "min_fee_for_0conf": 253,
-    "onchain_payment": null
+    "bolt11": {
+      "state": "EXPECT_PAYMENT",
+      "fee_total_sat": 8888,
+      "order_total_sat": 2008888,
+      "expires_at": "2015-01-25T19:29:44.612Z",
+      "invoice" : "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"},
+    "onchain": {
+      "fee_total_sat": 9999,
+      "order_total_sat": 2009999,
+      "expires_at": "2015-01-25T19:29:44.612Z",
+      "address" : "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4y",
+      "min_fee_for_0conf": 253,
+      "min_onchain_payment_confirmations": 0
+    }
   },
   "channel": null
 }
@@ -222,7 +215,6 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   - MUST be an empty string if the token was not provided.
 - `announce_channel <boolean>` Mirrored from the request.
 - `created_at` <[LSPS0.datetime][]> Datetime when the order was created.
-- `expires_at` <[LSPS0.datetime][]> Datetime when the order expires.
 - `order_state <string enum>` Current state of the order.
   - `CREATED` Order has been created. Default value.
   - `COMPLETED` LSP has published funding transaction.
@@ -230,7 +222,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 - `payment <object>` Contains everything about payments, see [3. Payment](#3-payment).
 - `channel <object or null>` Contains information about the channel, see [4 Channel](#4-channel).
   - MUST be `null` if the channel funding transaction is not published yet.
-  
+
 
 **Client**
 - SHOULD validate the `fee_total_sat` is reasonable.
@@ -261,7 +253,7 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
 > **Rationale Client rejected** LSPs can reject a client for example for misbehaviour. LSPs can reject a node on two levels: Prevent a peer connection OR disable order creation. Preventing a peer connection might not work in case you still want to allow other functions to keep working, for example an existing channel.
 
 
-### 2.1 lsps1.get_order 
+### 2.1 lsps1.get_order
 
 | JSON-RPC Method | lsps1.get_order |
 |---------------- |---------------- |
@@ -288,71 +280,78 @@ The client MAY check the current status of the order at any point.
 
 ### 3. Payment
 
-This section describes the `payment` object returned by `lsps1.create_order` and `lsps1.get_order`. The client MUST pay the `bolt11_invoice` OR the `onchain_address`. Using both methods MAY lead to the loss of funds.
-
-> **Rationale** On-chain payments are required for payments with higher amounts, especially to push `client_balance_sat` to the client. On-chain payments are also useful to onboard new users to Lightining. On the other hand, Lightning payments are the preferred way to do payments because they are quick and easily refundable.
-
-
-**Payment object**
+This section describes the `payment` object returned by `lsps1.create_order` and `lsps1.get_order`.
 
 ```json
 {
+  "bolt11": {
+    "state" : "EXPECT_PAYMENT",
+    "expires_at": "2025-01-01T00:00:00Z",
+    "fee_total_sat": 8888,
+    "order_total_sat": "200888",
+    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
+  },
+  "onchain": {
     "state": "EXPECT_PAYMENT",
-    "fee_total_sat": "8888",
-    "order_total_sat": "2008888",
-    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn97...",
+    "expires_at": "2025-01-01T00:00:00Z",
+    "fee_total_sat": 9999,
+    "order_total_sat": 200999,
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations": 1,
-    "min_fee_for_0conf": 253,
-    "onchain_payment": {
-        "outpoint": "0301e0480b374b32851a9462db29dc19fe830a7f7d7a88b81612b9d42099c0ae:1",
-        "sat": "1200",
-        "confirmed": false
+    "min_fee_for_0conf": 253
     }
-},
+  }
+}
 ```
 
-- `state <string enum>` MUST be one of these values:
+The Client MUST ignore unkown payment options.
+
+The LSP MAY omit payment options.
+
+> **Rationale**: E.g.: The LSP might not support onchain payments.
+
+> **Rationale**:
+> Fees and expiry dates are defined on the level of the payment-option.
+> This allows an LSP to provide the cheapest service for each payment option.
+>
+> An LSP might choose to have a lower fee for lightning than for onchain payments.
+> Onchain payments might
+> - be more costly for the LSP as they might have to spend a small UTXO in the future
+> - be more risky for the LSP in case of 0-conf channels
+> - require longer confirmation times than a lightning payment. (Risk of changing on-chain fees)
+
+
+#### 3.1 Lightning Payments using BOLT-11
+
+```json
+{
+    "state" : "EXPECT_PAYMENT",
+    "expires_at": "2025-01-01T00:00:00Z",
+    "fee_total_sat": 8888,
+    "order_total_sat": "200888",
+    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
+}
+```
+
+- `state`
     - `EXPECT_PAYMENT` Payment expected.
     - `HOLD` Lighting payment arrived, preimage NOT released.
-    - `PAID` Lightning payment arrived, preimage released OR full `order_total_sat` on-chain payment arrived.
-    - `REFUNDED` Lightning payment or on-chain payment has been refunded.
+    - `PAID`  When the has been preimage released
+    - `REFUNDED` Lightning payment has been refunded.
+- `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
+    - `CANCELLED` Lightning payment has been cancelled
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
-  - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
+    - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
 - `bolt11_invoice <string>`
     - MUST be a [Lightning BOLT 11 invoice](https://github.com/lightning/bolts/blob/master/11-payment-encoding.md) for the number of `order_total_sat`. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
     - MUST be at most 2048 characters long.
-- `onchain_address` <[LSPS0.onchain_address][]> On-chain address the client can pay the `order_total_sat` to
-    - MUST be `null` IF one of the following is true:
-      - `options.min_onchain_payment_size_sat` is greater than `order_total_sat`.
-      - `options.min_onchain_payment_size_sat` is `null` and on-chain payments are therefore not supported.
-      - `refund_onchain_address` is `null`.
-- `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
-    - MUST be equal or greater than `options.min_onchain_payment_confirmations`.
-    - MUST be `null` if `onchain_address` is `null`.
-- `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
-    - MUST be `null` if `onchain_address` is `null`.
-    - MUST be `null` if `min_onchain_payment_confirmations` is greater than 0.
-    - SHOULD choose a high enough fee to lower the risk of a double spend.
-- `onchain_payment <object>` Detected on-chain payment.
-    - MUST contain the incoming/confirmed outpoint to `onchain_address`.
-    - MAY be null if no payment has been detected.
-    - `outpoint` <LSPS0.outpoint> MUST be an outpoint in the form of [txid:vout](https://btcinformation.org/en/glossary/outpoint).
-    - `sat` <[LSPS0.sat][]> MUST contain the received satoshi.
-    - `confirmed <boolean>` Indicates if the LSP sees the transaction as confirmed.
-
-> **Rationale `min_onchain_payment_confirmations`** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
-
-> **Rationale `min_fee_for_0conf`** The client MAY want to have instant confirmation of the on-chain payment. The LSP can mitigate the risk of a double spend by requiring a high fee rate. The client can then decide if he wants to pay the high fee rate or wait for the on-chain payment to be confirmed once.
-
-#### 3.1 Lightning Payment
 
 **Client**
 
-- MUST pay the `bolt11_invoice`.
-- SHOULD pull `lsps1.get_order` to check the success of the payment.
+- MAY pay the `bolt11_invoice`.
+- MAY pull `lsps1.get_order` to check the success of the payment.
 - The client gets refunded automatically in case the channel open failed, the order expires, or just before the payment times out.
 
 **LSP**
@@ -363,11 +362,40 @@ This section describes the `payment` object returned by `lsps1.create_order` and
     - MUST set the `payment.state` to `PAID`.
 - If the channel failed to open or the order expired or shortly before the payment times out:
     - MUST reject the payment.
-    - MUST set the `payment.state` to `REFUNDED`.
+    - MUST set the `payment.state` to `CANCELLED`.
 
+#### 3.2 Onchain payments
 
+```json
+{
+    "state": "EXPECT_PAYMENT",
+    "expires_at": "2025-01-01T00:00:00Z",
+    "fee_total_sat": 9999,
+    "order_total_sat": 200999,
+    "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
+    "min_onchain_payment_confirmations": 1,
+    "min_fee_for_0conf": 253
+}
+```
 
-#### 3.2 Onchain Payment Flow
+- `state`
+  - `EXPECT_PAYMENT`: Payment expected
+  - `PAID`: Onchain payment is confirmed
+  - `REFUNDED`: Onchain payment has been refunded
+- `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
+- `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
+- `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
+    - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
+- `onchain_address` <[LSPS0.onchain_address][]> On-chain address the client can pay the `order_total_sat` to
+- `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
+    - MUST be equal or greater than `options.min_onchain_payment_confirmations`.
+- `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
+    - MUST be `null` or absent if `min_onchain_payment_confirmations` is greater than 0.
+    - SHOULD choose a high enough fee to lower the risk of a double spend.
+
+> **Rationale `min_onchain_payment_confirmations`** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
+
+> **Rationale `min_fee_for_0conf`** The client MAY want to have instant confirmation of the on-chain payment. The LSP can mitigate the risk of a double spend by requiring a high fee rate. The client can then decide if he wants to pay the high fee rate or wait for the on-chain payment to be confirmed once.
 
 **Client**
 
@@ -380,9 +408,9 @@ This section describes the `payment` object returned by `lsps1.create_order` and
 - IF `min_onchain_payment_confirmations	` is 0 and incoming transaction fee is greater than `min_fee_for_0conf`:
   - SHOULD set the transaction as confirmed.
 - IF `min_onchain_payment_confirmations	` is equal or greater than 1:
-  - SHOULD set the transaction as confirmed after `min_onchain_payment_confirmations	` confirmations.
-- MAY always set the transaction as confirmed before `min_onchain_payment_confirmations	` confirmations.
-- In rare circumstances, MAY take longer than `min_onchain_payment_confirmations	` confirmations in case the LSP doesn't trust the transaction.
+  - SHOULD set the transaction as confirmed after `min_onchain_payment_confirmations` confirmations.
+- MAY always set the transaction as confirmed before `min_onchain_payment_confirmations` confirmations.
+- In rare circumstances, MAY take longer than `min_onchain_payment_confirmations` confirmations in case the LSP doesn't trust the transaction.
 - MUST always set the transaction as confirmed after 6 block confirmations.
 
 
@@ -461,7 +489,7 @@ In case the channel open failed
 
 For orders where `required_channel_confirmations = 0` the LSP MUST attempt to open the channel immediately after receiving the payment.
 
-> **Rationale `funding_confirms_within_blocks** We use `funding_confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch channel funding transactions. For example, if a client orders a channel within five blocks, the LSP may wait to publish the funding transaction for three blocks to batch channel openings and add a fee to the funding transaction to ensure it confirms within two blocks.
+> **Rationale `funding_confirms_within_blocks`** We use `funding_confirms_within_blocks` instead of `fee_rate` to allow the LSP to batch channel funding transactions. For example, if a client orders a channel within five blocks, the LSP may wait to publish the funding transaction for three blocks to batch channel openings and add a fee to the funding transaction to ensure it confirms within two blocks.
 
 
 

@@ -185,13 +185,14 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
   "payment": {
     "bolt11": {
       "state": "EXPECT_PAYMENT",
-      "fee_total_sat": 8888,
-      "order_total_sat": 2008888,
+      "fee_total_sat": "8888",
+      "order_total_sat": "2008888",
       "expires_at": "2015-01-25T19:29:44.612Z",
-      "invoice" : "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"},
+      "invoice" : "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
+    },
     "onchain": {
-      "fee_total_sat": 9999,
-      "order_total_sat": 2009999,
+      "fee_total_sat": "9999",
+      "order_total_sat": "2009999",
       "expires_at": "2015-01-25T19:29:44.612Z",
       "address" : "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4y",
       "min_fee_for_0conf": 253,
@@ -287,19 +288,18 @@ This section describes the `payment` object returned by `lsps1.create_order` and
   "bolt11": {
     "state" : "EXPECT_PAYMENT",
     "expires_at": "2025-01-01T00:00:00Z",
-    "fee_total_sat": 8888,
+    "fee_total_sat": "8888",
     "order_total_sat": "200888",
-    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
+    "invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
   },
   "onchain": {
     "state": "EXPECT_PAYMENT",
     "expires_at": "2025-01-01T00:00:00Z",
-    "fee_total_sat": 9999,
-    "order_total_sat": 200999,
+    "fee_total_sat": "9999",
+    "order_total_sat": "200999",
     "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations": 1,
     "min_fee_for_0conf": 253
-    }
   }
 }
 ```
@@ -327,9 +327,9 @@ The LSP MAY omit payment options.
 {
     "state" : "EXPECT_PAYMENT",
     "expires_at": "2025-01-01T00:00:00Z",
-    "fee_total_sat": 8888,
+    "fee_total_sat": "8888",
     "order_total_sat": "200888",
-    "bolt11_invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
+    "invoice": "lnbc252u1p3aht9ysp580g4633gd2x9lc5al0wd8wx0mpn9748jeyz46kqjrpxn52uhfpjqpp5qgf67tcqmuqehzgjm8mzya90h73deafvr4m5705l5u5l4r05l8cqdpud3h8ymm4w3jhytnpwpczqmt0de6xsmre2pkxzm3qydmkzdjrdev9s7zhgfaqxqyjw5qcqpjrzjqt6xptnd85lpqnu2lefq4cx070v5cdwzh2xlvmdgnu7gqp4zvkus5zapryqqx9qqqyqqqqqqqqqqqcsq9q9qyysgqen77vu8xqjelum24hgjpgfdgfgx4q0nehhalcmuggt32japhjuksq9jv6eksjfnppm4hrzsgyxt8y8xacxut9qv3fpyetz8t7tsymygq8yzn05"
 }
 ```
 
@@ -343,14 +343,14 @@ The LSP MAY omit payment options.
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
     - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
-- `bolt11_invoice <string>`
+- `invoice <string>`
     - MUST be a [Lightning BOLT 11 invoice](https://github.com/lightning/bolts/blob/master/11-payment-encoding.md) for the number of `order_total_sat`. 
     - Invoice MUST be a [HOLD invoice](https://bitcoinops.org/en/topics/hold-invoices/).
     - MUST be at most 2048 characters long.
 
 **Client**
 
-- MAY pay the `bolt11_invoice`.
+- MAY pay the `invoice`.
 - MAY pull `lsps1.get_order` to check the success of the payment.
 - The client gets refunded automatically in case the channel open failed, the order expires, or just before the payment times out.
 
@@ -370,9 +370,9 @@ The LSP MAY omit payment options.
 {
     "state": "EXPECT_PAYMENT",
     "expires_at": "2025-01-01T00:00:00Z",
-    "fee_total_sat": 9999,
-    "order_total_sat": 200999,
-    "onchain_address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
+    "fee_total_sat": "9999",
+    "order_total_sat": "200999",
+    "address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations": 1,
     "min_fee_for_0conf": 253
 }
@@ -386,7 +386,7 @@ The LSP MAY omit payment options.
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.
     - MUST be the `fee_total_sat` plus the `client_balance_sat` requested in satoshi.
-- `onchain_address` <[LSPS0.onchain_address][]> On-chain address the client can pay the `order_total_sat` to
+- `address` <[LSPS0.onchain_address][]> On-chain address the client can pay the `order_total_sat` to
 - `min_onchain_payment_confirmations <uint16>` Minimum number of block confirmations that are required for the on-chain payment to be considered confirmed.
     - MUST be equal or greater than `options.min_onchain_payment_confirmations`.
 - `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
@@ -399,7 +399,7 @@ The LSP MAY omit payment options.
 
 **Client**
 
-- MUST pay `order_total_sat` to `onchain_address`.
+- MUST pay `order_total_sat` to `address`.
 - MAY pull `lsps1.get_order` to check the success of the payment.
 
 **LSP** Payment confirmation

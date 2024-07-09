@@ -943,7 +943,7 @@ onion minus the individual `extra_fee`.
 
 `extra_fee` is currently proposed in [bLIP-0025][].
 
-[bLIP-0025]: https://github.com/lightning/blips/pull/25
+[bLIP-0025]: https://github.com/lightning/blips/blob/master/blip-0025.md
 
 For example, the LSP can use the algorithm below to determine
 how much to forward for each incoming payment part, while ensuring

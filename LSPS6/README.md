@@ -11,11 +11,11 @@ LSPS6 requires [BOLT8][] as a transport layer.
 
 ## Motivation
 
-Sometimes the client wants to obtain extra information from the LSP.
-There might be information that is not available through regular LSPS messages.
+Not all information is available through regular LSPS messages.
+In order to provide more transparency, LSPS6 provides the ability to deliver extra information.
 An example for such information could be the pricing strategy for LSPS1.
-This extra information can be in the form of a URL or an email address.
-We need a way to prevent spoofing.
+This extra information can be in the form of a short description about a specific LSPS, a URL and/or an email address.
+We need to be conscious about information spoofing.
 
 ### Actors
 
@@ -25,8 +25,19 @@ The 'client' is the API consumer.
 ## DNS Public Key Verification
 
 [BIP353][] provides a way to discover payment instructions over DNS.
-Analogous to this the LSP SHOULD create a DNS TXT record in the form of
+Analogous to this the LSP SHOULD create a DNS TXT records in the form of
 `lsps.acme.com. 3600 IN TXT "public_key:0326e6...2833a3"` for public key verification.
+If the LSP has multiple lightning network nodes, then the LSP SHOULD create multiple corresponding TXT records.
+If the LSP has multiple domains which is wishes to reference to, then the LSP SHOULD create multiple corresponding TXT records for each domain.
+In the given example `0326e6...2833a3` should be replaced with the lightning network nodes' public key of the LSP (in zbase32 format).
+The LSP must replace `acme.com` in `lsps.acme.com.` with their own domain.
+Any TXT record not starting with `public_key:` can be ignored by the client.
+
+The response from [lsps6.get_info](#lsps6get_info) may contain URLs and/or an email address in it's response.
+When the LSP indicates support for DNS Public Key Verification via the flag is_dns_verification_available then
+the client MUST confirm authenticity by verify the public key(s) from the domain's DNS record(s)
+with the public key that sends the [BOLT8][] messages.
+The client MUST verify all distinct domains.
 
 [BIP353]: https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki
 
@@ -34,11 +45,8 @@ Analogous to this the LSP SHOULD create a DNS TXT record in the form of
 
 ### lsps6.get_info
 
-`lsps6.get_info` provides generic information about the LSP like icon, logo, etc.
-
-It is possible to confirm authority over DNS when there are URLs (or an email address) in the response.
-To confirm authority the client MUST verify the public key(s) from the domain's DNS record(s)
-with the public key that sends the [Bolt8][] messages.
+`lsps6.get_info` provides generic information about the LSP like icon, logo, etc. Omitted fields are considered as not supported/available.
+Any provided URLs should be valid and reachable. So starting with `http(s)://`.
 
 **Request** No parameters needed.
 
@@ -47,20 +55,20 @@ with the public key that sends the [Bolt8][] messages.
 ```JSON
 {
   "url": "https://acme.com/lsp",
-  "dns": true,
+  "is_dns_verification_available": true,
   "icon": "https://acme.com/lsp-icon.png",
   "logo": "https://acme.com/lsp-logo.png",
   "email": "lsp-support@acme.com"
 }
 ```
 
-- `url` LSP SHOULD include the URL of its website.
-- `dns` LSP MAY include a boolean to indicate if the LSP has DNS Public Key Verification.
-The default is that it does not support it.
-- `icon` LSP MAY include the URL of its icon.
-Icon is a squarely shaped smaller representation of the logo.
-Often the icon is the logo without the text to fit in a square shape.
-- `logo` LSP MAY include the URL of its logo.
+- `url` LSP SHOULD include the URL to its website with a maximum length of 64 characters.
+The LSP can choose to include a URL to a specific page that provides more information about the LSP or simple a top level domain.
+- `is_dns_verification_available` LSP MAY include a boolean to indicate if the LSP has DNS Public Key Verification.
+- `icon` LSP MAY include the URL of its icon with a maximum length of 128 characters.
+  Icon is a squarely shaped smaller representation of the logo.
+  Often the icon is the logo without the text to fit in a square shape.
+- `logo` LSP MAY include the URL of its logo with a maximum length of 128 characters.
 - `email` LSP MAY include its support email.
 
 ### lsps6.get_lsp_info

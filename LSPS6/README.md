@@ -13,8 +13,7 @@ LSPS6 requires [BOLT8][] as a transport layer.
 
 Not all information is available through regular LSPS messages.
 In order to provide more transparency, LSPS6 provides the ability to deliver extra information.
-An example for such information could be the pricing strategy for LSPS1.
-This extra information can be in the form of a short description about a specific LSPS, a URL and/or an email address.
+This extra information can be in the form of a URL, icon, logo and/or a support email address.
 We need to be conscious about information spoofing.
 
 ### Actors
@@ -70,28 +69,3 @@ The LSP can choose to include a URL to a specific page that provides more inform
   Often the icon is the logo without the text to fit in a square shape.
 - `logo` LSP MAY include the URL of its logo with a maximum length of 128 characters.
 - `email` LSP MAY include its support email.
-
-### lsps6.get_lsp_info
-
-`lsps6.get_lsp_info` provides generic additional information about an LSPS spec.
-
-**Request**
-```JSON
-{
-  "spec": "LSPS1"
-}
-```
-
-**Response**
-
-```JSON
-{
-  "short": "Short description",
-  "long": "Longer description of the details"
-}
-```
-
-LSP MUST always respond even when there is no support for a spec. LSP MUST include the following fields
-(field values can be empty):
-- `short` is a short description of the additional details with no formatting. With a maximum of 64 characters.
-- `long` is a long description of the additional details with md formatting. With a maximum of 1024 characters.

@@ -401,7 +401,8 @@ and/or the LSP disabled onchain payments.
     - MUST be `null` or absent if `min_onchain_payment_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
 - `refund_onchain_address` <[LSPS0.onchain_address][]> Client supplied refund address. Mirrored back from the order creation request.
-    - Ealier versions of LSPS1 MAY omit this field.
+    - LSP SHOULD set this to mirror the order creation request.
+    - LSP MAY omit this field as it wasn't present in earlier versions of this specification.
 
 > **Rationale `min_onchain_payment_confirmations`** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
 

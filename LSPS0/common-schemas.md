@@ -101,7 +101,7 @@ For example, the minimum feerate would be encoded as `253`.
 ###### Link: LSPS0.ppm
 
 Proportional numbers (i.e. anything that humans might typically
-express as a perentage) MUST be expressed in units of
+express as a percentage) MUST be expressed in units of
 parts-per-million.
 
 Parts-per-million units MUST be encoded as JSON integral numbers.

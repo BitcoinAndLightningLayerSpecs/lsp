@@ -198,7 +198,8 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
       "expires_at": "2015-01-25T19:29:44.612Z",
       "address" : "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
       "min_fee_for_0conf": 253,
-      "min_onchain_payment_confirmations": 0
+      "min_onchain_payment_confirmations": 0,
+      "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
     }
   },
   "channel": null
@@ -301,7 +302,8 @@ This section describes the `payment` object returned by `lsps1.create_order` and
     "order_total_sat": "200999",
     "address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations": 1,
-    "min_fee_for_0conf": 253
+    "min_fee_for_0conf": 253,
+    "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
   }
 }
 ```
@@ -368,6 +370,9 @@ The LSP MAY omit payment options.
 
 #### 3.2 Onchain payments
 
+Onchain payments dictionary MUST be omitted if the client didn't provide a `refund_onchain_address` 
+and/or the LSP disabled onchain payments.
+
 ```json
 {
     "state": "EXPECT_PAYMENT",
@@ -376,7 +381,8 @@ The LSP MAY omit payment options.
     "order_total_sat": "200999",
     "address": "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
     "min_onchain_payment_confirmations": 1,
-    "min_fee_for_0conf": 253
+    "min_fee_for_0conf": 253,
+    "refund_onchain_address": "bc1qvmsy0f3yyes6z9jvddk8xqwznndmdwapvrc0xrmhd3vqj5rhdrrq6hz49h"
 }
 ```
 
@@ -394,6 +400,9 @@ The LSP MAY omit payment options.
 - `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
     - MUST be `null` or absent if `min_onchain_payment_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
+- `refund_onchain_address` <[LSPS0.onchain_address][]> Client supplied refund address.
+    - LSP SHOULD set this to mirror the order creation request.
+    - LSP MAY omit this field as it wasn't present in earlier versions of this specification.
 
 > **Rationale `min_onchain_payment_confirmations`** The main risk for an LSP is that the client pays the on-chain payment and then double spends the transaction. This is especially critical in case the client requested a high `client_balance`. Opening a 0conf channel alone has no risk attached to it IF the on-chain payment is confirmed. Therefore, the LSP can mitigate this risk by waiting for a certain number of block confirmations before opening the channel.
 

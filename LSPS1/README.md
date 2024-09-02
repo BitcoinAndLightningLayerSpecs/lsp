@@ -370,7 +370,7 @@ The LSP MAY omit payment options.
 
 #### 3.2 Onchain payments
 
-Onchain payments dictionary MUST be null if the client didn't provide a `refund_onchain_address` 
+Onchain payments dictionary MUST be omitted if the client didn't provide a `refund_onchain_address` 
 and/or the LSP disabled onchain payments.
 
 ```json
@@ -400,7 +400,7 @@ and/or the LSP disabled onchain payments.
 - `min_fee_for_0conf <LSPS0.onchain_fee>` Fee rate for on-chain payment in case the client wants the payment to be confirmed without a confirmation.
     - MUST be `null` or absent if `min_onchain_payment_confirmations` is greater than 0.
     - SHOULD choose a high enough fee to lower the risk of a double spend.
-- `refund_onchain_address` <[LSPS0.onchain_address][]> Client supplied refund address. Mirrored back from the order creation request.
+- `refund_onchain_address` <[LSPS0.onchain_address][]> Client supplied refund address.
     - LSP SHOULD set this to mirror the order creation request.
     - LSP MAY omit this field as it wasn't present in earlier versions of this specification.
 

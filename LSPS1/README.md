@@ -343,7 +343,7 @@ The LSP MAY omit payment options.
     - `PAID`  When the has been preimage released
     - `REFUNDED` Lightning payment has been refunded.
     - <del>`CANCELLED` Lightning payment has been cancelled.</del> This state has been deprecated.
-      - You MUST use `REFUNDED` for a cancelled or refunded invoice.
+      - The LSP MUST use `REFUNDED` for a cancelled or refunded invoice.
       - Earlier versions of this spec MAY still use this state. 
       - Clients SHOULD still support this state for backwards compatibility.
 - `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires

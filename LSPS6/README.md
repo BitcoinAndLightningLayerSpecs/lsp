@@ -62,10 +62,10 @@ Any provided URLs should be valid and reachable. So starting with `http(s)://`.
 ```
 
 - `url` LSP SHOULD include the URL to its website with a maximum length of 64 characters.
-The LSP can choose to include a URL to a specific page that provides more information about the LSP or simple a top level domain.
-- `is_dns_verification_available` LSP MAY include a boolean to indicate if the LSP has DNS Public Key Verification.
-- `icon` LSP MAY include the URL of its icon with a maximum length of 128 characters.
+  The LSP can choose to include a URL to a specific page that provides more information about the LSP or simple a top level domain.
+- `is_dns_verification_available` is an **optional** boolean field, if present it's purpose is to indicate if the LSP supports DNS Public Key Verification.
+- `icon` is an **optional** field, if present it contains the URL to an icon with a maximum length of 128 characters.
   Icon is a squarely shaped smaller representation of the logo.
   Often the icon is the logo without the text to fit in a square shape.
-- `logo` LSP MAY include the URL of its logo with a maximum length of 128 characters.
-- `email` LSP MAY include its support email.
+- `logo` is an **optional** field, if present it contains the URL to a logo with a maximum length of 128 characters.
+- `email` is an **optional** field, if present it contains the support email address.

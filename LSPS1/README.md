@@ -342,7 +342,10 @@ The LSP MAY omit payment options.
     - `HOLD` Lighting payment arrived, preimage NOT released.
     - `PAID`  When the has been preimage released
     - `REFUNDED` Lightning payment has been refunded.
-    - `CANCELLED` Lightning payment has been cancelled
+    - <del>`CANCELLED` Lightning payment has been cancelled.</del> This state has been deprecated.
+      - The LSP MUST use `REFUNDED` for a cancelled or refunded invoice.
+      - Earlier versions of this spec MAY still use this state. 
+      - Clients SHOULD still support this state for backwards compatibility.
 - `expires_at` <[LSPS0.datetime][]> The timestamp at which the payment option for this order expires
 - `fee_total_sat` <[LSPS0.sat][]> The total fee the LSP will charge to open this channel in satoshi.
 - `order_total_sat` <[LSPS0.sat][]> What the client needs to pay in total to open the requested channel.

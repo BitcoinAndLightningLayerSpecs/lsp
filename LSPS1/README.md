@@ -195,7 +195,6 @@ The client MUST check if [option_support_large_channel](https://bitcoinops.org/e
       "expires_at": "2015-01-25T19:29:44.612Z",
       "fee_total_sat": "9999",
       "order_total_sat": "2009999",
-      "expires_at": "2015-01-25T19:29:44.612Z",
       "address" : "bc1p5uvtaxzkjwvey2tfy49k5vtqfpjmrgm09cvs88ezyy8h2zv7jhas9tu4yr",
       "min_fee_for_0conf": 253,
       "min_onchain_payment_confirmations": 0,

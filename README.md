@@ -10,7 +10,7 @@ The group meets every second week on Thursday 14am UTC. The meeting is open to e
 
 [Telegram group]: https://t.me/LSPstandards
 
-## ARCHVIAL NOTE (2025-01-10)
+## ARCHIVAL NOTE (2025-01-10)
 
 Please note that the LSP Spec group is continuing its work as a bLIP-only process. This repository is hence being archived.
 

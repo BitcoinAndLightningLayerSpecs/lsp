@@ -10,6 +10,16 @@ The group meets every second week on Thursday 14am UTC. The meeting is open to e
 
 [Telegram group]: https://t.me/LSPstandards
 
+## ARCHVIAL NOTE (2025-01-10)
+
+Please note that the LSP Spec group is continuing its work as a bLIP-only process. This repository is hence being archived.
+
+As of January 2025, you can find the following specs under their bLIP URLs:
+
+- LSPS0 has been finalized as [bLIP-50](https://github.com/lightning/blips/blob/master/blip-0050.md)
+- LSPS1 has been finalized as [bLIP-51](https://github.com/lightning/blips/blob/master/blip-0051.md)
+- LSPS2 has been finalized as [bLIP-52](https://github.com/lightning/blips/blob/master/blip-0052.md)
+
 ## Status Specification
 
 All LSPS specifications include a "Status" field.
